@@ -1,0 +1,77 @@
+language: python
+
+python: 3.8
+
+jobs:
+  include:
+    # perform a linux build
+    - services: docker
+      env:
+        - COVER="on"
+    # and a mac build
+    - os: osx
+      language: shell
+      env:
+        - COVER="off"
+    # and a windows build
+    - os: windows
+      language: shell
+      env:
+        - COVER="off"
+      before_install:
+        - choco install python --version 3.8.0
+        - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
+
+env:
+  global:
+    - TWINE_USERNAME=mcuntz
+    # Note: TWINE_PASSWORD is set in Travis settings
+
+install:
+  - python -m pip install -U pip
+  - python -m pip install -U setuptools
+  - python -m pip install -U pytest
+  - python -m pip install -U pytest-cov
+  - python -m pip install -U coveralls
+  - python -m pip install -r tests/requirements_test.txt
+  - python -m pip install -r docs/requirements.txt
+  - python -m pip install cibuildwheel
+  - python -m pip install twine
+
+script:
+  # create wheels
+  - python -m cibuildwheel --output-dir wheelhouse
+  # create source dist for pypi and create coverage
+  - |
+    if [[ $COVER == "on" ]] ; then
+      python -m pip install -U pytest
+      python -m pip install -U pytest-cov
+      python -m pip install -U coveralls
+      python -m pip install -r tests/requirements_test.txt
+      rm -rf dist
+      python setup.py sdist
+      export PYTHONPATH=${PYTHONPATH}:${PWD}
+      python -m pytest --cov hesseflux --cov-report term-missing -v tests/
+      python -m coveralls
+    fi
+
+after_success:
+  # pypi upload (test always, official on TAG)
+  - python -m pip install -U twine
+  - python -m twine upload --verbose --skip-existing --repository-url https://test.pypi.org/legacy/ wheelhouse/*.whl
+  - |
+    if [[ $COVER == "on" ]] ; then
+      python -m twine upload --verbose --skip-existing --repository-url https://test.pypi.org/legacy/ dist/*.tar.gz
+    fi
+  - |
+    if [[ $TRAVIS_TAG ]] ; then
+      python -m twine upload --skip-existing wheelhouse/*.whl
+      if [[ $COVER == "on" ]] ; then
+        python -m twine upload --skip-existing dist/*.tar.gz
+      fi
+    fi
+
+notifications:
+  email:
+    recipients:
+    - mc@macu.de

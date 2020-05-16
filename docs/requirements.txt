@@ -1,0 +1,2 @@
+# required for readthedocs.org
+numpydoc

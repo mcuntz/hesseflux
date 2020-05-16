@@ -1,0 +1,121 @@
+Variable_Code;Description;Unit;Template_to_be_used
+ALB;Albedo;%;Database
+APAR;Absorbed PAR (400-700 nm);umol m-2 s-1;Database
+CH4;Methane concentration;ppb (nmol mol-1);Database
+CO2;CO2 concentration;ppm (umol mol-1);Database
+CO2C13;Stable isotopic composition of CO2 - C13 (i.e., d13C of CO2);permil;Database
+D_SNOW;Snow depth;cm;Database
+DBH;Diameter at breast height (1.3m) from dendrometer;cm;Database
+FC;CO2 flux;umolCO2 m-2 s-1;Database
+FC_f;CO2 flux (filled);umolCO2 m-2 s-1;Database
+FC_CMB;NEE measured using transparent chambers;umolCO2 m-2 s-1;BADM or Database
+FC_SSITC_TEST;Quality check - CO2 flux - * see the note;adimensional;Database
+FCH4;Methane (CH4) flux;nmol m-2 s-1;Database
+FCH4_f;Methane (CH4) flux (filled);nmol m-2 s-1;Database
+FCH4_CMB;Methane flux measured using chambers;nmol m-2 s-1;BADM or Database
+FCH4_SSITC_TEST;Quality check - Methane flux * see the note;adimensional;Database
+FETCH_70;Fetch at which footprint cumulated probability is 70%;m;Database
+FETCH_80;Fetch at which footprint cumulated probability is 70%;m;Database
+FETCH_90;Fetch at which footprint cumulated probability is 90%;m;Database
+FETCH_FILTER;Footprint quality check: 0 if Fetch70 is outside the fetch or however to be discarded due to footprint issues, 1 if the data are ok;adimensional;Database
+FETCH_MAX;Fetch at which footprint cumulated probability is maximum;m;Database
+FN2O;Nitrous oxide (N2O) flux;nmol m-2 s-1;Database
+FN2O_f;Nitrous oxide (N2O) flux (filled);nmol m-2 s-1;Database
+FN2O_CMB;N2O flux measured using chambers;nmol m-2 s-1;BADM or Database
+FNO;NO flux;nmol m-2 s-1;Database
+FNO_f;NO flux (filled);nmol m-2 s-1;Database
+FNO_CMB;NO flux measured using chambers;nmol m-2 s-1;BADM or Database
+FNO2;NO2 flux;nmol m-2 s-1;Database
+FNO2_f;NO2 flux (filled);nmol m-2 s-1;Database
+FNO2_CMB;NO2 flux measured using chambers;nmol m-2 s-1;BADM or Database
+FO3;O3 flux;nmol m-2 s-1;Database
+FO3_f;O3 flux (filled);nmol m-2 s-1;Database
+FO3_SSITC_TEST;Quality check - Ozone flux * see the note;adimensional;Database
+G;Soil heat flux;W m-2;Database
+G_f;Soil heat flux (filled);W m-2;Database
+GPP_PI;Gross Primary Production (submitted by PI);umolCO2 m-2 s-1;Database
+GPP_PI_f;Gross Primary Production (submitted by PI) (filled);umolCO2 m-2 s-1;Database
+H;Sensible heat flux;W m-2;Database
+H_f;Sensible heat flux (filled);W m-2;Database
+H_PI;Sensible Heat (PI processed version);W m-2;Database
+H_PI_f;Sensible Heat (PI processed version) (filled);W m-2;Database
+H_SSITC_TEST;Quality check - sensible heat flux - * see the note;adimensional;Database
+H2O;Water (H2O) vapor mole fraction;ppt (mmolH2O mol-1);Database
+LE;Latent heat flux;W m-2;Database
+LE_f;Latent heat flux (filled);W m-2;Database
+LE_PI;Latent heat (PI processed version);W m-2;Database
+LE_PI_f;Latent heat (PI processed version) (filled);W m-2;Database
+LE_SSITC_TEST;Quality check - latent heat flux - * see the note;adimensional;Database
+LEAF_WET;Leaf wetness;%;Database
+LW_IN;Incoming Longwave radiation (in the range from 4 to 50 micron);W m-2;Database
+LW_OUT;Outgoing Longwave radiation (in the range from 4 to 50 micron);W m-2;Database
+MO_LENGTH;Monin-Obukhov length;m;Database
+N2O;Nitrous oxide (N2O) mole fraction;nmolN2O mol-1;BADM or Database
+NDVI;Normalized Difference Vegetation Index;adimensional;Database
+NEE_PI;Net Ecosystem Exchange (PI processed version);umolCO2 m-2 s-1;Database
+NEE_PI_f;Net Ecosystem Exchange (PI processed version) (filled);umolCO2 m-2 s-1;Database
+NETRAD;Net radiation (including SW and LW components);W m-2;Database
+NO;NO concentration;ppb;Database
+NO2;NO2 concentration;ppb;Database
+O3;O3 concentration;ppb;Database
+P;Precipitation;mm;Database
+P_RAIN;Rainfall;mm;Database
+P_SNOW;Snowfall - snow precipitation;mm (or water);Database
+PA;Atmospheric pressure;KPa;Database
+PBLH;Planetary boundary layer height;m;Database
+PPFD_BC_IN;Below canopy PPFD (400-700 nm);umol m-2 s-1;Database
+PPFD_DIF;Diffuse PPFD (400-700 nm);umol m-2 s-1;Database
+PPFD_DIR;Photosynthetic photon flux density, direct incoming;umol m-2 s-1;Database
+PPFD_IN;Photosynthetic Photon Flux Density (400-700 nm);umol m-2 s-1;Database
+PPFD_OUT;Reflected PPFD (400-700 nm);umol m-2 s-1;Database
+PRI;Photochemical reflectance index;adimensional;Database
+R_UVA;UVA radiation;W m-2;Database
+R_UVB;UVB radiation;W m-2;Database
+RECO_PI;Ecosystem Respiration (submitted by PI);umolCO2 m-2 s-1;Database
+RECO_PI_f;Ecosystem Respiration (submitted by PI) (filled);umolCO2 m-2 s-1;Database
+RH;Relative humidity;%;Database
+RUNOFF;Runoff;mm;Database
+SAP_DT;Difference of probes temperature for sapflow measurements;degC;Database
+SAP_FLOW;Sapflow;mmolH2O m-2 s-1;Database
+SAP_FLOW_f;Sapflow;mmolH2O m-2 s-1;Database
+SB;Heat storage in biomass;W m-2;Database
+SC;CO2 storage in air below flux measurement level;umolCO2 m-2 s-1;Database
+SCH4;Methane (CH4) storage flux;nmolCH4 m-2 s-1;Database
+SG;Heat storage in the soil above the soil heat fluxes measurement;W m-2;Database
+SH;Heat storage in air below flux measurement level;W m-2;Database
+SLE;Latent heat storage below flux measurement level;W m-2;Database
+SPEC_NIR_IN;Incoming radiation (infra-red band);umol m-2 s-1;Database
+SPEC_NIR_OUT;Outgoing radiation (infra-red band);umol m-2 s-1;Database
+SPEC_PRI_REF_IN;Incoming radiation at 568 nm;umol m-2 s-1;Database
+SPEC_PRI_REF_OUT;Outgoing radiation at 568 nm;umol m-2 s-1;Database
+SPEC_PRI_TGT_IN;Incoming radiation at 529 nm;umol m-2 s-1;Database
+SPEC_PRI_TGT_OUT;Outgoing radiation at 529 nm;umol m-2 s-1;Database
+SPEC_RED_IN;Incoming radiation (red band);umol m-2 s-1;Database
+SPEC_RED_OUT;Outgoing radiation (red band);umol m-2 s-1;Database
+STEMFLOW;Stem flow;mm;Database
+SW_BC_IN;Below canopy incoming short wave radiation;W m-2;Database
+SW_DIF;Diffuse incoming Shortwave radiation (in the range from 0.3 to 4.5 micron);W m-2;Database
+SW_IN;Incoming Shortwave radiation (in the range from 0.3 to 4.5 micron);W m-2;Database
+SW_OUT;Outgoing Shortwave radiation (in the range from 0.3 to 4.5 micron);W m-2;Database
+SWC;Soil water content;%;Database
+T_BOLE;Bole temperature;degC;Database
+T_CANOPY;Canopy temperature;degC;Database
+T_DP;Dew Point Temperature;degC;Database
+T_SONIC;Sonic Temperature;degC;Database
+T_SONIC_SIGMA;variance of the sonic temperature;degC;Database
+TA;Air temperature;degC;Database
+TAU;Momentum flux;Kg m-1 s-2;Database
+TAU_f;Momentum flux (filled);Kg m-1 s-2;Database
+TAU_SSITC_TEST;Quality check - momentum flux - * see the note;adimensional;Database
+THROUGHFALL;Throughfall;mm;Database
+TS;Soil temperature;degC;Database
+U_SIGMA;Standard deviation of velocity fluctuations (towards main-wind direction after coordinates rotation);m s-1;Database
+USTAR;Friction velocity;m s-1;Database
+V_SIGMA;Standard deviation of lateral velocity fluctuations (cross main-wind direction after coordinates rotation);m s-1;Database
+VPD_PI;Vapour pressure deficit (PI processed version);hPa;Database
+W_SIGMA;Standard deviation of vertical velocity fluctuations;m s-1;Database
+WD;Wind direction;Decimal degrees;Database
+WS;Wind speed;m s-1;Database
+WS_MAX;Maximum wind speed;m s-1;Database
+WTD;Water table depth;m;Database
+ZL;Stability parameter;adimensional;Database
