@@ -80,7 +80,7 @@ setup(
     classifiers          = classifiers,
     platforms            = ["Windows", "Linux", "Solaris", "Mac OS-X", "Unix"],
     include_package_data = True,
-    install_requires     = ["numpy", "scipy",],
+    install_requires     = ["numpy", "scipy", "pandas"],
     extras_require       = {},
     packages             = [package], # packages=find_packages(exclude=["tests*", "docs*"]),
     scripts              = scripts,

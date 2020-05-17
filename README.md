@@ -6,13 +6,11 @@ post-processing of the Eddy covariance flux data of the
 [ICOS](https://www.icos-cp.eu/) ecosystem site
 [FR-Hes](https://www.icos-france.fr/en/static3/the-network).
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3620909.svg)](https://doi.org/10.5281/zenodo.3620909)
-<!-- [![DOI](https://zenodo.org/badge/233405522.svg)](https://zenodo.org/badge/latestdoi/233405522)  -->
+[![DOI](https://zenodo.org/badge/261030976.svg)](https://zenodo.org/badge/latestdoi/261030976)
 [![PyPI version](https://badge.fury.io/py/hesseflux.svg)](https://badge.fury.io/py/hesseflux)
 [![License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/mcuntz/hesseflux/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/mcuntz/hesseflux.svg?branch=master)](https://travis-ci.org/mcuntz/hesseflux)
-<!-- [![Build status](https://ci.appveyor.com/api/projects/status/bc57psfpa0676i4d/branch/master?svg=true)](https://ci.appveyor.com/project/mcuntz/hesseflux) -->
-[![Coverage Status](https://coveralls.io/repos/github/mcuntz/hesseflux/badge.svg?branch=master)](https://coveralls.io/github/mcuntz/hesseflux?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/mcuntz/hesseflux/badge.svg)](https://coveralls.io/github/mcuntz/hesseflux)
 [![Documentation Status](https://readthedocs.org/projects/hesseflux/badge/?version=latest)](https://hesseflux.readthedocs.io/en/latest/?badge=latest)
 
 

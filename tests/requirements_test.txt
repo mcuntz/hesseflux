@@ -6,3 +6,4 @@ pytest-cov
 numpy
 scipy
 matplotlib
+pandas

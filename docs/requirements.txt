@@ -1,3 +1,5 @@
 # required for readthedocs.org
 numpy
 numpydoc
+scipy
+pandas
