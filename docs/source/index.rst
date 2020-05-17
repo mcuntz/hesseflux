@@ -23,7 +23,7 @@ The package uses several functions of the JAMS Python package
 
    https://github.com/mcuntz/jams_python
 
-The JAMS package and hesseflux are synchronised irregularily.
+The JAMS package and hesseflux are synchronised irregularly.
 
 ``hesseflux`` includes a Python port of Logtools, the Logger Tools
 Software of Olaf Kolle, MPI-BGC Jena, (c) 2012.
