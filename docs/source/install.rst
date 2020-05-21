@@ -1,6 +1,6 @@
-=======================
-hesseflux Installation
-=======================
+============
+Installation
+============
 
 The easiest way to install ``hesseflux`` is via ``pip``:
 
@@ -56,7 +56,6 @@ to the command:
 Dependencies
 ------------
 
-``hesseflux`` uses the packages :mod:`numpy` and :mod:`scipy`.
-They are all available in PyPI and ``pip`` should install them
-automatically. Installations via `setup.py` might need to install
-the three dependencies first.
+``hesseflux`` uses the packages :mod:`numpy`, :mod:`scipy` and :mod:`pandas`.
+They are all available in PyPI and ``pip`` should install them automatically.
+Installations via `setup.py` might need to install the three dependencies first.

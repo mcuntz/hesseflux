@@ -1,6 +1,6 @@
-====================
-hesseflux User Guide
-====================
+==========
+User Guide
+==========
 
 ``hesseflux`` collects functions used for processing Eddy covariance data of the
 `ICOS <https://www.icos-cp.eu/>`_ ecosystem site `FR-Hes

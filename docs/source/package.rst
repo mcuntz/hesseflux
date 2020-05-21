@@ -1,6 +1,6 @@
-================
-hesseflux API
-================
+===
+API
+===
 
 .. automodule:: hesseflux
 

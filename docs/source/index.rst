@@ -1,6 +1,6 @@
-====================
-hesseflux Quickstart
-====================
+==========
+Quickstart
+==========
 
 ``hesseflux`` provides functions used in the processing and
 post-processing of the Eddy covariance flux data of the `ICOS
