@@ -4,7 +4,8 @@ All notable changes after its initial release in May 2020 (v2.0) are documented 
 
 ### v2.1 (May 2020)
     - Refined documentation.
-    - Use python3 for TravisCI.
+    - Use python3 for *nix and python for Windows on TravisCI.
+    - Use pip3 for *nix and pip for Windows on TravisCI.
 
 ### v2.0.2 (May 2020)
     - Finished setup in repositories with all dependencies, TWINE password, etc.

@@ -8,16 +8,22 @@ jobs:
     - services: docker
       env:
         - COVER="on"
+        - PYTHON=python3
+        - PIP=pip3
     # and a mac build
     - os: osx
       language: shell
       env:
         - COVER="off"
+        - PYTHON=python3
+        - PIP=pip3
     # and a windows build
     - os: windows
       language: shell
       env:
         - COVER="off"
+        - PYTHON=python
+        - PIP=pip
       before_install:
         - choco install python --version 3.8.0
         - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
@@ -28,46 +34,46 @@ env:
     # Note: TWINE_PASSWORD is set in Travis settings
 
 install:
-  - python3 -m pip install -U pip
-  - python3 -m pip install -U setuptools
-  - python3 -m pip install -U pytest
-  - python3 -m pip install -U pytest-cov
-  - python3 -m pip install -U coveralls
-  - python3 -m pip install -r tests/requirements_test.txt
-  - python3 -m pip install -r docs/requirements.txt
-  - python3 -m pip install cibuildwheel
-  - python3 -m pip install twine
+  - $PYTHON -m $PIP install -U pip
+  - $PYTHON -m $PIP install -U setuptools
+  - $PYTHON -m $PIP install -U pytest
+  - $PYTHON -m $PIP install -U pytest-cov
+  - $PYTHON -m $PIP install -U coveralls
+  - $PYTHON -m $PIP install -r tests/requirements_test.txt
+  - $PYTHON -m $PIP install -r docs/requirements.txt
+  - $PYTHON -m $PIP install cibuildwheel
+  - $PYTHON -m $PIP install twine
 
 script:
   # create wheels
-  - python3 -m cibuildwheel --output-dir wheelhouse
+  - $PYTHON -m cibuildwheel --output-dir wheelhouse
   # create source dist for pypi and create coverage
   - |
     if [[ $COVER == "on" ]] ; then
-      python3 -m pip install -U pytest
-      python3 -m pip install -U pytest-cov
-      python3 -m pip install -U coveralls
-      python3 -m pip install -r tests/requirements_test.txt
+      $PYTHON -m $PIP install -U pytest
+      $PYTHON -m $PIP install -U pytest-cov
+      $PYTHON -m $PIP install -U coveralls
+      $PYTHON -m $PIP install -r tests/requirements_test.txt
       rm -rf dist
-      python3 setup.py sdist
+      $PYTHON setup.py sdist
       export PYTHONPATH=${PYTHONPATH}:${PWD}
-      python3 -m pytest --cov hesseflux --cov-report term-missing -v tests/
-      python3 -m coveralls
+      $PYTHON -m pytest --cov hesseflux --cov-report term-missing -v tests/
+      $PYTHON -m coveralls
     fi
 
 after_success:
   # pypi upload (test always, official on TAG)
-  - python3 -m pip install -U twine
-  - python3 -m twine upload --verbose --skip-existing --repository-url https://test.pypi.org/legacy/ wheelhouse/*.whl
+  - $PYTHON -m $PIP install -U twine
+  - $PYTHON -m twine upload --verbose --skip-existing --repository-url https://test.pypi.org/legacy/ wheelhouse/*.whl
   - |
     if [[ $COVER == "on" ]] ; then
-      python3 -m twine upload --verbose --skip-existing --repository-url https://test.pypi.org/legacy/ dist/*.tar.gz
+      $PYTHON -m twine upload --verbose --skip-existing --repository-url https://test.pypi.org/legacy/ dist/*.tar.gz
     fi
   - |
     if [[ $TRAVIS_TAG ]] ; then
-      python3 -m twine upload --skip-existing wheelhouse/*.whl
+      $PYTHON -m twine upload --skip-existing wheelhouse/*.whl
       if [[ $COVER == "on" ]] ; then
-        python3 -m twine upload --skip-existing dist/*.tar.gz
+        $PYTHON -m twine upload --skip-existing dist/*.tar.gz
       fi
     fi
 
