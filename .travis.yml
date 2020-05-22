@@ -9,14 +9,14 @@ jobs:
       env:
         - COVER="on"
         - PYTHON=python3
-        - PIP=pip3
+        - PIP=pip
     # and a mac build
     - os: osx
       language: shell
       env:
         - COVER="off"
         - PYTHON=python3
-        - PIP=pip3
+        - PIP=pip
     # and a windows build
     - os: windows
       language: shell
