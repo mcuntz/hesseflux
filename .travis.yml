@@ -28,46 +28,46 @@ env:
     # Note: TWINE_PASSWORD is set in Travis settings
 
 install:
-  - python -m pip install -U pip
-  - python -m pip install -U setuptools
-  - python -m pip install -U pytest
-  - python -m pip install -U pytest-cov
-  - python -m pip install -U coveralls
-  - python -m pip install -r tests/requirements_test.txt
-  - python -m pip install -r docs/requirements.txt
-  - python -m pip install cibuildwheel
-  - python -m pip install twine
+  - python3 -m pip install -U pip
+  - python3 -m pip install -U setuptools
+  - python3 -m pip install -U pytest
+  - python3 -m pip install -U pytest-cov
+  - python3 -m pip install -U coveralls
+  - python3 -m pip install -r tests/requirements_test.txt
+  - python3 -m pip install -r docs/requirements.txt
+  - python3 -m pip install cibuildwheel
+  - python3 -m pip install twine
 
 script:
   # create wheels
-  - python -m cibuildwheel --output-dir wheelhouse
+  - python3 -m cibuildwheel --output-dir wheelhouse
   # create source dist for pypi and create coverage
   - |
     if [[ $COVER == "on" ]] ; then
-      python -m pip install -U pytest
-      python -m pip install -U pytest-cov
-      python -m pip install -U coveralls
-      python -m pip install -r tests/requirements_test.txt
+      python3 -m pip install -U pytest
+      python3 -m pip install -U pytest-cov
+      python3 -m pip install -U coveralls
+      python3 -m pip install -r tests/requirements_test.txt
       rm -rf dist
-      python setup.py sdist
+      python3 setup.py sdist
       export PYTHONPATH=${PYTHONPATH}:${PWD}
-      python -m pytest --cov hesseflux --cov-report term-missing -v tests/
-      python -m coveralls
+      python3 -m pytest --cov hesseflux --cov-report term-missing -v tests/
+      python3 -m coveralls
     fi
 
 after_success:
   # pypi upload (test always, official on TAG)
-  - python -m pip install -U twine
-  - python -m twine upload --verbose --skip-existing --repository-url https://test.pypi.org/legacy/ wheelhouse/*.whl
+  - python3 -m pip install -U twine
+  - python3 -m twine upload --verbose --skip-existing --repository-url https://test.pypi.org/legacy/ wheelhouse/*.whl
   - |
     if [[ $COVER == "on" ]] ; then
-      python -m twine upload --verbose --skip-existing --repository-url https://test.pypi.org/legacy/ dist/*.tar.gz
+      python3 -m twine upload --verbose --skip-existing --repository-url https://test.pypi.org/legacy/ dist/*.tar.gz
     fi
   - |
     if [[ $TRAVIS_TAG ]] ; then
-      python -m twine upload --skip-existing wheelhouse/*.whl
+      python3 -m twine upload --skip-existing wheelhouse/*.whl
       if [[ $COVER == "on" ]] ; then
-        python -m twine upload --skip-existing dist/*.tar.gz
+        python3 -m twine upload --skip-existing dist/*.tar.gz
       fi
     fi
 

@@ -4,6 +4,7 @@ All notable changes after its initial release in May 2020 (v2.0) are documented 
 
 ### v2.1 (May 2020)
     - Refined documentation.
+    - Use python3 for TravisCI.
 
 ### v2.0.2 (May 2020)
     - Finished setup in repositories with all dependencies, TWINE password, etc.
