@@ -41,7 +41,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S', colhead=
             longgap=60, fullday=False, undef=-9999, ddof=1,
             err=False, verbose=0):
     """
-    Fills gaps in flux data from Eddy covariance measurements with 
+    Fills gaps in flux data from Eddy covariance measurements with
     Marginal Distribution Sampling (MDS) according to Reichstein et al.
     (Global Change Biology, 2005).
 
@@ -114,7 +114,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S', colhead=
 
         False: outputs are 1D arrays if `dfin` is numpy array (default: False).
     verbose : int, optional
-        Verbosity level 0-3 (default: 0). 0 is no output; 3 is very verbose. 
+        Verbosity level 0-3 (default: 0). 0 is no output; 3 is very verbose.
 
     Returns
     -------
@@ -284,7 +284,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S', colhead=
     dfill    = df.copy(deep=True)
     ffill    = ff.copy(deep=True)
     ffill[:] = 0
-    
+
     # Times
     # number of data points per week; basic factor of the time window
     week    = pd.Timedelta('1 W') / (df.index[1] - df.index[0])
@@ -295,7 +295,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S', colhead=
     # Filling variables
     ndata = len(df)
     for hcol in df.columns:
-        
+
         if hcol.startswith('SW_IN_') or (hcol == 'SW_IN'): continue
         if hcol.startswith('TA_')    or (hcol == 'TA'):    continue
         if hcol.startswith('VPD_')   or (hcol == 'VPD'):   continue
@@ -313,7 +313,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S', colhead=
         dflag_f = ffill[hcol].to_numpy()
 
         # Large margins
-        
+
         # Check for large margins at beginning
         largegap   = np.zeros(ndata, dtype=np.bool)
         firstvalid = np.amin(np.where(dflag == 0)[0])
@@ -327,7 +327,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S', colhead=
             largegap[(lastvalid+nn):] = True
 
         # Large gaps
-        
+
         # search largegap - code from maskgroup.py
         index  = []
         length = []
@@ -350,7 +350,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S', colhead=
                     pass
         if count > 0:
             length += [count]
-            
+
         # set largegap
         for i in range(len(index)):
             if length[i] > nn:
@@ -442,7 +442,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S', colhead=
 
             # If nothing is found under similar meteo within two weeks,
             # look for global radiation within one week ->
-            
+
             # Method 2: just global radiation available
             if sw_flg[j] == 0:
                 j1  = j - np.arange(1,week+1,dtype=np.int) + 1
@@ -516,7 +516,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S', colhead=
                         else:
                             dflag_f[j] = 2
                         break
-                        
+
                 # Check because continue does not support to jump out of two loops
                 if dflag_f[j] > 0: continue
 
@@ -544,7 +544,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S', colhead=
                         else:
                             dflag_f[j] = 3
                         break
-                    
+
                 if dflag_f[j] > 0: continue
 
             # Method 6: same as 3 but for 3-120 days

@@ -27,6 +27,8 @@ Released under the MIT License; see LICENSE file for details.
 * mo for months always integer, Oct 2016, Matthias Cuntz
 * 00, 01, etc. for integers not accepted by Python 3, removed from examples and code, Nov 2016, Matthias Cuntz
 * Using numpy docstring format, May 2020, Matthias Cuntz
+* Succeed eng by en keyword as in ascii2ascii and dec2date, Jul 2020, Matthias Cuntz
+* proleptic_gregorian instead of gregorian calendar for Excel dates, Jul 2020, Matthias Cuntz
 
 .. moduleauthor:: Matthias Cuntz, Arndt Piayda
 
@@ -45,7 +47,7 @@ __all__ = ['date2dec']
 def date2dec(calendar = 'standard', units=None,
              excelerr = True, yr=1,
              mo=1, dy=1, hr=0, mi=0, sc=0,
-             ascii=None, eng=None):
+             ascii=None, en=None, eng=None):
     """
     Convert scalar and array_like with calendar dates into decimal
     dates. Supported calendar formats are standard, gregorian, julian,
@@ -79,14 +81,16 @@ def date2dec(calendar = 'standard', units=None,
         `ascii` overwrites all other keywords.
 
         `ascii` and `eng` are mutually exclusive.
-    eng : array_like, optional
+    en : array_like, optional
         strings of the format 'yyyy-mm-dd hh:mm:ss'.
         Missing hour, minutes and/or seconds are set
         to their default values (0).
 
-        `eng` overwrites all other keywords.
+        `en` overwrites all other keywords.
 
-        `eng` and `ascii` are mutually exclusive.
+        `en` and `ascii` are mutually exclusive.
+    eng : array_like, optional
+        Same as en: obsolete.
     calendar : str, optional
         Calendar of output dates (default: 'standard').
 
@@ -278,6 +282,14 @@ def date2dec(calendar = 'standard', units=None,
     >>> print((date2dec(ascii='01.03.2003 00:00:00') - date2dec(ascii='01.03.2003')) == 0.)
     True
 
+    # en
+    >>> decimal = date2dec(en='1992-01-26 02:00', calendar='decimal360')
+    >>> print('{:.7f}'.format(decimal))
+    1992.0696759
+    >>> decimal = date2dec(eng='1992-01-26 02:00', calendar='decimal360')
+    >>> print('{:.7f}'.format(decimal))
+    1992.0696759
+
     History
     -------
     Written  Arndt Piayda, Jun 2010
@@ -298,6 +310,8 @@ def date2dec(calendar = 'standard', units=None,
              Matthias Cuntz, Oct 2016 - netcdftime provided even with netCDF4 > 1.0.0; make mo for months always integer
              Matthias Cuntz, Nov 2016 - 00, 01, etc. for integers not accepted by Python3
              Matthias Cuntz, May 2020 - numpy docstring format
+             Matthias Cuntz, Jul 2020 - en for eng
+             Matthias Cuntz, Jul 2020 - use proleptic_gregorian for Excel dates
     """
     #
     # Checks
@@ -322,17 +336,25 @@ def date2dec(calendar = 'standard', units=None,
     if (calendar not in calendars):
         raise ValueError("date2dec error: Wrong calendar!"
                     " Choose: "+''.join([i+' ' for i in calendars]))
+    # obsolete eng
+    if (eng is not None):
+        if (en is not None):
+            raise ValueError("date2dec error: 'eng' was succeeded by 'en'. Only one can be given.")
+        else:
+            en = eng
     # if ascii input is given by user, other input will be neglected
     # calculation of input size and shape
-    if (ascii is not None) and (eng is not None):
-        raise ValueError("date2dec error: 'ascii' and 'eng' mutually exclusive")
-    if ascii is not None:
+    if (ascii is not None) and (en is not None):
+        raise ValueError("date2dec error: 'ascii' and 'en' mutually exclusive")
+    if (ascii is not None):
         islist = type(ascii) != type(np.array(ascii))
         isarr = np.ndim(ascii)
         if (islist & (isarr > 2)):
             raise ValueError("date2dec error: ascii input is list > 2D; Use array input")
-        if isarr == 0: ascii = np.array([ascii])
-        else: ascii = np.array(ascii)
+        if isarr == 0:
+            ascii = np.array([ascii])
+        else:
+            ascii = np.array(ascii)
         insize   = ascii.size
         outsize  = insize
         outshape = ascii.shape
@@ -371,22 +393,22 @@ def date2dec(calendar = 'standard', units=None,
                 timeobj[i] = nt.datetime(yr[i], 3, 1, hr[i], mi[i], sc[i])
             else:
                 timeobj[i] = nt.datetime(yr[i], mo[i], dy[i], hr[i], mi[i], sc[i])
-    if eng is not None:
-        islist = type(eng) != type(np.array(eng))
-        isarr = np.ndim(eng)
+    if (en is not None):
+        islist = type(en) != type(np.array(en))
+        isarr  = np.ndim(en)
         if isarr == 0:
-             eng = np.array([eng])
+             en = np.array([en])
         else:
-             eng = np.array(eng)
+             en = np.array(en)
         if (islist & (isarr > 2)):
-            raise ValueError("date2dec error: eng input is list > 2D; Use array input")
-        eng = np.array(eng)
-        insize   = eng.size
+            raise ValueError("date2dec error: en input is list > 2D; Use array input")
+        en = np.array(en)
+        insize   = en.size
         outsize  = insize
-        outshape = eng.shape
-        engfl    = eng.flatten()
+        outshape = en.shape
+        enfl     = en.flatten()
         timeobj  = np.zeros(insize, dtype=object)
-        # slicing of eng strings to implement in datetime object. missing times
+        # slicing of en strings to implement in datetime object. missing times
         # will be set to 0.
         yr = np.zeros(insize, dtype=np.int)
         mo = np.zeros(insize, dtype=np.int)
@@ -395,7 +417,7 @@ def date2dec(calendar = 'standard', units=None,
         mi = np.zeros(insize, dtype=np.int)
         sc = np.zeros(insize, dtype=np.int)
         for i in range(insize):
-            ee      = engfl[i].split('-')
+            ee      = enfl[i].split('-')
             yr[i]   = int(ee[0])
             mo[i]   = int(ee[1])
             tail    = ee[2].split()
@@ -421,7 +443,7 @@ def date2dec(calendar = 'standard', units=None,
                 timeobj[i] = nt.datetime(yr[i], mo[i], dy[i], hr[i], mi[i], sc[i])
     # if no ascii input, other inputs will be concidered
     # calculation of input sizes, shapes and number of axis
-    if ((ascii is None) and (eng is None)):
+    if (ascii is None) and (en is None):
         isnlist1 = type(yr) == type(np.array(yr))
         isarr1   = np.ndim(yr)
         if isarr1 == 0: yr = np.array([yr])
@@ -508,7 +530,7 @@ def date2dec(calendar = 'standard', units=None,
     t1    = nt.datetime(1582, 10, 15, 0, 0, 0)
     is121 = True if (min(timeobj)<t0) and (max(timeobj)>=t1) else False
     if (calendar == 'standard') or (calendar == 'gregorian'):
-        if units is None:
+        if not units:
             units = 'days since 0001-01-01 12:00:00'
             dec0 = 1721424
         else:
@@ -518,7 +540,7 @@ def date2dec(calendar = 'standard', units=None,
         else:
             output = nt.date2num(timeobj, units, calendar='gregorian')+dec0
     elif calendar == 'julian':
-        if units is None:
+        if not units:
             units = 'days since 0001-01-01 12:00:00'
             dec0 = 1721424
         else:
@@ -528,20 +550,20 @@ def date2dec(calendar = 'standard', units=None,
         else:
             output = nt.date2num(timeobj, units, calendar='julian')+dec0
     elif calendar == 'proleptic_gregorian':
-        if units is None: units = 'days since 0001-01-01 00:00:00'
+        if not units: units = 'days since 0001-01-01 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
             for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='proleptic_gregorian')
         else:
             output = nt.date2num(timeobj, units, calendar='proleptic_gregorian')
     elif calendar == 'excel1900':
         doerr = False
-        if units is None:
+        if not units:
             units = 'days since 1899-12-31 00:00:00'
             if excelerr: doerr = True
         if is121 and (nt.__version__ < '1.2.2'):
-            for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='gregorian')
+            for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='proleptic_gregorian')
         else:
-            output = nt.date2num(timeobj, units, calendar='gregorian')
+            output = nt.date2num(timeobj, units, calendar='proleptic_gregorian')
         if doerr:
             output = np.where(output >= 60., output+1., output)
             # date2num treats 29.02.1900 as 01.03.1990, i.e. is the same decimal number
@@ -552,25 +574,25 @@ def date2dec(calendar = 'standard', units=None,
                     if (yr[i]==1900) & (mo[i]==2) & (dy[i]==29):
                         output[i] -= 1.
     elif calendar == 'excel1904':
-        if units is None: units = 'days since 1903-12-31 00:00:00'
+        if not units: units = 'days since 1903-12-31 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
-            for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='gregorian')
+            for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='proleptic_gregorian')
         else:
-            output = nt.date2num(timeobj, units, calendar='gregorian')
+            output = nt.date2num(timeobj, units, calendar='proleptic_gregorian')
     elif (calendar == '365_day') or (calendar == 'noleap'):
-        if units is None: units = 'days since 0001-01-01 00:00:00'
+        if not units: units = 'days since 0001-01-01 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
             for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='365_day')
         else:
             output = nt.date2num(timeobj, units, calendar='365_day')
     elif (calendar == '366_day') or (calendar == 'all_leap'):
-        if units is None: units = 'days since 0001-01-01 00:00:00'
+        if not units: units = 'days since 0001-01-01 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
             for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='366_day')
         else:
             output = nt.date2num(timeobj, units, calendar='366_day')
     elif calendar == '360_day':
-        if units is None: units = 'days since 0001-01-01 00:00:00'
+        if not units: units = 'days since 0001-01-01 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
             for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='360_day')
         else:

@@ -28,6 +28,8 @@ Released under the MIT License; see LICENSE file for details.
 * Adapted to new netCDF4/netcdftime (>= v1.0) and datetime (>= Python v2.7.9), Jun 2015, Matthias Cuntz
 * leap always integer, Oct 2016, Matthias Cuntz
 * Using numpy docstring format, May 2020, Matthias Cuntz
+* Succeed eng by en keyword as in ascii2ascii and date2dec, Jul 2020, Matthias Cuntz
+* proleptic_gregorian instead of gregorian calendar for Excel dates, Jul 2020, Matthias Cuntz
 
 .. moduleauthor:: Matthias Cuntz, Arndt Piayda
 
@@ -46,7 +48,7 @@ __all__ = ['dec2date']
 def dec2date(indata, calendar='standard', refdate=None, units=None,
              excelerr=True, fulldate=None, yr=False,
              mo=False, dy=False, hr=False, mi=False,
-             sc=False, ascii=False, eng=False):
+             sc=False, ascii=False, en=False, eng=False):
     """
     Converts scale and array_like with decimal dates into
     calendar dates. Supported time formats are:
@@ -130,26 +132,27 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
     Returns
     -------
     list of array_like
+        `fulldate` -> output arrays with year, month, day, hour, minute, second
 
-    `fulldate` -> output arrays with year, month, day, hour, minute, second
+                      Default fulldate is overwritten by selection of special output `yr`,`mn`,`dy`,`hr`,`mi`,`sc`
 
-                  Default fulldate is overwritten by selection of special output `yr`,`mn`,`dy`,`hr`,`mi`,`sc`
+        `yr`       -> output array with year
 
-    `yr`       -> output array with year
+        `mo`       -> output array with month
 
-    `mo`       -> output array with month
+        `dy`       -> output array with day
 
-    `dy`       -> output array with day
+        `hr`       -> output array with hour
 
-    `hr`       -> output array with hour
+        `mi`       -> output array with minute
 
-    `mi`       -> output array with minute
+        `sc`       -> output array with second
 
-    `sc`       -> output array with second
+        `ascii`    -> output array with strings of the format 'dd.mm.yyyy hh:mm:ss'
 
-    `ascii`    -> output array with strings of the format 'dd.mm.yyyy hh:mm:ss'
+        `en`      -> output array with strings of the format 'yyyy-mm-dd hh:mm:ss'
 
-    `eng`      -> output array with strings of the format 'yyyy-mm-dd hh:mm:ss'
+        `eng`     -> Same as en: obsolete.
 
     Notes
     -----
@@ -242,7 +245,7 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
     # >>> print(asciidate[::4])
     # ['05.01.2000 12:30:15' '18.03.1271 19:41:34']
 
-    #calendar = 'excel1904'
+    # calendar = 'excel1904'
     >>> decimal = date2dec(calendar='excel1904', yr=year, mo=month, dy=day, hr=hour, mi=minute, sc=second)
     >>> asciidate = dec2date(decimal, calendar='excel1904', ascii = True)
     >>> print(asciidate[::4])
@@ -328,6 +331,12 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
     >>> print(dec2date(absolut, units='year as %Y.%f', ascii=True))
     ['01.07.2004 00:00:00' '01.07.2010 12:00:00']
 
+    # en, eng
+    >>> print(dec2date(719644.52101, calendar='proleptic_gregorian', en=True))
+    1971-04-28 12:30:15
+    >>> print(dec2date(719644.52101, calendar='proleptic_gregorian', eng=True))
+    1971-04-28 12:30:15
+
     History
     -------
     Written  Arndt Piayda,   Jun 2010
@@ -346,6 +355,8 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
              Matthias Cuntz, May 2016 - units=='month as %Y%m.%f', units=='year as %Y.%f'
              Matthias Cuntz, Oct 2016 - netcdftime provided even with netCDF4 > 1.0.0; make leap always integer
              Matthias Cuntz, May 2020 - numpy docstring format
+             Matthias Cuntz, Jul 2020 - en for eng
+             Matthias Cuntz, Jul 2020 - use proleptic_gregorian for Excel dates
     """
     #
     # Constants
@@ -370,18 +381,22 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
     #
     calendar = calendar.lower()
     if (calendar not in calendars):
-        raise ValueError("Wrong calendar! Choose: "+''.join([i+' ' for i in calendars]))
-    if (refdate is not None) & (units is not None):
-        raise ValueError("either refdate or units can be given.")
+        raise ValueError("dec2date error: Wrong calendar! Choose: "+''.join([i+' ' for i in calendars]))
+    if refdate and units:
+        raise ValueError("dec2date error: either refdate or units can be given.")
+    # obsolete eng
+    if en and eng:
+        raise ValueError("dec2date error: 'eng' was succeeded by 'en'. Only one can be given.")
+    if eng and (not en): en = eng
     #
     # Default
     if np.sum(np.array([yr,mo,dy,hr,mi,sc])) >= 1:
         ii = True
     else:
         ii = False
-    if ((ascii | eng | ii) & (fulldate is None)):
+    if ((ascii | en | ii) and (not fulldate)):
         fulldate = False
-    if ((not (ascii | eng | ii)) & (fulldate is None)):
+    if ((not (ascii | en | ii)) and (not fulldate)):
         fulldate = True
     if fulldate == True:
         yr = True
@@ -391,10 +406,10 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
         mi = True
         sc = True
         # Further checks
-    if np.sum(np.array([ascii,fulldate,eng])) > 1:
-        raise ValueError("dec2date error: Only one of ascii, fulldate, or eng can be chosen.")
-    if np.sum(np.array([ascii,eng,ii])) > 1:
-        raise ValueError("dec2date error: If ascii, fulldate or eng then no special selection yr,mo,dy,hr,mi,sc possible.")
+    if np.sum(np.array([ascii,fulldate,en])) > 1:
+        raise ValueError("dec2date error: Only one of ascii, fulldate, or en can be chosen.")
+    if np.sum(np.array([ascii,en,ii])) > 1:
+        raise ValueError("dec2date error: If ascii, fulldate or en then no special selection yr,mo,dy,hr,mi,sc possible.")
     #
     # Input size and shape
     islist = type(indata) != type(np.array(indata))
@@ -464,9 +479,9 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
     else:
         if (calendar == 'standard') or (calendar == 'gregorian'):
             dec0 = 0
-            if units is not None:
+            if units:
                 unit = units
-            elif refdate is not None:
+            elif refdate:
                 #unit = 'days since %s' % (refdate)
                 unit = 'days since {0:s}'.format(refdate)
             else:
@@ -475,64 +490,64 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
             timeobj = nt.num2date(indata-dec0, unit, calendar='gregorian')
         elif calendar == 'julian':
             dec0 = 0
-            if units is not None:
+            if units:
                 unit = units
-            elif refdate is not None:
+            elif refdate:
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 0001-01-01 12:00:00'
                 dec0 = 1721424
             timeobj = nt.num2date(indata-dec0, unit, calendar='julian')
         elif calendar == 'proleptic_gregorian':
-            if units is not None:
+            if units:
                 unit = units
-            elif refdate is not None:
+            elif refdate:
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 0001-01-01 00:00:00'
             timeobj = nt.num2date(indata, unit, calendar = 'proleptic_gregorian')
         elif calendar == 'excel1900':
             doerr = False
-            if units is not None:
+            if units:
                 unit = units
-            elif refdate is not None:
+            elif refdate:
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 1899-12-31 00:00:00'
                 if excelerr: doerr = True
             if doerr:
                 indata1 = np.where(indata >= 61., indata-1, indata)
-                timeobj = nt.num2date(indata1, unit, calendar = 'gregorian')
+                timeobj = nt.num2date(indata1, unit, calendar = 'proleptic_gregorian')
             else:
-                timeobj = nt.num2date(indata, unit, calendar = 'gregorian')
+                timeobj = nt.num2date(indata, unit, calendar = 'proleptic_gregorian')
         elif calendar == 'excel1904':
-            if units is not None:
+            if units:
                 unit = units
-            elif refdate is not None:
+            elif refdate:
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 1903-12-31 00:00:00'
-            timeobj = nt.num2date(indata, unit, calendar = 'gregorian')
+            timeobj = nt.num2date(indata, unit, calendar = 'proleptic_gregorian')
         elif (calendar == '365_day') or (calendar == 'noleap'):
-            if units is not None:
+            if units:
                 unit = units
-            elif refdate is not None:
+            elif refdate:
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 0001-01-01 00:00:00'
             timeobj = nt.num2date(indata, unit, calendar = '365_day')
         elif (calendar == '366_day') or (calendar == 'all_leap'):
-            if units is not None:
+            if units:
                 unit = units
-            elif refdate is not None:
+            elif refdate:
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 0001-01-01 00:00:00'
             timeobj = nt.num2date(indata, unit, calendar = '366_day')
         elif calendar == '360_day':
-            if units is not None:
+            if units:
                 unit = units
-            elif refdate is not None:
+            elif refdate:
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 0001-01-01 00:00:00'
@@ -627,7 +642,7 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
         if isarr==0:
             output = output[0]
     # Ascii english output
-    elif eng:
+    elif en:
         output = ( ['%04d-%02d-%02d %02d:%02d:%02d' %
                     (year[i], month[i], day[i], hour[i], minute[i], second[i]) for i in range(insize)] )
         output = np.reshape(output, inshape)

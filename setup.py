@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-from __future__ import division, absolute_import, print_function
 """
 hesseflux provides functions used in the processing and
 post-processing of the Eddy covariance flux data of the
 ICOS ecosystem site FR-Hes.
 """
+from __future__ import division, absolute_import, print_function
 import os
 import codecs
 import re

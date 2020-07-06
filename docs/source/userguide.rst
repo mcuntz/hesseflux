@@ -2,8 +2,8 @@
 User Guide
 ==========
 
-``hesseflux`` collects functions used for processing Eddy covariance data of the
-`ICOS <https://www.icos-cp.eu/>`_ ecosystem site `FR-Hes
+``hesseflux`` collects functions used for processing Eddy covariance data of the `ICOS
+<https://www.icos-cp.eu/>`_ ecosystem site `FR-Hes
 <https://www.icos-france.fr/en/static3/the-network>`_.
 
 The package uses several functions of the JAMS Python package
@@ -15,35 +15,31 @@ The JAMS package and hesseflux are synchronised irregularly.
 ``hesseflux`` includes a Python port of Logtools, the Logger Tools Software of
 Olaf Kolle, MPI-BGC Jena, (c) 2012.
 
-The post-processing functionality for Eddy flux data is similar to the R-package
-`REddyProc <https://cran.r-project.org/web/packages/REddyProc/index.html>`_ and
-includes basically the steps described in `Papale et al. (Biogeosciences, 2006)
-<https://doi.org/10.5194/bg-3-571-2006>`_ plus some extensions such as the
-daytime method of flux partitioning (`Lasslop et al., Global Change Biology 2010
-<https://doi.org/10.1111/j.1365-2486.2009.02041.x>`_) and the estimation of
+The post-processing functionality for Eddy flux data is similar to the R-package `REddyProc
+<https://cran.r-project.org/web/packages/REddyProc/index.html>`_ and includes basically the steps
+described in `Papale et al. (Biogeosciences, 2006) <https://doi.org/10.5194/bg-3-571-2006>`_ plus
+some extensions such as the daytime method of flux partitioning (`Lasslop et al., Global Change
+Biology 2010 <https://doi.org/10.1111/j.1365-2486.2009.02041.x>`_) and the estimation of
 uncertainties on the fluxes as in `Lasslop et al. (Biogeosci, 2008)
 <http://doi.org/10.5194/bg-5-1311-2008>`_.
 
-Only the post-processing steps are described here. We are happy to discuss any
-processing or post-processing directly. Contact us at mc (at) macu (dot) de.
+Only the post-processing steps are described here. We are happy to discuss any processing or
+post-processing directly. Contact us at mc (at) macu (dot) de.
 
 
 europe-fluxdata.eu file format
 ==============================
 
-The first processing steps at the ICOS ecosystem site FR-Hes (not shown) brings
-the data in a format that can be submitted to the database `europe-fluxdata.eu
-<http://www.europe-fluxdata.eu>`_. The database predates ICOS and is somewhat a
-precursor of the ICOS data processing.
+The first processing steps at the ICOS ecosystem site FR-Hes (not shown) brings the data in a
+format that can be submitted to the database `europe-fluxdata.eu <http://www.europe-fluxdata.eu>`_.
+The database predates ICOS and is somewhat a precursor of the ICOS data processing.
 
-The file format of europe-fluxdata.eu is hence very similar to the ICOS format.
-The only known difference to us is the unit of atmospheric pressure, which is in
-hPa in `europe-fluxdata.eu <http://www.europe-fluxdata.eu>`_ and in kPa in `ICOS
-ecosystems <http://www.icos-etc.eu>`_. The file format has notably one header
-line with variable names. There are no units in the file. ``hesseflux`` provides
-a little helper script :any:`europe-fluxdata_units.py` in the `bin` directory
-that adds a second header line with units. The script can be run on the output
-as:
+The file format of europe-fluxdata.eu is hence very similar to the ICOS format. The only known
+difference to us is the unit of atmospheric pressure, which is in hPa in `europe-fluxdata.eu
+<http://www.europe-fluxdata.eu>`_ and in kPa in `ICOS ecosystems <http://www.icos-etc.eu>`_. The
+file format has notably one header line with variable names. There are no units in the file.
+``hesseflux`` provides a little helper script :any:`europe-fluxdata_units.py` in the `bin`
+directory that adds a second header line with units. The script can be run on the output as:
 
 .. code-block:: bash
 
@@ -53,22 +49,20 @@ as:
 Post-processing Eddy covariance data
 ====================================
 
-The script :any:`postproc_europe-fluxdata.py` in the `example` directory
-provides a template for post-processing data that is in the `europe-fluxdata.eu
-<http://www.europe-fluxdata.eu>`_ file format. It basically makes all steps
-described in `Papale et al. (Biogeosciences, 2006)
-<https://doi.org/10.5194/bg-3-571-2006>`_. The script is governed by a
-configuration file in Python's standard :mod:`configparser` format. The example
-configuration file :any:`hesseflux_example.cfg` in the `example` directory is
-highly commented and should be (almost) self-explanatory. The script is called
-like:
+The script :any:`postproc_europe-fluxdata.py` in the `example` directory provides a template for
+post-processing data that is in the `europe-fluxdata.eu <http://www.europe-fluxdata.eu>`_ file
+format. It basically makes all steps described in `Papale et al. (Biogeosciences, 2006)
+<https://doi.org/10.5194/bg-3-571-2006>`_. The script is governed by a configuration file in
+Python's standard :mod:`configparser` format. The example configuration file
+:any:`hesseflux_example.cfg` in the `example` directory is highly commented and should be (almost)
+self-explanatory. The script is called like:
 
 .. code-block:: bash
 		
     python postproc_europe-fluxdata.py hesseflux_example.cfg
 
-This script should be taken as a template for one's own post-processing but
-includes most standard post-processing steps.
+This script should be taken as a template for one's own post-processing but includes most standard
+post-processing steps.
 
 Here we describe the main parts of the post-processing script.
 
@@ -90,9 +84,9 @@ The script :any:`postproc_europe-fluxdata.py` starts by reading the configuratio
     config = configparser.ConfigParser(interpolation=None)
     config.read(configfile)
 
-It then analyses the configuration options. The first section in the
-configuration file are the options controlling which steps shall be performed by
-the script. The section in the :any:`hesseflux_example.cfg` looks like:
+It then analyses the configuration options. The first section in the configuration file are the
+options controlling which steps shall be performed by the script. The section in the
+:any:`hesseflux_example.cfg` looks like:
 
 .. code-block:: python
 
@@ -124,9 +118,9 @@ And the code in :any:`postproc_europe-fluxdata.py` is:
     fill      = config['POSTSWITCH'].getboolean('fill',      True)
     fluxerr   = config['POSTSWITCH'].getboolean('fluxerr',   True)
 
-All options are boolean and set to `True` by default if they are not given in
-the configuration file. All post-processing steps except uncertainty estimation
-of flux data would be performed in the given example.
+All options are boolean and set to `True` by default if they are not given in the configuration
+file. All post-processing steps except uncertainty estimation of flux data would be performed in
+the given example.
 
 
 Read the data
@@ -173,9 +167,9 @@ The analysis of the options in :any:`postproc_europe-fluxdata.py` is:
 
 Note that strings are given without quotes in the configuration file.
 
-`eufluxfile` can be a single filename or a comma-separated list of filenames. If
-it is missing or empty, the script will try to open a GUI, where one can choose
-input files. The data will be appended if several input files are given.
+`eufluxfile` can be a single filename or a comma-separated list of filenames. If it is missing or
+empty, the script will try to open a GUI, where one can choose input files. The data will be
+appended if several input files are given.
 
 The (first) input file is read as:
 
@@ -187,30 +181,27 @@ The (first) input file is read as:
     infile = eufluxfile[0]
     df     = pd.read_csv(infile, sep, skiprows=skiprows, parse_dates=[0], date_parser=parser, index_col=0, header=0)
 
-:mod:`pandas` will use the first column as index (`index_col=0`), assuming that
-these are dates (`parse_dates=[0]`) in the format `timeformat`, where columns
-are separated by `sep`. The defaults follow the europe-fluxdata.eu format but
-similar formats may be used, and script and/or configuration file can be adapted
-easily. Only variable names have to follow europe-fluxdata.eu, ICOS or Ameriflux
-format at the moment. If the input file has a second header line with units, one
+:mod:`pandas` will use the first column as index (`index_col=0`), assuming that these are dates
+(`parse_dates=[0]`) in the format `timeformat`, where columns are separated by `sep`. The defaults
+follow the europe-fluxdata.eu format but similar formats may be used, and script and/or
+configuration file can be adapted easily. Only variable names have to follow europe-fluxdata.eu,
+ICOS or Ameriflux format at the moment. If the input file has a second header line with units, one
 can skip it giving `skiprows=[1]` (not `skiprows=1`).
 
-All input files are supposed to be in the same format, if `eufluxfile` is a
-comma-separated list of filenames, and they will be read with the same command
-above. The :mod:`pandas` dataframes (`df`) will simply be appended.
+All input files are supposed to be in the same format, if `eufluxfile` is a comma-separated list of
+filenames, and they will be read with the same command above. The :mod:`pandas` dataframes (`df`)
+will simply be appended.
 
 
 The flag dataframe
 ------------------
 
-All Not-a-Number (NaN) values will be set to `undef` and will be ignored in the
-following.
+All Not-a-Number (NaN) values will be set to `undef` and will be ignored in the following.
 
-This happens via a second dataframe (`dff`), having the same columns and index
-as the input dataframe `df`, representing quality flags. All cells that have a
-value other than `0` in the flag dataframe `dff` will be ignored in the
-dataframe `df`. This means all cells of `df` with `undef` will be set to `2` in
-`dff` immediately:
+This happens via a second dataframe (`dff`), having the same columns and index as the input
+dataframe `df`, representing quality flags. All cells that have a value other than `0` in the flag
+dataframe `dff` will be ignored in the dataframe `df`. This means all cells of `df` with `undef`
+will be set to `2` in `dff` immediately:
 
 .. code-block:: python
 
@@ -226,15 +217,13 @@ dataframe `df`. This means all cells of `df` with `undef` will be set to `2` in
 Day / night
 -----------
 
-Most post-processing routines differentiate between daytime and nighttime data.
-`Papale et al. (Biogeosciences, 2006) <https://doi.org/10.5194/bg-3-571-2006>`_
-use a threshold of 20 W m\ :sup:`-2` of global radiation to distinguish between
-day and night. `REddyProc
-<https://cran.r-project.org/web/packages/REddyProc/index.html>`_ uses incoming
-shortwave radiation greater than 10 W m\ :sup:`2` as daytime. The shortwave
-raditan threshold `swthr` (same name as in ReddyProc) can be used to define the
-appropriate threshold. The default is 10 W m\ :sup:`2`. The column `SW_IN_1_1_1`
-has to exist in the input data.
+Most post-processing routines differentiate between daytime and nighttime data. `Papale et al.
+(Biogeosciences, 2006) <https://doi.org/10.5194/bg-3-571-2006>`_ use a threshold of 20 W m\
+:sup:`-2` of global radiation to distinguish between day and night. `REddyProc
+<https://cran.r-project.org/web/packages/REddyProc/index.html>`_ uses incoming shortwave radiation
+greater than 10 W m\ :sup:`2` as daytime. The shortwave raditan threshold `swthr` (same name as in
+ReddyProc) can be used to define the appropriate threshold. The default is 10 W m\ :sup:`2`. The
+column `SW_IN_1_1_1` has to exist in the input data.
 
 .. code-block:: python
 
@@ -245,8 +234,8 @@ has to exist in the input data.
 Data check
 ----------
 
-:any:`postproc_europe-fluxdata.py` checks the units of air temperature (i.e. the
-first column starting with `TA_`).
+:any:`postproc_europe-fluxdata.py` checks the units of air temperature (i.e. the first column
+starting with `TA_`).
 
 .. code-block:: python
 
@@ -259,15 +248,13 @@ first column starting with `TA_`).
         tkelvin = 0.
     df.loc[dff[hout[0]]==0, hout[0]] += tkelvin
 
-:func:`_findfirststart(starts, names)` is a helper function that finds the first
-occurrence in `names` that starts with the string `starts`. This is used for the
-moment until it was implemented in `hesseflux`` that the user can give individual
-variable names.
+:func:`_findfirststart(starts, names)` is a helper function that finds the first occurrence in
+`names` that starts with the string `starts`. This is used for the moment until it was implemented
+in `hesseflux`` that the user can give individual variable names.
 
-The script calculates air vapour pressure deficit `VPD_PI_1_1_1` from air temperature
-and relative humidity (i.e. the first column starting with `RH_`) if not given
-in input data using the function :func:`esat` of ``hesseflux`` for saturation
-vapour pressure:
+The script calculates air vapour pressure deficit `VPD_PI_1_1_1` from air temperature and relative
+humidity (i.e. the first column starting with `RH_`) if not given in input data using the function
+:func:`esat` of ``hesseflux`` for saturation vapour pressure:
 
 .. code-block:: python
 
@@ -314,8 +301,8 @@ It further checks assures that VPD is in Pa for further calculations.
         vpdpa = 1.
     df.loc[dff[hout[0]]==0, hout[0]] *= vpdpa
 
-And finally determines the time intervals of the input data `dtsec` (s) and the
-number of time steps per day `ntday`.
+And finally determines the time intervals of the input data `dtsec` (s) and the number of time
+steps per day `ntday`.
 
 .. code-block:: python
 
@@ -327,11 +314,10 @@ number of time steps per day `ntday`.
 Spike / outlier flagging
 ------------------------
 
-If `outlier=True` is set in the configuration file, spikes will be detected
-with the method given in `Papale et al. (Biogeosciences, 2006)
-<https://doi.org/10.5194/bg-3-571-2006>`_. A median absolute deviation (MAD)
-filter will be used on the second derivatives of the time series in two-week
-chunks. The section in :any:`hesseflux_example.cfg` looks like:
+If `outlier=True` is set in the configuration file, spikes will be detected with the method given
+in `Papale et al. (Biogeosciences, 2006) <https://doi.org/10.5194/bg-3-571-2006>`_. A median
+absolute deviation (MAD) filter will be used on the second derivatives of the time series in
+two-week chunks. The section in :any:`hesseflux_example.cfg` looks like:
 
 .. code-block:: python
 
@@ -350,23 +336,20 @@ chunks. The section in :any:`hesseflux_example.cfg` looks like:
     # int
     deriv = 2
 
-`nfill` is the number of days that are treated at once. `nfill=1` means that the
-time series will be stepped through day by day. `nscan` are the days to be
-considered to calculate the mean absolute deviations. `nscan=15` means that 7
-days before the fill day, the fill day itself and 7 days after the fill day will
-be used for the robust statistic. However, only spikes detected within the inner
-`nfill` days will be flagged in the `nscan` days. Spikes will be detected if
-they deviate more than `z` mean absolute deviations from the median. `deriv=2`
-applies the MAD filter to the second derivatives. A spike has normally a strong
-curvature and hence a large second derivative. `deriv=1` is currently not
-implemented. `deriv=0` applies the filter to the raw time series. This might be
-useful to find outliers in smooth time series such as soil moisture. `deriv=0`
-is also used on the 20 Hz Eddy raw data in the quality and uncertainty strategy
-of `Mauder et al. (Agric Forest Meteo, 2013)
-<http://doi.org/10.1016/j.agrformet.2012.09.006>`_.
+`nfill` is the number of days that are treated at once. `nfill=1` means that the time series will
+be stepped through day by day. `nscan` are the days to be considered to calculate the mean absolute
+deviations. `nscan=15` means that 7 days before the fill day, the fill day itself and 7 days after
+the fill day will be used for the robust statistic. However, only spikes detected within the inner
+`nfill` days will be flagged in the `nscan` days. Spikes will be detected if they deviate more than
+`z` mean absolute deviations from the median. `deriv=2` applies the MAD filter to the second
+derivatives. A spike has normally a strong curvature and hence a large second derivative. `deriv=1`
+is currently not implemented. `deriv=0` applies the filter to the raw time series. This might be
+useful to find outliers in smooth time series such as soil moisture. `deriv=0` is also used on the
+20 Hz Eddy raw data in the quality and uncertainty strategy of `Mauder et al. (Agric Forest
+Meteo, 2013) <http://doi.org/10.1016/j.agrformet.2012.09.006>`_.
 
-The default values, if option are not given in the configuration file, are
-`nscan=15`, `nfill=1`, `z=7`, and `deriv=2`.
+The default values, if option are not given in the configuration file, are `nscan=15`, `nfill=1`,
+`z=7`, and `deriv=2`.
 
 :any:`postproc_europe-fluxdata.py` calls the spike detection like this:
 
@@ -381,17 +364,16 @@ The default values, if option are not given in the configuration file, are
     for ii, hh in enumerate(hout):
         dff.loc[sflag[hh]==2, hh] = 3
 
-The function :func:`madspikes` returns flag columns for the input variables
-where spiked data is flagged as 2. The scripts sets the corresponding columns in
-the flag dataframe `dff` to 3 (3 just to keep track where the flag was set).
+The function :func:`madspikes` returns flag columns for the input variables where spiked data is
+flagged as 2. The scripts sets the corresponding columns in the flag dataframe `dff` to 3 (3 just
+to keep track where the flag was set).
 
 
 u* filtering
 ------------
 
-If `ustar=True` is set in the configuration file, a u*-filter will be applied
-following `Papale et al. (Biogeosciences, 2006)
-<https://doi.org/10.5194/bg-3-571-2006>`_. 
+If `ustar=True` is set in the configuration file, a u*-filter will be applied following `Papale et
+al. (Biogeosciences, 2006) <https://doi.org/10.5194/bg-3-571-2006>`_.
 
 The section in :any:`hesseflux_example.cfg` looks like:
 
@@ -409,21 +391,18 @@ The section in :any:`hesseflux_example.cfg` looks like:
     # float
     plateaucrit = 0.95
 
-A minimum threhold `ustarmin` is defined under which data is flagged by default.
-`Papale et al. (Biogeosciences, 2006) <https://doi.org/10.5194/bg-3-571-2006>`_
-suggest 0.1 for forests and 0.01 for other land cover types.
-:any:`postproc_europe-fluxdata.py` sets 0.01 as its default value. Uncertainty
-of the u*-threshold is calculated via bootstraping in Papale et al. `nboot`
-gives the number of bootstrepping for an the uncertainty estimate of the
-u*-threshold. The algorithm divides the input data (per season) in 7 temperature
-classes and in 20 u*-classes within each temperature class. It then determines
-the threshold as the average u* of the u*-class where the average CO2 flux is
-less than `plateaucrit` times the average of all CO2 fluxes with u* greater than
-the u*-class. `Papale et al. (Biogeosciences, 2006)
-<https://doi.org/10.5194/bg-3-571-2006>`_ took `plateaucrit=0.99`, while
-`REddyProc <https://cran.r-project.org/web/packages/REddyProc/index.html>`_
-takes `plateaucrit=0.95`, which :any:`postproc_europe-fluxdata.py` also takes as
-its default.
+A minimum threhold `ustarmin` is defined under which data is flagged by default. `Papale et al.
+(Biogeosciences, 2006) <https://doi.org/10.5194/bg-3-571-2006>`_ suggest 0.1 for forests and 0.01
+for other land cover types. :any:`postproc_europe-fluxdata.py` sets 0.01 as its default value.
+Uncertainty of the u*-threshold is calculated via bootstraping in Papale et al. `nboot` gives the
+number of bootstrepping for an the uncertainty estimate of the u*-threshold. The algorithm divides
+the input data (per season) in 7 temperature classes and in 20 u*-classes within each temperature
+class. It then determines the threshold as the average u* of the u*-class where the average CO2
+flux is less than `plateaucrit` times the average of all CO2 fluxes with u* greater than the
+u*-class. `Papale et al. (Biogeosciences, 2006) <https://doi.org/10.5194/bg-3-571-2006>`_ took
+`plateaucrit=0.99`, while `REddyProc
+<https://cran.r-project.org/web/packages/REddyProc/index.html>`_ takes `plateaucrit=0.95`, which
+:any:`postproc_europe-fluxdata.py` also takes as its default.
 
 The u*-filtering is then performed as:
 
@@ -447,16 +426,15 @@ The u*-filtering is then performed as:
     for ii, hh in enumerate(hout):
         dff.loc[flag==2, hh] = 5
 
-The function :func:`ustarfilter` returns the ustar 5, 50 and 95 percentile of
-the bootstrapped u*-thresholds and a flag columns, which is 0 except where u* is
-smaller than the median u*-threshold. The scripts sets the columns of the Eddy
-fluxes in the flag dataframe `dff` to 5 (5 just to keep track where the flag was
-set).
+The function :func:`ustarfilter` returns the ustar 5, 50 and 95 percentile of the bootstrapped
+u*-thresholds and a flag columns, which is 0 except where u* is smaller than the median
+u*-threshold. The scripts sets the columns of the Eddy fluxes in the flag dataframe `dff` to 5 (5
+just to keep track where the flag was set).
 
-One might not want to do u*-filtering, but use for example Integral Turbulence
-Characteristics (ITC) that were calculated, for example, with EddyPro\ :sup:`(R)`. These
-should be set right at the start after reading the input data into the dataframe
-`df` and producing the flag dataframe `dff` like:
+One might not want to do u*-filtering, but use for example Integral Turbulence Characteristics
+(ITC) that were calculated, for example, with EddyPro\ :sup:`(R)`. These should be set right at the
+start after reading the input data into the dataframe `df` and producing the flag dataframe `dff`
+like:
 
 .. code-block:: python
 
@@ -466,14 +444,12 @@ should be set right at the start after reading the input data into the dataframe
 Partitioning of Net Ecosystem Exchange
 --------------------------------------
 
-If `partition=True` is set in the configuration file, two estimates of Gross
-Primary Productivity (GPP) and Ecosystem Respiration (RECO) are calculated:
-firstly with the method of `Reichstein et al. (Glob Change Biolo, 2005)
-<http://doi.org/10.1111/j.1365-2486.2005.001002.x>`_ using nighttime data only,
-and secondly with the method of `Lasslop et al. (Glob Change Biolo, 2010)
-<http://doi.org/10.1111/j.1365-2486.2009.02041.x>`_ using a light-response curve
-on 'daytime' data. The configuration :any:`hesseflux_example.cfg` gives only one
-option in this section:
+If `partition=True` is set in the configuration file, two estimates of Gross Primary Productivity
+(GPP) and Ecosystem Respiration (RECO) are calculated: firstly with the method of `Reichstein et
+al. (Glob Change Biolo, 2005) <http://doi.org/10.1111/j.1365-2486.2005.001002.x>`_ using nighttime
+data only, and secondly with the method of `Lasslop et al. (Glob Change Biolo, 2010)
+<http://doi.org/10.1111/j.1365-2486.2009.02041.x>`_ using a light-response curve on 'daytime' data.
+The configuration :any:`hesseflux_example.cfg` gives only one option in this section:
 
 .. code-block:: python
 
@@ -483,11 +459,10 @@ option in this section:
     # bool
     nogppnight = False
 
-Many people find it unaesthetic that the 'daytime' method gives negative GPP at
-night. We esteem this the correct behaviour, reflecting the uncertainty in the
-gross flux estimates. However, one can set `nogppnight=True` to set GPP=0 at
-night and RECO=NEE in this case, the latter having then all variability of the
-net fluxes.
+Many people find it unaesthetic that the 'daytime' method gives negative GPP at night. We esteem
+this the correct behaviour, reflecting the uncertainty in the gross flux estimates. However, one
+can set `nogppnight=True` to set GPP=0 at night and RECO=NEE in this case, the latter having then
+all variability of the net fluxes.
 
 The partitioning is calculated as:
 
@@ -518,11 +493,10 @@ The partitioning is calculated as:
 Gap-filling / Imputation
 ------------------------
 
-Marginal Distribution Sampling (MDS) of `Reichstein et al. (Glob Change
-Biolo, 2005) <http://doi.org/10.1111/j.1365-2486.2005.001002.x>`_ is implemented
-as imputation or called gap-filling algorithm. The algorithm looks for similar
-conditions in the vicinity of a missing data point, if option `fill=True`.
-The configuration file is:
+Marginal Distribution Sampling (MDS) of `Reichstein et al. (Glob Change Biolo, 2005)
+<http://doi.org/10.1111/j.1365-2486.2005.001002.x>`_ is implemented as imputation or called
+gap-filling algorithm. The algorithm looks for similar conditions in the vicinity of a missing data
+point, if option `fill=True`. The configuration file is:
 
 .. code-block:: python
 
@@ -540,12 +514,11 @@ The configuration file is:
     # avoid extrapolation in gaps longer than longgap days
     longgap = 60
 
-If a flux data point is missing, times with incoming shortwave radiation in the
-range of `sw_dev` around the actual shortwave radiation will be looked for, as
-well as air temperatures within `ta_dev` and air vapour pressure deficit within
-`vpd_dev`. The function does not fill long gaps longer than `longgap` days. A
-good summary is given in Fig. A1 of `Reichstein et al. (Glob Change Biolo, 2005)
-<http://doi.org/10.1111/j.1365-2486.2005.001002.x>`_.
+If a flux data point is missing, times with incoming shortwave radiation in the range of `sw_dev`
+around the actual shortwave radiation will be looked for, as well as air temperatures within
+`ta_dev` and air vapour pressure deficit within `vpd_dev`. The function does not fill long gaps
+longer than `longgap` days. A good summary is given in Fig. A1 of `Reichstein et al. (Glob Change
+Biolo, 2005) <http://doi.org/10.1111/j.1365-2486.2005.001002.x>`_.
 
 The script invokes MDS as:
 
@@ -579,14 +552,13 @@ are translated to quality flags 1-3.
 Uncertainty estimates of flux data
 ----------------------------------
 
-`Lasslop et al. (Biogeosci, 2008) <http://doi.org/10.5194/bg-5-1311-2008>`_
-presented an algorithm to estimate uncertainties of Eddy covariance fluxes using
-Marginal Distribution Sampling (MDS). The gap-filling function :func:`gapfill`
-can be used for uncertainty estimation giving the keyword `err=True`. The same
-thresholds as for gap-filling are used.
+`Lasslop et al. (Biogeosci, 2008) <http://doi.org/10.5194/bg-5-1311-2008>`_ presented an algorithm
+to estimate uncertainties of Eddy covariance fluxes using Marginal Distribution Sampling (MDS). The
+gap-filling function :func:`gapfill` can be used for uncertainty estimation giving the keyword
+`err=True`. The same thresholds as for gap-filling are used.
 
-The script :any:`postproc_europe-fluxdata.py` uses the function :func:`gapfill`
-to calculate flux uncertainties like:
+The script :any:`postproc_europe-fluxdata.py` uses the function :func:`gapfill` to calculate flux
+uncertainties like:
 
 .. code-block:: python
 
@@ -616,10 +588,10 @@ to calculate flux uncertainties like:
     for cc in range(len(colin)):
         dff[colout[cc]] = dff[colin[cc]]
 
-We recommend, however, to calculate flux uncertainties with the Eddy covariance
-raw data as described in `Mauder et al. (Agric Forest Meteo, 2013)
-<http://doi.org/10.1016/j.agrformet.2012.09.006>`_. This is, for example,
-implemented in the processing software EddyPro\ :sup:`(R)`.
+We recommend, however, to calculate flux uncertainties with the Eddy covariance raw data as
+described in `Mauder et al. (Agric Forest Meteo, 2013)
+<http://doi.org/10.1016/j.agrformet.2012.09.006>`_. This is, for example, implemented in the
+processing software EddyPro\ :sup:`(R)`.
 
 
 Writing the output file
@@ -647,15 +619,14 @@ The configuration for output is:
     # bool
     outflagcols = False
 
-If `outputfile` is missing or empty, the script will try to open a GUI, where
-one can choose an output directory and the filename will then be name of the
-configuration file with the suffix '.csv'.
+If `outputfile` is missing or empty, the script will try to open a GUI, where one can choose an
+output directory and the filename will then be name of the configuration file with the suffix
+'.csv'.
 
-If `outundef=True` then all values in `df` with a flag value in `dff` greater
-than zero will be set to `undef`. The script can also add flag columns, prefixed
-with 'flag_', for each column in `df`, if `outflagcols=True`. The script will
-always output the columns with the flags for fill quality, if gap-filling was
-performed: option `fill=True`.
+If `outundef=True` then all values in `df` with a flag value in `dff` greater than zero will be set
+to `undef`. The script can also add flag columns, prefixed with `flag_`, for each column in `df`,
+if `outflagcols=True`. The script will always output the columns with the flags for fill quality,
+if gap-filling was performed: option `fill=True`.
 
 The code before :func:`pandas.Dataframe.to_csv` is then:
 

@@ -44,7 +44,7 @@ __all__ = ['ascii2ascii',
            'ascii2en', 'ascii2fr', 'ascii2us', 'ascii2eng',
            'en2ascii', 'fr2ascii', 'us2ascii', 'eng2ascii']
 
-    
+
 def ascii2ascii(edate, full=False, en=False, fr=False, us=False, eng=False, YY=False):
     """
     Convert date notations between ascii DD.MM.YYYY hh:mm:ss, English YYYY-MM-DD hh:mm:ss,
@@ -455,7 +455,7 @@ def fr2ascii(edate, full=False, YY=False):
     if YY:
         import time as ptime
         iyr2 = int(ptime.asctime()[-2:])
-        odate = [ d[0:6]+'19'+d[6:] if int(d[6:8]) > iyr2 else d[0:6]+'20'+d[6:] for d in odate ] # ascii -> ascii  
+        odate = [ d[0:6]+'19'+d[6:] if int(d[6:8]) > iyr2 else d[0:6]+'20'+d[6:] for d in odate ] # ascii -> ascii
 
     if full:
         odate = [ (d+' 00:00:00')[:19] if len(d) < 11 else (d+':00:00')[:19] for d in odate ]

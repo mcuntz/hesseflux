@@ -21,7 +21,7 @@ of the ICOS ecosystem site FR-Hes.
 
 The package uses several functions of the JAMS Python package
 https://github.com/mcuntz/jams_python  
-The JAMS package and *hesseflux* are synchronised irregularily.
+The JAMS package and *hesseflux* are synchronised irregularly.
 
 *hesseflux* includes a Python port of Logtools, the Logger Tools
 Software of Olaf Kolle, MPI-BGC Jena, (c) 2012.
@@ -94,7 +94,8 @@ The project structure is based on a
 ## Contributing to hesseflux
 
 Users are welcome to submit bug reports, feature requests, and code
-contributions to this project through GitHub.  
+contributions to this project through GitHub.
+
 More information is available in the
 [Contributing](http://hesseflux.readthedocs.org/en/latest/contributing.html)
 guidelines.

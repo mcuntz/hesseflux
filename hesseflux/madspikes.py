@@ -33,7 +33,7 @@ try:    # import package
 except: # python madspikes.py
     from mad import mad
 
-    
+
 __all__ = ['madspikes']
 
 
@@ -45,7 +45,7 @@ def madspikes(dfin, flag=None, isday=None,
     """
     Spike detection for using a moving median absolute difference filter.
     Used with Eddy vovariance data in Papale et al. (Biogeosciences, 2006).
-    
+
     Parameters
     ----------
     dfin : pandas.Dataframe or numpy.array
@@ -83,7 +83,7 @@ def madspikes(dfin, flag=None, isday=None,
         Input is allowed to deviate maximum `z` standard deviations from the median (default: 7)
     deriv : int, optional
         0: Act on raw input.
-        
+
         1: Use first derivatives.
 
         2: Use 2nd derivatives (default).
@@ -168,7 +168,7 @@ def madspikes(dfin, flag=None, isday=None,
     nrow, ncol = df.shape
     half_scan_win = nscan//2
     half_fill_win = nfill//2
-    
+
     # calculate dusk and dawn times and separate in day and night
     isdawn         = np.zeros(nrow, dtype=np.bool)
     isdusk         = np.zeros(nrow, dtype=np.bool)
@@ -191,7 +191,7 @@ def madspikes(dfin, flag=None, isday=None,
 
     cols = list(df.columns)
     for hcol in df.columns:
-        
+
         if hcol.startswith == 'SW_IN': continue
 
         data  = df[hcol]
@@ -217,7 +217,7 @@ def madspikes(dfin, flag=None, isday=None,
             nn = data_night[j1:j2]
             night_flag = mad(np.ma.masked_array(data=nn, mask=np.isnan(nn)), z=z, deriv=deriv)
             ff.iloc[fill_start:fill_end, cols.index(hcol)] += np.where(night_flag[fill_start-j1-1:fill_end-j1-1], 2, 0)
-            
+
         if plot:
             fig = plt.figure(1)
             sub = fig.add_subplot(111)
