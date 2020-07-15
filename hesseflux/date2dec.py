@@ -183,12 +183,12 @@ def date2dec(calendar = 'standard', units=None,
     >>> decimal = date2dec(calendar = 'standard', yr=year, mo=month, dy=day, hr=hour, mi=minute, sc=second)
     >>> nn = year.size
     >>> print('{:.14e} {:.14e} {:.14e} {:.14e}'.format(*decimal[:nn//2]))
-    2.45154902100694e+06 2.38226217719907e+06 2.31660093101852e+06 2.27284810821759e+06
+    2.45154902100695e+06 2.38226217719907e+06 2.31660093101852e+06 2.27284810821759e+06
     >>> print('{:.14e} {:.14e}'.format(*decimal[nn//2:nn-2]))
     2.18536732053241e+06 1.94738596431713e+06
     >>> decimal = date2dec(calendar='standard', yr=year, mo=6, dy=15, hr=12, mi=minute, sc=second)
     >>> print('{:.14e} {:.14e} {:.14e} {:.14e}'.format(*decimal[:nn//2]))
-    2.45171102100694e+06 2.38231401053241e+06 2.31657101435185e+06 2.27275102488426e+06
+    2.45171102100695e+06 2.38231401053241e+06 2.31657101435185e+06 2.27275102488426e+06
     >>> print('{:.14e} {:.14e}'.format(*decimal[nn//2:nn-2]))
     2.18545602886574e+06 1.94731300598380e+06
 
@@ -202,14 +202,14 @@ def date2dec(calendar = 'standard', units=None,
     >>> decimal = date2dec(calendar='standard', ascii=a)
     >>> nn = a.size
     >>> print('{:.14e} {:.14e} {:.14e} {:.14e}'.format(*decimal[:nn//2]))
-    2.45154902100694e+06 2.38226217719907e+06 2.31660093101852e+06 2.27284810821759e+06
+    2.45154902100695e+06 2.38226217719907e+06 2.31660093101852e+06 2.27284810821759e+06
     >>> print('{:.14e} {:.14e}'.format(*decimal[nn//2:nn-2]))
     2.18536732053241e+06 1.94738596431713e+06
 
     # calendar = 'julian'
     >>> decimal = date2dec(calendar='julian', ascii=a)
     >>> print('{:.14e} {:.14e} {:.14e} {:.14e}'.format(*decimal[:nn//2]))
-    2.45156202100694e+06 2.38227417719907e+06 2.31661093101852e+06 2.27284810821759e+06
+    2.45156202100695e+06 2.38227417719907e+06 2.31661093101852e+06 2.27284810821759e+06
     >>> print('{:.14e} {:.14e}'.format(*decimal[nn//2:nn-2]))
     2.18536732053241e+06 1.94738596431713e+06
 
@@ -318,7 +318,13 @@ def date2dec(calendar = 'standard', units=None,
     calendars = ['standard', 'gregorian', 'julian', 'proleptic_gregorian',
                  'excel1900', 'excel1904', '365_day', 'noleap', '366_day',
                  'all_leap', '360_day', 'decimal', 'decimal360']
-    import netCDF4 as nt
+    muleps = np.finfo(np.float).eps # add little epsilon to julian dates for better reconversion
+    try:
+        import cftime as nt
+        if (nt.__version__ <= '1.0.4'):
+            muleps = 0. # eps was implemented before in cftime
+    except:
+        import netCDF4 as nt
     try:
         tst = nt.date2num
         tst = nt.datetime
@@ -330,7 +336,7 @@ def date2dec(calendar = 'standard', units=None,
                                  " or below 0.9.2. The 360_day calendar does not work with"
                                  " arrays here. Please download a newer one.")
         except:
-            import cftime as nt
+            raise ImportError('Could not determine netcdf time library.')
     #
     calendar = calendar.lower()
     if (calendar not in calendars):
@@ -539,6 +545,7 @@ def date2dec(calendar = 'standard', units=None,
             for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='gregorian')+dec0
         else:
             output = nt.date2num(timeobj, units, calendar='gregorian')+dec0
+        output += np.abs(output) * muleps
     elif calendar == 'julian':
         if not units:
             units = 'days since 0001-01-01 12:00:00'
@@ -546,15 +553,18 @@ def date2dec(calendar = 'standard', units=None,
         else:
             dec0 = 0
         if is121 and (nt.__version__ < '1.2.2'):
-            for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='julian')+dec0
+            for ii, tt in enumerate(timeobj):
+                output[ii] = nt.date2num(tt, units, calendar='julian')+dec0
         else:
             output = nt.date2num(timeobj, units, calendar='julian')+dec0
+        output += np.abs(output) * muleps
     elif calendar == 'proleptic_gregorian':
         if not units: units = 'days since 0001-01-01 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
             for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='proleptic_gregorian')
         else:
             output = nt.date2num(timeobj, units, calendar='proleptic_gregorian')
+        output += np.abs(output) * muleps
     elif calendar == 'excel1900':
         doerr = False
         if not units:
@@ -573,30 +583,35 @@ def date2dec(calendar = 'standard', units=None,
                     #     output[i] -= 1.
                     if (yr[i]==1900) & (mo[i]==2) & (dy[i]==29):
                         output[i] -= 1.
+        output += np.abs(output) * muleps
     elif calendar == 'excel1904':
         if not units: units = 'days since 1903-12-31 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
             for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='proleptic_gregorian')
         else:
             output = nt.date2num(timeobj, units, calendar='proleptic_gregorian')
+        output += np.abs(output) * muleps
     elif (calendar == '365_day') or (calendar == 'noleap'):
         if not units: units = 'days since 0001-01-01 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
             for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='365_day')
         else:
             output = nt.date2num(timeobj, units, calendar='365_day')
+        output += np.abs(output) * muleps
     elif (calendar == '366_day') or (calendar == 'all_leap'):
         if not units: units = 'days since 0001-01-01 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
             for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='366_day')
         else:
             output = nt.date2num(timeobj, units, calendar='366_day')
+        output += np.abs(output) * muleps
     elif calendar == '360_day':
         if not units: units = 'days since 0001-01-01 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
             for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='360_day')
         else:
             output = nt.date2num(timeobj, units, calendar='360_day')
+        output += np.abs(output) * muleps
     elif calendar == 'decimal':
         ntime = np.size(yr)
         leap  = np.array((((yr%4)==0) & ((yr%100)!=0)) | ((yr%400)==0)).astype(np.int)
