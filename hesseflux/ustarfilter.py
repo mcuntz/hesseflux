@@ -17,6 +17,9 @@ Released under the MIT License; see LICENSE file for details.
 * Maintained by Arndt Piayda since Aug 2014.
 * Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz
 * Using numpy docstring format, May 2020, Matthias Cuntz
+* No bootstrap by default, Jul 2020, Matthias Cuntz
+* Optionally return thresholds and flags for each season, Jul 2020, Matthias Cuntz
+* Bugfix if no threshold found, and for multi-year flags, Jul 2020, Matthias Cuntz
 
 .. moduleauthor:: Matthias Cuntz, Arndt Piayda, Tino Rau
 
@@ -34,7 +37,7 @@ __all__ = ['ustarfilter']
 
 
 def ustarfilter(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:%M:%S', colhead=None,
-                ustarmin=0.01, nboot=100, undef=-9999, plot=False,
+                ustarmin=0.01, nboot=1, undef=-9999, plot=False, seasonout=False,
                 nmon=3, ntaclasses=7, corrcheck=0.5, nustarclasses=20, plateaucrit=0.95, swthr=10.):
     """
     Flag Eddy Covariance data using a threshold of friction velocity (u*)
@@ -75,18 +78,20 @@ def ustarfilter(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:
         Format of dates in `date`, if given (default: '%Y-%m-%d %H:%M:%S').
         See strftime documentation of Python's datetime module:
         https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
-    colhed : array_like of str, optional
+    colhead : array_like of str, optional
         column names if `dfin` is numpy array. See `dfin` for mandatory column names.
     ustarmin : float, optional
         minimum ustar threshold (default: 0.01)
 
         Papale et al. (Biogeosciences, 2006) take 0.1 for forest ant 0.01 otherwise.
     nboot : int, optional
-        number of boot straps for estimate of confidence interval of u* threshold (default: 100)
+        number of boot straps for estimate of confidence interval of u* threshold (default: 1)
     undef : float, optional
         values having `undef` value are treated as missing values in `dfin` (default: -9999)
     plot : bool, optional
         True: data and u* thresholds are plotted into ustarfilter.pdf (default: False)
+    seasonout : bool, optional
+        True: return u* thresholds for each season (default: False)
     nmon : int, optional
         Number of month to combine for a season (default: 3).
     ntaclasses : int, optional
@@ -105,11 +110,12 @@ def ustarfilter(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:
 
     Returns
     -------
-    # report 5, 50 and 95 percentile
-    oustars = np.quantile(bustars, (0.05, 0.5, 0.95), axis=0)
-    tuple of numpy array, pandas.Dataframe or numpy array
+    tuple of numpy arrays, pandas.Dataframe or numpy array
         numpy array with 5, 50 and 95 percentile of u* thresholds,
         flags: 0 everywhere except set to 2 where u* < u*-threshold.
+
+        Either maximum threshold of all seasons or thresholds for each season, i.e.
+        threshold array is `array(3,nseason)` if `seasonout` and `array(3)` otherwise.
 
     Notes
     -----
@@ -121,6 +127,10 @@ def ustarfilter(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:
     Maintained, Arndt Piayda,   Aug 2014
     Modified,   Matthias Cuntz, Apr 2020 - input can be pandas Dataframe or numpy array(s)
                 Matthias Cuntz, May 2020 - numpy docstring format
+                Matthias Cuntz, Jul 2020 - default nboot=1
+                Matthias Cuntz, Jul 2020 - seasonout
+                Matthias Cuntz, Jul 2020 - bugfix if no threshold found flag_p -> flag_b
+                                         - bugfix in multi-year flags
     """
     # Check input
     # numpy or panda
@@ -241,8 +251,10 @@ def ustarfilter(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:
 
     # calculate thresholds
     nperiod = 12//nmon  # number of nmon periods per year
-    bustars = np.ones((nboot,nyears)) * undef
-    b0ustar = np.ones(nyears) * undef
+    if seasonout:
+        bustars = np.ones((nboot,nyears,nperiod)) * undef
+    else:
+        bustars = np.ones((nboot,nyears)) * undef
     for y in range(nyears):
         yy = yrmin + y
         iiyr    = df.index.year == yy
@@ -268,7 +280,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:
             # periods / seasons
             pustars = np.ones(nperiod) * undef
             for p in range(nperiod):
-                flag_p   = ( (isday_b == False) &
+                flag_p   = ( (~isday_b) &
                             (ff_b[fc_id] == 0) & (ff_b[ustar_id] == 0) & (ff_b[ta_id] == 0) &
                             (df_b.index.month > p*nmon) & (df_b.index.month <= (p+1)*nmon) )
                 fc_p    = df_b.loc[flag_p, fc_id]
@@ -305,16 +317,23 @@ def ustarfilter(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:
                 # median of thresholds of all temperature classes = threshold of period
                 if len(custars) > 0:
                     pustars[p] = np.median(custars)
+                elif seasonout:
+                    # Set threshold to 90% of data per season if no threshold found
+                    pustars[p] = np.quantile(ustar_p, 0.9)
             # Take maximum of periods if any thresholds found,
             # otherwise set threshold to 90% of data
             ii = np.where(pustars != undef)[0]
             if ii.size > 0:
-                bustars[b,y] = pustars[ii].max()
+                if seasonout:
+                    bustars[b,y,:] = pustars
+                else:
+                    bustars[b,y]   = pustars[ii].max()
             else:
-                flag_b       = ( (isday_b == False) &
+                if seasonout:
+                    raise ValueError('Should not be here.')
+                flag_b       = ( (~isday_b) &
                                  (ff_b[fc_id] == 0) & (ff_b[ustar_id] == 0) & (ff_b[ta_id] == 0) )
-                bustars[b,y] = np.quantile(df_b.loc[flag_p, ustar_id], 0.9)
-            if b == 0: b0ustar[y] = bustars[b,y]
+                bustars[b,y] = np.quantile(df_b.loc[flag_b, ustar_id], 0.9)
 
     # set minimum ustar threshold
     bustars = np.maximum(bustars, ustarmin)
@@ -326,12 +345,20 @@ def ustarfilter(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:
     off    = ustar_in.astype(int)
     off[:] = 0
     ii     = np.zeros(len(off), dtype=np.bool)
-    for y in range(nyears):
-        ii[:] = False
-        yy    = yrmin + y
-        iiyr  = df.index.year == yy # df DatetimeIndex
-        ii[iiyr] = ustar_in[iiyr] < oustars[1,y]
-        off[ii]  = 2                # original DatetimeIndex
+    if seasonout:
+        for y in range(nyears):
+            yy = yrmin + y
+            for p in range(nperiod):
+                iiyr = ( (df.index.year == yy) &           # df DatetimeIndex
+                         (df.index.month > p*nmon) &
+                         (df.index.month <= (p+1)*nmon) )
+                ii[iiyr] = ustar_in[iiyr] < oustars[1,y,p]
+    else:
+        for y in range(nyears):
+            yy    = yrmin + y
+            iiyr  = df.index.year == yy # df DatetimeIndex
+            ii[iiyr] = ustar_in[iiyr] < oustars[1,y]
+    off[ii] = 2 # original DatetimeIndex
 
     if plot:
         import matplotlib.pyplot as plt
@@ -339,27 +366,56 @@ def ustarfilter(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:
         pd.plotting.register_matplotlib_converters()
 
         pp = pdf.PdfPages('ustarfilter.pdf')
-        for y in range(nyears):
-            yy = yrmin + y
+        if seasonout:
+            for y in range(nyears):
+                yy = yrmin + y
 
-            iiyr    = df.index.year == yy
-            fc_y    = df.loc[iiyr & (isday == False), fc_id]
-            ffc_y   = ff.loc[iiyr & (isday == False), fc_id]
-            ustar_y = df.loc[iiyr & (isday == False), ustar_id]
-            ffu_y   = ff.loc[iiyr & (isday == False), ustar_id]
-            # off_y   = off[iiyr & (isday == False)]
+                iiyr    = df.index.year == yy
+                iidf    = df.index[iiyr]
+                df_f    = df.loc[iidf]
+                ff_f    = ff.loc[iidf]
+                isday_f = isday[iiyr]
 
-            fig  = plt.figure(1)
-            sub  = fig.add_subplot(111)
-            flag_p = (ffu_y == 0) & (ffc_y == 0)
-            sub.plot(ustar_y[flag_p], fc_y[flag_p], 'bo')
-            sub.axvline(x=oustars[1,y], linewidth=0.75, color='r')
-            plt.ylabel('F CO2')
-            plt.xlabel('u_star')
-            plt.title('u_star thresh: {:5.3f}'.format(oustars[1,y]))
+                for p in range(nperiod):
+                    flag_p = ( (~isday_f) &
+                               (ff_f[fc_id] == 0) & (ff_f[ustar_id] == 0) & (ff_f[ta_id] == 0) &
+                               (df_f.index.month > p*nmon) & (df_f.index.month <= (p+1)*nmon) )
+                    fc_p    = df_f.loc[flag_p, fc_id]
+                    ustar_p = df_f.loc[flag_p, ustar_id]
 
-            pp.savefig(fig)
-            plt.close(fig)
+                    fig  = plt.figure(1)
+                    sub  = fig.add_subplot(111)
+                    sub.plot(ustar_p, fc_p, 'bo')
+                    sub.axvline(x=oustars[1,y,p], linewidth=0.75, color='r')
+                    plt.ylabel('F CO2')
+                    plt.xlabel('u_star')
+                    plt.title('u_star thresh for season {:d} of year {:d}: {:5.3f}'.format(
+                        p, yy, oustars[1,y,p]))
+
+                    pp.savefig(fig)
+                    plt.close(fig)
+        else:
+            for y in range(nyears):
+                yy = yrmin + y
+
+                iiyr    = (df.index.year == yy) & (~isday)
+                fc_y    = df.loc[iiyr, fc_id]
+                ffc_y   = ff.loc[iiyr, fc_id]
+                ustar_y = df.loc[iiyr, ustar_id]
+                ffu_y   = ff.loc[iiyr, ustar_id]
+                # off_y   = off[iiyr & (isday == False)]
+
+                fig  = plt.figure(1)
+                sub  = fig.add_subplot(111)
+                flag_p = (ffu_y == 0) & (ffc_y == 0)
+                sub.plot(ustar_y[flag_p], fc_y[flag_p], 'bo')
+                sub.axvline(x=oustars[1,y], linewidth=0.75, color='r')
+                plt.ylabel('F CO2')
+                plt.xlabel('u_star')
+                plt.title('u_star thresh of year ${:d}: {:5.3f}'.format(yy, oustars[1,y]))
+
+                pp.savefig(fig)
+                plt.close(fig)
         pp.close()
 
     # out
