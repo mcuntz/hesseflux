@@ -19,7 +19,6 @@ def _iread(*fparts):
     with codecs.open(os.path.join(here, *fparts), "r") as fp:
         return fp.read()
 
-
 def _find_version(*file_paths):
     """Find version without importing module."""
     version_file = _iread(*file_paths)
