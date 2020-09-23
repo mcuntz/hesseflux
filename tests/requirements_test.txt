@@ -1,4 +1,3 @@
-cibuildwheel
 setuptools
 coverage
 coveralls
