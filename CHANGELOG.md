@@ -2,6 +2,9 @@
 
 All notable changes after its initial release in May 2020 (v2.0) are documented in this file.
 
+### v3.0 (Sep 2020)
+    - Included subpackages const, functions, logtools in automatic packaging.
+
 ### v2.2 (Aug 2020)
     - No bootstrap by default in ustarfilter.
     - Optionally return u* thresholds per season in ustarfilter.

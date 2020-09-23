@@ -14,9 +14,10 @@ Released under the MIT License; see LICENSE file for details.
 * v2.0.2, finished setup with all dependencies, setting passwords, etc., May 2020, Matthias Cuntz
 * v2.1, use en instead of eng and bugfix for Excel dates in date routines, Jul 2020, Matthias Cuntz
 * v2.2, seasonout in ustarfilter, flag gross fluxes if partitioning was not possible, Aug 2020, Matthias Cuntz
+* v3.0, include subpackages in const, functions, logtools in setup.py, Sep 2020, Matthias Cuntz
 
 .. moduleauthor:: Matthias Cuntz
 """
 
 __author__  = "Matthias Cuntz"
-__version__ = "2.2"
+__version__ = "3.0"

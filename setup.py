@@ -81,6 +81,6 @@ setup(
     include_package_data = True,
     install_requires     = ["numpy", "scipy", "pandas"],
     extras_require       = {},
-    packages             = [package], # packages=find_packages(exclude=["tests*", "docs*"]),
+    packages             = find_packages(include=[package, package+'.*']),
     scripts              = scripts,
 )
