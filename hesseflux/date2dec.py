@@ -318,7 +318,7 @@ def date2dec(calendar = 'standard', units=None,
     calendars = ['standard', 'gregorian', 'julian', 'proleptic_gregorian',
                  'excel1900', 'excel1904', '365_day', 'noleap', '366_day',
                  'all_leap', '360_day', 'decimal', 'decimal360']
-    muleps = np.finfo(np.float).eps # add little epsilon to julian dates for better reconversion
+    muleps = np.finfo(np.float).eps  # add little epsilon to julian dates for better reconversion
     try:
         import cftime as nt
         if (nt.__version__ <= '1.0.4'):
@@ -532,9 +532,12 @@ def date2dec(calendar = 'standard', units=None,
     # depending on chosen calendar and optional set of the time units
     # decimal date is calculated
     output = np.zeros(outsize)
-    t0    = nt.datetime(1582, 10, 5, 0, 0, 0)
+    try:
+        t0 = nt.datetime(1582, 10, 4, 23, 59, 59, 999999)
+    except:
+        t0 = nt.datetime(1582, 10, 4, 23, 59, 59)
     t1    = nt.datetime(1582, 10, 15, 0, 0, 0)
-    is121 = True if (min(timeobj)<t0) and (max(timeobj)>=t1) else False
+    is121 = True if (min(timeobj)<=t0) and (max(timeobj)>=t1) else False
     if (calendar == 'standard') or (calendar == 'gregorian'):
         if not units:
             units = 'days since 0001-01-01 12:00:00'
