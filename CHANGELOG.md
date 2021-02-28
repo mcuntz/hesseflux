@@ -1,6 +1,13 @@
 # Changelog
 
-All notable changes after its initial release in May 2020 (v2.0) are documented in this file.
+All notable changes after its initial release in May 2020 (v2.0) are documented
+in this file.
+
+### v3.1 (Feb 2021)
+    - Support cftime > v1.3.0 by checking Gregorian calendar with existing
+      rather than skipped dates.
+    - eddypro2nc.py script converting EddyPro output to netCDF file.
+    - Use build instead of cibuildwheel to make pure Python wheels.
 
 ### v3.0 (Sep 2020)
     - Included subpackages const, functions, logtools in automatic packaging.
