@@ -20,11 +20,15 @@ Released under the MIT License; see LICENSE file for details.
 * nc can be tuple, Feb 2015, Matthias Cuntz
 * Large rewrite of code to improve speed, Feb 2015, Matthias Cuntz
 * range instead of np.arange, Nov 2017, Matthias Cuntz
-* Keywords cname, sname, hstrip, rename file to infile, Nov 2017, Matthias Cuntz
+* Keywords cname, sname, hstrip, rename file to infile,
+  Nov 2017, Matthias Cuntz
 * Ignore unicode characters on read, Jun 2019, Matthias Cuntz
-* Make ignoring unicode characters campatible with Python 2 and Python 3, Jul 2019, Matthias Cuntz
+* Make ignoring unicode characters campatible with Python 2 and Python 3,
+  Jul 2019, Matthias Cuntz
 * Keywords encoding, errors with codecs module, Aug 2019, Matthias Cuntz
 * Using numpy docstring format, May 2020, Matthias Cuntz
+* flake8 compatible, Mar 2021, Matthias Cuntz
+* Preserve trailing whitespace column delimiters, Mar 2021, Matthias Cuntz
 
 .. moduleauthor:: Matthias Cuntz
 
@@ -40,10 +44,10 @@ import numpy as np
 __all__ = ['sread']
 
 
-def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separator=None,
-          squeeze=False, reform=False, skip_blank=False, comment=None,
-          fill=False, fill_value='', strip=None, encoding='ascii', errors='ignore',
-          header=False, full_header=False,
+def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True,
+          separator=None, squeeze=False, reform=False, skip_blank=False,
+          comment=None, fill=False, fill_value='', strip=None,
+          encoding='ascii', errors='ignore', header=False, full_header=False,
           transpose=False, strarr=False):
     """
     Read strings into string array from a file.
@@ -96,14 +100,17 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
 
         str: strip character given by `strip`.
     encoding : str, optional
-        Specifies the encoding which is to be used for the file (default: 'ascii').
+        Specifies the encoding which is to be used for the file
+        (default: 'ascii').
         Any encoding that encodes to and decodes from bytes is allowed.
     errors : str, optional
-        Errors may be given to define the error handling during encoding of the file (default: 'ignore').
+        Errors may be given to define the error handling during encoding
+        of the file (default: 'ignore').
 
         Possible values: 'strict', 'replace', 'ignore'.
     squeeze : bool, optional
-        True:  2-dim array will be cleaned of degenerated dimension, i.e. results in a vector.
+        True: 2-dim array will be cleaned of degenerated dimension,
+        i.e. results in a vector.
 
         False: array will be two-dimensional as read (default)
     reform : bool, optional
@@ -115,7 +122,8 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
     fill : bool, optional
         True:  fills in `fill_value` if not enough columns in line.
 
-        False: stops execution and returns None if not enough columns in line (default).
+        False: stops execution and returns None if not enough columns
+        in line (default).
     header : bool, optional
         True:  header strings will be returned.
 
@@ -180,9 +188,11 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
     [['head1'], ['1.1']]
     >>> print(sread(filename, nc=1, skip=2, header=True, squeeze=True))
     ['head1', '1.1']
-    >>> print(sread(filename, nc=1, skip=2, header=True, squeeze=True, strarr=True))
+    >>> print(sread(filename, nc=1, skip=2, header=True, squeeze=True,
+    ...             strarr=True))
     ['head1' '1.1']
-    >>> print(sread(filename, nc=1, skip=2, header=True, squeeze=True, transpose=True))
+    >>> print(sread(filename, nc=1, skip=2, header=True, squeeze=True,
+    ...             transpose=True))
     ['head1', '1.1']
 
     >>> # data
@@ -283,15 +293,20 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
     [['1.1', '1.2', '1.3', '1.4'], ['2.1', '-1', '2.3', '2.4']]
 
     >>> # cname
-    >>> print(sread(filename, cname='head2', skip=1, skip_blank=True, comment='#!', squeeze=True))
+    >>> print(sread(filename, cname='head2', skip=1, skip_blank=True,
+    ...             comment='#!', squeeze=True))
     ['1.2', '2.2', '3.2', '4.2']
-    >>> print(sread(filename, cname=['head1','head2'], skip=1, skip_blank=True, comment='#!'))
+    >>> print(sread(filename, cname=['head1','head2'], skip=1, skip_blank=True,
+    ...             comment='#!'))
     [['1.1', '1.2'], ['2.1', '2.2'], ['3.1', '3.2'], ['4.1', '4.2']]
-    >>> print(sread(filename, cname=['head1','head2'], skip=1, skip_blank=True, comment='#!', header=True))
+    >>> print(sread(filename, cname=['head1','head2'], skip=1, skip_blank=True,
+    ...             comment='#!', header=True))
     ['head1', 'head2']
-    >>> print(sread(filename, cname=['head1','head2'], skip=1, skip_blank=True, comment='#!', header=True, full_header=True))
+    >>> print(sread(filename, cname=['head1','head2'], skip=1, skip_blank=True,
+    ...             comment='#!', header=True, full_header=True))
     ['head1 head2 head3 head4']
-    >>> print(sread(filename, cname=['  head1','head2'], skip=1, skip_blank=True, comment='#!', hstrip=False))
+    >>> print(sread(filename, cname=['  head1','head2'], skip=1,
+    ...             skip_blank=True, comment='#!', hstrip=False))
     [['1.2'], ['2.2'], ['3.2'], ['4.2']]
 
     >>> # Clean up doctest
@@ -310,12 +325,21 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
               Matthias Cuntz, Nov 2014 - hskip
               Matthias Cuntz, Feb 2015 - no lif, nc can be tuple
                                        - large re-write
-              Matthias Cuntz, Nov 2017 - use range instead of np.arange for producing indexes
+              Matthias Cuntz, Nov 2017
+                  - use range instead of np.arange for producing indexes
               Matthias Cuntz, Nov 2017 - cname, sname, file->infile, hstrip
-              Matthias Cuntz, Jun 2019 - open(errors='ignore') to ignore unicode characters, for example, on read
-              Matthias Cuntz, Jul 2019 - errors='ignore' compatible with Python2 and Python3
-                                         -> returns header in unicode in Python2
-              Matthias Cuntz, Aug 2019 - use codecs module and allow user encoding and error handling
+              Matthias Cuntz, Jun 2019
+                  - open(errors='ignore') to ignore unicode characters,
+                    for example, on read
+              Matthias Cuntz, Jul 2019
+                  - errors='ignore' compatible with Python2 and Python3
+                    -> returns header in unicode in Python2
+              Matthias Cuntz, Aug 2019
+                  - use codecs module and allow user encoding
+                    and error handling
+              Matthias Cuntz, Mar 2021
+                  - flake8 compatible
+                  - preserve trailing whitespace if separated by whitespace
     """
     #
     # Open file
@@ -326,26 +350,27 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
     if hskip > 0:
         ihskip = 0
         while ihskip < hskip:
-            tmp = f.readline().rstrip()
+            tmp = f.readline()
             ihskip += 1
     if skip > 0:
         head = ['']*(skip-hskip)
         iskip = 0
         while iskip < (skip-hskip):
-            head[iskip] = str(f.readline().rstrip())
+            head[iskip] = str(f.readline().rstrip('\r\n'))
             iskip += 1
     #
     # read first line to determine nc and separator (if not set)
     split = -1
     while True:
-        s = str(f.readline().rstrip())
+        s = str(f.readline().rstrip('\r\n'))
         if len(s) == 0:
             if skip_blank:
                 continue
             else:
                 break
         if comment is not None:
-            if (s[0] in comment): continue
+            if (s[0] in comment):
+                continue
         break
     if separator is None:
         sep = ','
@@ -373,13 +398,17 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
         if (skip-hskip) <= 0:
             f.close()
             raise IOError('No header line left for choosing columns by name.')
-        if not isinstance(cname, (list, tuple, np.ndarray)): cname = [cname]
-        if hstrip: cname = [ h.strip() for h in cname ]
+        if not isinstance(cname, (list, tuple, np.ndarray)):
+            cname = [cname]
+        if hstrip:
+            cname = [ h.strip() for h in cname ]
         hres = head[0].split(sep)
-        if hstrip: hres = [ h.strip() for h in hres ]
+        if hstrip:
+            hres = [ h.strip() for h in hres ]
         iinc = []
         for k in range(len(hres)):
-            if hres[k] in cname: iinc.append(k)
+            if hres[k] in cname:
+                iinc.append(k)
         nnc = len(iinc)
     else:
         # from nc keyword
@@ -388,10 +417,10 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
             iinc = tuple(nc)
         else:
             if nc <= 0:
-                iinc = range(cskip,nres)
-                nnc  = nres-cskip
+                iinc = range(cskip, nres)
+                nnc  = nres - cskip
             else:
-                iinc = range(cskip,cskip+nc)
+                iinc = range(cskip, cskip+nc)
                 nnc = nc
     miinc = max(iinc)
     #
@@ -410,24 +439,31 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
                     nhres = len(hres)
                     if (miinc >= nhres) and (not fill):
                         f.close()
-                        raise ValueError('Line has not enough columns to index: '+head[k])
+                        estr = 'Line has not enough columns to index: '+head[k]
+                        raise ValueError(estr)
                     null = line2var(hres, var, iinc, strip)
                     k += 1
-                if (skip-hskip) == 1: var = var[0]
+                if (skip-hskip) == 1:
+                    var = var[0]
         f.close()
         if strarr:
             var = np.array(var, dtype=np.str)
-            if transpose: var = var.T
-            if squeeze or reform: var = var.squeeze()
-            if fill: var = np.where(var=='', fill_value, var)
+            if transpose:
+                var = var.T
+            if squeeze or reform:
+                var = var.squeeze()
+            if fill:
+                var = np.where(var == '', fill_value, var)
         else:
             if fill:
-                var = [ [ fill_value if i=='' else i for i in row ] for row in var ]
+                var = [ [ fill_value if i == '' else i for i in row ]
+                        for row in var ]
             if squeeze or reform:
                 maxi = max([ len(i) for i in var])
-                if maxi==1: var = [ i[0] for i in var ]
+                if maxi == 1:
+                    var = [ i[0] for i in var ]
             if transpose and isinstance(var[0], list):
-                var = [list(i) for i in zip(*var)] # transpose
+                var = [list(i) for i in zip(*var)]  # transpose
         return var
     #
     # Values - first line
@@ -439,14 +475,15 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
     #
     # Values - rest of file
     for line in f:
-        s = str(line.rstrip())
+        s = str(line.rstrip('\r\n'))
         if len(s) == 0:
             if skip_blank:
                 continue
             else:
                 break
         if comment is not None:
-            if (s[0] in comment): continue
+            if (s[0] in comment):
+                continue
         res = s.split(sep)
         nres = len(res)
         if (miinc >= nres) and (not fill):
@@ -456,17 +493,22 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
     f.close()
     if strarr:
         var = np.array(var, dtype=np.str)
-        if transpose: var = var.T
-        if squeeze or reform: var = var.squeeze()
-        if fill: var = np.where(var=='', fill_value, var)
+        if transpose:
+            var = var.T
+        if squeeze or reform:
+            var = var.squeeze()
+        if fill:
+            var = np.where(var == '', fill_value, var)
     else:
         if fill:
-            var = [ [ fill_value if i=='' else i for i in row ] for row in var ]
+            var = [ [ fill_value if i == '' else i for i in row ]
+                    for row in var ]
         if squeeze or reform:
             maxi = max([ len(i) for i in var])
-            if maxi==1: var = [ i[0] for i in var ]
+            if maxi == 1:
+                var = [ i[0] for i in var ]
         if transpose and isinstance(var[0], list):
-            var = [list(i) for i in zip(*var)] # transpose
+            var = [list(i) for i in zip(*var)]  # transpose
 
     return var
 

@@ -16,15 +16,20 @@ Released under the MIT License; see LICENSE file for details.
 * Ported to Python 3, Feb 2013, Matthias Cuntz
 * Removed bug when nc is list and contains 0, Nov 2014, Matthias Cuntz
 * Keyword hskip, Nov 2014, Matthias Cuntz
-* Speed improvements: everything list until the very end, Feb 2015, Matthias Cuntz
+* Speed improvements: everything list until the very end,
+  Feb 2015, Matthias Cuntz
 * range instead of np.arange, Nov 2017, Matthias Cuntz
-* Keywords cname, sname, hstrip, rename file to infile, Nov 2017, Matthias Cuntz
+* Keywords cname, sname, hstrip, rename file to infile,
+  Nov 2017, Matthias Cuntz
 * Ignore unicode characters on read, Jun 2019, Matthias Cuntz
-* Make ignoring unicode characters campatible with Python 2 and Python 3, Jul 2019, Matthias Cuntz
+* Make ignoring unicode characters campatible with Python 2 and Python 3,
+  Jul 2019, Matthias Cuntz
 * Keywords encoding, errors with codecs module, Aug 2019, Matthias Cuntz
 * Keyword return_list, Dec 2019, Stephan Thober
 * return_list=False default, Jan 2020, Matthias Cuntz
 * Using numpy docstring format, May 2020, Matthias Cuntz
+* flake8 compatible, Mar 2021, Matthias Cuntz
+* Preserve trailing whitespace column delimiters, Mar 2021, Matthias Cuntz
 
 .. moduleauthor:: Matthias Cuntz
 
@@ -40,11 +45,11 @@ import numpy as np
 __all__ = ['fread']
 
 
-def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separator=None,
-          squeeze=False, reform=False, skip_blank=False, comment=None,
-          fill=False, fill_value=0, strip=None, encoding='ascii', errors='ignore',
-          header=False, full_header=False,
-          transpose=False, strarr=False, return_list=False):
+def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True,
+          separator=None, squeeze=False, reform=False, skip_blank=False,
+          comment=None, fill=False, fill_value=0, strip=None, encoding='ascii',
+          errors='ignore', header=False, full_header=False, transpose=False,
+          strarr=False, return_list=False):
     """
     Read numbers into array with floats from a file.
 
@@ -96,14 +101,17 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
 
         str: strip character given by `strip`.
     encoding : str, optional
-        Specifies the encoding which is to be used for the file (default: 'ascii').
+        Specifies the encoding which is to be used for the file
+        (default: 'ascii').
         Any encoding that encodes to and decodes from bytes is allowed.
     errors : str, optional
-        Errors may be given to define the error handling during encoding of the file (default: 'ignore').
+        Errors may be given to define the error handling during encoding
+        of the file (default: 'ignore').
 
         Possible values: 'strict', 'replace', 'ignore'.
     squeeze : bool, optional
-        True:  2-dim array will be cleaned of degenerated dimension, i.e. results in a vector.
+        True:  2-dim array will be cleaned of degenerated dimension,
+        i.e. results in a vector.
 
         False: array will be two-dimensional as read (default)
     reform : bool, optional
@@ -115,7 +123,8 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
     fill : bool, optional
         True:  fills in `fill_value` if not enough columns in line.
 
-        False: stops execution and returns None if not enough columns in line (default).
+        False: stops execution and returns None if not enough columns
+        in line (default).
     header : bool, optional
         True:  header strings will be returned.
 
@@ -260,7 +269,8 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
     >>> print(fread(filename, skip=1))
     [[1.1 1.2 1.3 1.4]
      [2.1 2.2 2.3 2.4]]
-    >>> print(fread(filename, skip=1, skip_blank=True, comment='#!', fill=True, fill_value=-1))
+    >>> print(fread(filename, skip=1, skip_blank=True, comment='#!',
+    ...             fill=True, fill_value=-1))
     [[ 1.1  1.2  1.3  1.4]
      [ 2.1  2.2  2.3  2.4]
      [ 3.1  3.2  3.3  3.4]
@@ -323,19 +333,24 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
     ['head1', 'head2']
 
     >>> # cname
-    >>> print(fread(filename, cname='head2', skip=1, skip_blank=True, comment='#!', squeeze=True))
+    >>> print(fread(filename, cname='head2', skip=1, skip_blank=True,
+    ...             comment='#!', squeeze=True))
     [1.2 2.2 3.2 4.2 5.2]
-    >>> print(fread(filename, cname=['head1','head2'], skip=1, skip_blank=True, comment='#!'))
+    >>> print(fread(filename, cname=['head1','head2'], skip=1,
+    ...             skip_blank=True, comment='#!'))
     [[1.1 1.2]
      [2.1 2.2]
      [3.1 3.2]
      [4.1 4.2]
      [5.1 5.2]]
-    >>> print(fread(filename, cname=['head1','head2'], skip=1, skip_blank=True, comment='#!', header=True))
+    >>> print(fread(filename, cname=['head1','head2'], skip=1, skip_blank=True,
+    ...             comment='#!', header=True))
     ['head1', 'head2']
-    >>> print(fread(filename, cname=['head1','head2'], skip=1, skip_blank=True, comment='#!', header=True, full_header=True))
+    >>> print(fread(filename, cname=['head1','head2'], skip=1, skip_blank=True,
+    ...             comment='#!', header=True, full_header=True))
     ['head1 head2 head3 head4']
-    >>> print(fread(filename, cname=['  head1','head2'], skip=1, skip_blank=True, comment='#!', hstrip=False))
+    >>> print(fread(filename, cname=['  head1','head2'], skip=1,
+    ...             skip_blank=True, comment='#!', hstrip=False))
     [[1.2]
      [2.2]
      [3.2]
@@ -357,15 +372,24 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
               Matthias Cuntz, Nov 2014 - bug when nc is list and contains 0
               Matthias Cuntz, Nov 2014 - hskip
               Matthias Cuntz, Feb 2015 - speed: everything list until very end
-              Matthias Cuntz, Nov 2017 - use range instead of np.arange for producing indexes
+              Matthias Cuntz, Nov 2017
+                  - use range instead of np.arange for producing indexes
               Matthias Cuntz, Nov 2017 - cname, sname, file->infile, hstrip
-              Matthias Cuntz, Jun 2019 - open(errors='ignore') to ignore unicode characters, for example, on read
-              Matthias Cuntz, Jul 2019 - errors='ignore' compatible with Python2 and Python3
-                                         -> returns header in unicode in Python2
-              Matthias Cuntz, Aug 2019 - use codecs module and allow user encoding and error handling
+              Matthias Cuntz, Jun 2019
+                  - open(errors='ignore') to ignore unicode characters,
+                    for example, on read
+              Matthias Cuntz, Jul 2019
+                  - errors='ignore' compatible with Python2 and Python3
+                    -> returns header in unicode in Python2
+              Matthias Cuntz, Aug 2019
+                  - use codecs module and allow user encoding and
+                    error handling
               Stephan Thober, Dec 2019 - added return_list flag
               Matthias Cuntz, Jan 2020 - default return_list=False
               Matthias Cuntz, May 2020 - numpy docstring format
+              Matthias Cuntz, Mar 2021
+                  - flake8 compatible
+                  - preserve trailing whitespace if separated by whitespace
     """
     #
     # Open file
@@ -376,26 +400,27 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
     if hskip > 0:
         ihskip = 0
         while ihskip < hskip:
-            tmp = f.readline().rstrip()
+            tmp = f.readline()
             ihskip += 1
     if skip > 0:
         head = ['']*(skip-hskip)
         iskip = 0
         while iskip < (skip-hskip):
-            head[iskip] = str(f.readline().rstrip())
+            head[iskip] = str(f.readline().rstrip('\r\n'))
             iskip += 1
     #
     # read first line to determine nc and separator (if not set)
     split = -1
     while True:
-        s = f.readline().rstrip()
+        s = f.readline().rstrip('\r\n')
         if len(s) == 0:
             if skip_blank:
                 continue
             else:
                 break
         if comment is not None:
-            if (s[0] in comment): continue
+            if (s[0] in comment):
+                continue
         break
     if separator is None:
         sep = ','
@@ -423,13 +448,17 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
         if (skip-hskip) <= 0:
             f.close()
             raise IOError('No header line left for choosing columns by name.')
-        if not isinstance(cname, (list, tuple, np.ndarray)): cname = [cname]
-        if hstrip: cname = [ h.strip() for h in cname ]
+        if not isinstance(cname, (list, tuple, np.ndarray)):
+            cname = [cname]
+        if hstrip:
+            cname = [ h.strip() for h in cname ]
         hres = head[0].split(sep)
-        if hstrip: hres = [ h.strip() for h in hres ]
+        if hstrip:
+            hres = [ h.strip() for h in hres ]
         iinc = []
         for k in range(len(hres)):
-            if hres[k] in cname: iinc.append(k)
+            if hres[k] in cname:
+                iinc.append(k)
         nnc = len(iinc)
     else:
         # from nc keyword
@@ -438,10 +467,10 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
             iinc = tuple(nc)
         else:
             if nc <= 0:
-                iinc = range(cskip,nres)
-                nnc  = nres-cskip
+                iinc = range(cskip, nres)
+                nnc  = nres - cskip
             else:
-                iinc = range(cskip,cskip+nc)
+                iinc = range(cskip, cskip+nc)
                 nnc = nc
     miinc = max(iinc)
     #
@@ -460,10 +489,13 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
                     nhres = len(hres)
                     if (miinc >= nhres) and (not fill):
                         f.close()
-                        raise ValueError('Line has not enough columns to index - 01: '+head[k])
+                        estr  = 'Line has not enough columns to index - 01: '
+                        estr += head[k]
+                        raise ValueError(estr)
                     null = line2var(hres, var, iinc, strip)
                     k += 1
-                if (skip-hskip) == 1: var = var[0]
+                if (skip-hskip) == 1:
+                    var = var[0]
             f.close()
         else:
             var = None
@@ -471,17 +503,22 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
             return var
         if strarr:
             var = np.array(var, dtype=np.str)
-            if transpose: var = var.T
-            if squeeze or reform: var = var.squeeze()
-            if fill: var = np.where(var=='', fill_value, var)
+            if transpose:
+                var = var.T
+            if squeeze or reform:
+                var = var.squeeze()
+            if fill:
+                var = np.where(var == '', fill_value, var)
         else:
             if fill:
-                var = [ [ fill_value if i=='' else i for i in row ] for row in var ]
+                var = [ [ fill_value if i == '' else i for i in row ]
+                        for row in var ]
             if squeeze or reform:
                 maxi = max([ len(i) for i in var])
-                if maxi==1: var = [ i[0] for i in var ]
+                if maxi == 1:
+                    var = [ i[0] for i in var ]
             if transpose and isinstance(var[0], list):
-                var = [ list(i) for i in zip(*var) ] # transpose
+                var = [ list(i) for i in zip(*var) ]  # transpose
         return var
     #
     # Values - first line
@@ -493,14 +530,15 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
     #
     # Values - rest of file
     for line in f:
-        s = str(line.rstrip())
+        s = str(line.rstrip('\r\n'))
         if len(s) == 0:
             if skip_blank:
                 continue
             else:
                 break
         if comment is not None:
-            if (s[0] in comment): continue
+            if (s[0] in comment):
+                continue
         res = s.split(sep)
         nres = len(res)
         if (miinc >= nres) and (not fill):
@@ -511,15 +549,19 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True, separ
     f.close()
     # list -> array
     if fill:
-        var = [ [ fill_value if i=='' else i for i in row ] for row in var ]
+        var = [ [ fill_value if i == '' else i for i in row ]
+                for row in var ]
     var = np.array(var, dtype=np.float)
-    if squeeze or reform: var = var.squeeze()
-    if transpose: var = var.T
+    if squeeze or reform:
+        var = var.squeeze()
+    if transpose:
+        var = var.T
     if return_list:
         if var.ndim == 1:
             var = [ i for i in var ]
         else:
-            var = [ [ var[i,j] for j in range(var.shape[1]) ] for i in range(var.shape[0]) ]
+            var = [ [ var[i, j] for j in range(var.shape[1]) ]
+                    for i in range(var.shape[0]) ]
 
     return var
 

@@ -8,5 +8,6 @@ Contents
 
    index
    userguide
+   reddyproc
    install
    package
