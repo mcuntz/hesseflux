@@ -312,17 +312,20 @@ def date2dec(calendar = 'standard', units=None,
              Matthias Cuntz, May 2020 - numpy docstring format
              Matthias Cuntz, Jul 2020 - en for eng
              Matthias Cuntz, Jul 2020 - use proleptic_gregorian for Excel dates
+             Matthias Cuntz, May 2021 - rm np.int and np.float
+                                      - (almost) flake8 compatible
     """
     #
     # Checks
     calendars = ['standard', 'gregorian', 'julian', 'proleptic_gregorian',
                  'excel1900', 'excel1904', '365_day', 'noleap', '366_day',
                  'all_leap', '360_day', 'decimal', 'decimal360']
-    muleps = np.finfo(np.float).eps  # add little epsilon to julian dates for better reconversion
+    # add little epsilon to julian dates for better reconversion
+    muleps = np.finfo(float).eps
     try:
         import cftime as nt
         if (nt.__version__ <= '1.0.4'):
-            muleps = 0. # eps was implemented before in cftime
+            muleps = 0.  # before 1.0.5, cftime used eps
     except:
         import netCDF4 as nt
     try:
@@ -332,16 +335,18 @@ def date2dec(calendar = 'standard', units=None,
         try:
             import netcdftime as nt
             if ((nt.__version__ <= '0.9.2') & (calendar == '360_day')):
-                raise ValueError("date2dec error: Your version of netcdftime.py is equal"
-                                 " or below 0.9.2. The 360_day calendar does not work with"
-                                 " arrays here. Please download a newer one.")
+                raise ValueError(
+                    "date2dec error: Your version of netcdftime.py is equal"
+                    " or below 0.9.2. The 360_day calendar does not work with"
+                    " arrays here. Please download a newer one.")
         except:
             raise ImportError('Could not determine netcdf time library.')
     #
     calendar = calendar.lower()
     if (calendar not in calendars):
-        raise ValueError("date2dec error: Wrong calendar!"
-                    " Choose: "+''.join([i+' ' for i in calendars]))
+        raise ValueError(
+            "date2dec error: Wrong calendar!" +
+            " Choose: " + ''.join([i + ' ' for i in calendars]))
     # obsolete eng
     if (eng is not None):
         if (en is not None):
@@ -368,12 +373,12 @@ def date2dec(calendar = 'standard', units=None,
         timeobj  = np.zeros(insize, dtype=object)
         # slicing of ascii strings to implement in datetime object. missing times
         # will be set to 0.
-        yr = np.zeros(insize, dtype=np.int)
-        mo = np.zeros(insize, dtype=np.int)
-        dy = np.zeros(insize, dtype=np.int)
-        hr = np.zeros(insize, dtype=np.int)
-        mi = np.zeros(insize, dtype=np.int)
-        sc = np.zeros(insize, dtype=np.int)
+        yr = np.zeros(insize, dtype=int)
+        mo = np.zeros(insize, dtype=int)
+        dy = np.zeros(insize, dtype=int)
+        hr = np.zeros(insize, dtype=int)
+        mi = np.zeros(insize, dtype=int)
+        sc = np.zeros(insize, dtype=int)
         for i in range(insize):
             aa      = asciifl[i].split('.')
             dy[i]   = int(aa[0])
@@ -395,17 +400,18 @@ def date2dec(calendar = 'standard', units=None,
                 hr[i] = 0
                 mi[i] = 0
                 sc[i] = 0
-            if ((yr[i]==1900) & (mo[i]==2) & (dy[i]==29)):
+            if ((yr[i] == 1900) & (mo[i] == 2) & (dy[i] == 29)):
                 timeobj[i] = nt.datetime(yr[i], 3, 1, hr[i], mi[i], sc[i])
             else:
-                timeobj[i] = nt.datetime(yr[i], mo[i], dy[i], hr[i], mi[i], sc[i])
+                timeobj[i] = nt.datetime(yr[i], mo[i], dy[i], hr[i], mi[i],
+                                         sc[i])
     if (en is not None):
         islist = type(en) != type(np.array(en))
         isarr  = np.ndim(en)
         if isarr == 0:
-             en = np.array([en])
+            en = np.array([en])
         else:
-             en = np.array(en)
+            en = np.array(en)
         if (islist & (isarr > 2)):
             raise ValueError("date2dec error: en input is list > 2D; Use array input")
         en = np.array(en)
@@ -416,12 +422,12 @@ def date2dec(calendar = 'standard', units=None,
         timeobj  = np.zeros(insize, dtype=object)
         # slicing of en strings to implement in datetime object. missing times
         # will be set to 0.
-        yr = np.zeros(insize, dtype=np.int)
-        mo = np.zeros(insize, dtype=np.int)
-        dy = np.zeros(insize, dtype=np.int)
-        hr = np.zeros(insize, dtype=np.int)
-        mi = np.zeros(insize, dtype=np.int)
-        sc = np.zeros(insize, dtype=np.int)
+        yr = np.zeros(insize, dtype=int)
+        mo = np.zeros(insize, dtype=int)
+        dy = np.zeros(insize, dtype=int)
+        hr = np.zeros(insize, dtype=int)
+        mi = np.zeros(insize, dtype=int)
+        sc = np.zeros(insize, dtype=int)
         for i in range(insize):
             ee      = enfl[i].split('-')
             yr[i]   = int(ee[0])
@@ -443,70 +449,97 @@ def date2dec(calendar = 'standard', units=None,
                 hr[i] = 0
                 mi[i] = 0
                 sc[i] = 0
-            if ((yr[i]==1900) & (mo[i]==2) & (dy[i]==29)):
+            if ((yr[i] == 1900) & (mo[i] == 2) & (dy[i] == 29)):
                 timeobj[i] = nt.datetime(yr[i], 3, 1, hr[i], mi[i], sc[i])
             else:
-                timeobj[i] = nt.datetime(yr[i], mo[i], dy[i], hr[i], mi[i], sc[i])
+                timeobj[i] = nt.datetime(yr[i], mo[i], dy[i], hr[i], mi[i],
+                                         sc[i])
     # if no ascii input, other inputs will be concidered
     # calculation of input sizes, shapes and number of axis
     if (ascii is None) and (en is None):
         isnlist1 = type(yr) == type(np.array(yr))
         isarr1   = np.ndim(yr)
-        if isarr1 == 0: yr = np.array([yr])
-        else: yr = np.array(yr)
+        if isarr1 == 0:
+            yr = np.array([yr])
+        else:
+            yr = np.array(yr)
         isnlist2 = type(mo) == type(np.array(mo))
         isarr2   = np.ndim(mo)
-        if isarr2 == 0: mo = np.array([mo], dtype=np.int)
-        else: mo = np.array(mo, dtype=np.int)
+        if isarr2 == 0:
+            mo = np.array([mo], dtype=int)
+        else:
+            mo = np.array(mo, dtype=int)
         isnlist3 = type(dy) == type(np.array(dy))
         isarr3   = np.ndim(dy)
-        if isarr3 == 0: dy = np.array([dy])
-        else: dy = np.array(dy)
+        if isarr3 == 0:
+            dy = np.array([dy])
+        else:
+            dy = np.array(dy)
         isnlist4 = type(hr) == type(np.array(hr))
         isarr4   = np.ndim(hr)
-        if isarr4 == 0: hr = np.array([hr])
-        else: hr = np.array(hr)
+        if isarr4 == 0:
+            hr = np.array([hr])
+        else:
+            hr = np.array(hr)
         isnlist5 = type(mi) == type(np.array(mi))
         isarr5   = np.ndim(mi)
-        if isarr5 == 0: mi = np.array([mi])
-        else: mi = np.array(mi)
+        if isarr5 == 0:
+            mi = np.array([mi])
+        else:
+            mi = np.array(mi)
         isnlist6 = type(sc) == type(np.array(sc))
         isarr6   = np.ndim(sc)
-        if isarr6 == 0: sc = np.array([sc])
-        else: sc = np.array(sc)
-        islist = not (isnlist1 | isnlist2 | isnlist3 | isnlist4 | isnlist5 | isnlist6)
+        if isarr6 == 0:
+            sc = np.array([sc])
+        else:
+            sc = np.array(sc)
+        islist = not (isnlist1 | isnlist2 | isnlist3 | isnlist4 | isnlist5 |
+                      isnlist6)
         isarr  = isarr1 + isarr2 + isarr3 + isarr4 + isarr5 + isarr6
-        shapes = [np.shape(yr), np.shape(mo), np.shape(dy), np.shape(hr), np.shape(mi), np.shape(sc)]
+        shapes = [np.shape(yr), np.shape(mo), np.shape(dy), np.shape(hr),
+                  np.shape(mi), np.shape(sc)]
         nyr    = np.size(yr)
         nmo    = np.size(mo)
         ndy    = np.size(dy)
         nhr    = np.size(hr)
         nmi    = np.size(mi)
         nsc    = np.size(sc)
-        sizes  = [nyr,nmo,ndy,nhr,nmi,nsc]
+        sizes  = [nyr, nmo, ndy, nhr, nmi, nsc]
         nmax   = np.amax(sizes)
         ii     = np.argmax(sizes)
         outshape = shapes[ii]
         if (islist & (np.size(outshape) > 2)):
             raise ValueError("date2dec error: input is list > 2D; Use array input.")
         if nyr < nmax:
-            if nyr == 1: yr  = np.ones(outshape,)*yr
-            else: raise ValueError("date2dec error: size of yr != max input or 1.")
+            if nyr == 1:
+                yr  = np.ones(outshape, dtype=int) * yr
+            else:
+                raise ValueError("date2dec error: size of yr != max input or 1.")
         if nmo < nmax:
-            if nmo == 1: mo  = np.ones(outshape, dtype=np.int)*mo
-            else: raise ValueError("date2dec error: size of mo != max input or 1.")
+            if nmo == 1:
+                mo  = np.ones(outshape, dtype=int) * mo
+            else:
+                raise ValueError("date2dec error: size of mo != max input or 1.")
         if ndy < nmax:
-            if ndy == 1: dy  = np.ones(outshape)*dy
-            else: raise ValueError("date2dec error: size of dy != max input or 1.")
+            if ndy == 1:
+                dy  = np.ones(outshape, dtype=int) * dy
+            else:
+                raise ValueError("date2dec error: size of dy != max input or 1.")
         if nhr < nmax:
-            if nhr == 1: hr  = np.ones(outshape)*hr
-            else: raise ValueError("date2dec error: size of hr != max input or 1.")
+            if nhr == 1:
+                hr  = np.ones(outshape, dtype=int) * hr
+            else:
+                raise ValueError("date2dec error: size of hr != max input or 1.")
         if nmi < nmax:
-            if nmi == 1: mi  = np.ones(outshape)*mi
-            else: raise ValueError("date2dec error: size of mi != max input or 1.")
+            if nmi == 1:
+                mi  = np.ones(outshape, dtype=int) * mi
+            else:
+                raise ValueError("date2dec error: size of mi != max input or 1.")
         if nsc < nmax:
-            if nsc == 1: sc  = np.ones(outshape)*sc
-            else: raise ValueError("date2dec error: size of sc != max input or 1.")
+            if nsc == 1:
+                sc  = np.ones(outshape, dtype=int) * sc
+            else:
+                raise ValueError("date2dec error: size of sc != max input or 1.")
         indate  = [yr, mo, dy, hr, mi, sc]
         insize  = [np.size(i) for i in indate]
         inshape = [np.shape(i) for i in indate]
@@ -524,8 +557,7 @@ def date2dec(calendar = 'standard', units=None,
             ihr = int(indate[3][i])
             imi = int(indate[4][i])
             isc = int(indate[5][i])
-
-            if ((iyr==1900) & (imo==2) & (idy==29)):
+            if ((iyr == 1900) & (imo == 2) & (idy == 29)):
                 timeobj[i] = nt.datetime(iyr, 3, 1, ihr, imi, isc)
             else:
                 timeobj[i] = nt.datetime(iyr, imo, idy, ihr, imi, isc)
@@ -537,7 +569,7 @@ def date2dec(calendar = 'standard', units=None,
     except:
         t0 = nt.datetime(1582, 10, 4, 23, 59, 59)
     t1    = nt.datetime(1582, 10, 15, 0, 0, 0)
-    is121 = True if (min(timeobj)<=t0) and (max(timeobj)>=t1) else False
+    is121 = True if (min(timeobj) <= t0) and (max(timeobj) >= t1) else False
     if (calendar == 'standard') or (calendar == 'gregorian'):
         if not units:
             units = 'days since 0001-01-01 12:00:00'
@@ -545,9 +577,12 @@ def date2dec(calendar = 'standard', units=None,
         else:
             dec0 = 0
         if is121 and (nt.__version__ < '1.2.2'):
-            for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='gregorian')+dec0
+            for ii, tt in enumerate(timeobj):
+                output[ii] = nt.date2num(tt, units,
+                                         calendar='gregorian') + dec0
         else:
-            output = nt.date2num(timeobj, units, calendar='gregorian')+dec0
+            output = nt.date2num(timeobj, units,
+                                 calendar='gregorian').astype(float) + dec0
         output += np.abs(output) * muleps
     elif calendar == 'julian':
         if not units:
@@ -557,111 +592,139 @@ def date2dec(calendar = 'standard', units=None,
             dec0 = 0
         if is121 and (nt.__version__ < '1.2.2'):
             for ii, tt in enumerate(timeobj):
-                output[ii] = nt.date2num(tt, units, calendar='julian')+dec0
+                output[ii] = nt.date2num(tt, units,
+                                         calendar='julian') + dec0
         else:
-            output = nt.date2num(timeobj, units, calendar='julian')+dec0
+            output = nt.date2num(timeobj, units,
+                                 calendar='julian').astype(float) + dec0
         output += np.abs(output) * muleps
     elif calendar == 'proleptic_gregorian':
-        if not units: units = 'days since 0001-01-01 00:00:00'
+        if not units:
+            units = 'days since 0001-01-01 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
-            for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='proleptic_gregorian')
+            for ii, tt in enumerate(timeobj):
+                output[ii] = nt.date2num(tt, units,
+                                         calendar='proleptic_gregorian')
         else:
-            output = nt.date2num(timeobj, units, calendar='proleptic_gregorian')
+            output = nt.date2num(timeobj, units,
+                                 calendar='proleptic_gregorian').astype(float)
         output += np.abs(output) * muleps
     elif calendar == 'excel1900':
         doerr = False
         if not units:
             units = 'days since 1899-12-31 00:00:00'
-            if excelerr: doerr = True
+            if excelerr:
+                doerr = True
         if is121 and (nt.__version__ < '1.2.2'):
-            for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='proleptic_gregorian')
+            for ii, tt in enumerate(timeobj):
+                output[ii] = nt.date2num(tt, units,
+                                         calendar='proleptic_gregorian')
         else:
-            output = nt.date2num(timeobj, units, calendar='proleptic_gregorian')
+            output = nt.date2num(timeobj, units,
+                                 calendar='proleptic_gregorian').astype(float)
         if doerr:
-            output = np.where(output >= 60., output+1., output)
-            # date2num treats 29.02.1900 as 01.03.1990, i.e. is the same decimal number
+            output = np.where(output >= 60., output + 1., output)
+            # date2num treats 29.02.1900 as 01.03.1990,
+            # i.e. is the same decimal number
             if np.any((output >= 61.) & (output < 62.)):
                 for i in range(outsize):
-                    # if (timeobj[i].year==1900) & (timeobj[i].month==2) & (timeobj[i].day==29):
+                    # if (timeobj[i].year==1900) & (timeobj[i].month==2) &
+                    #    (timeobj[i].day==29):
                     #     output[i] -= 1.
-                    if (yr[i]==1900) & (mo[i]==2) & (dy[i]==29):
+                    if (yr[i] == 1900) & (mo[i] == 2) & (dy[i] == 29):
                         output[i] -= 1.
         output += np.abs(output) * muleps
     elif calendar == 'excel1904':
-        if not units: units = 'days since 1903-12-31 00:00:00'
+        if not units:
+            units = 'days since 1903-12-31 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
-            for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='proleptic_gregorian')
+            for ii, tt in enumerate(timeobj):
+                output[ii] = nt.date2num(tt, units,
+                                         calendar='proleptic_gregorian')
         else:
-            output = nt.date2num(timeobj, units, calendar='proleptic_gregorian')
+            output = nt.date2num(timeobj, units,
+                                 calendar='proleptic_gregorian').astype(float)
         output += np.abs(output) * muleps
     elif (calendar == '365_day') or (calendar == 'noleap'):
-        if not units: units = 'days since 0001-01-01 00:00:00'
+        if not units:
+            units = 'days since 0001-01-01 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
-            for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='365_day')
+            for ii, tt in enumerate(timeobj):
+                output[ii] = nt.date2num(tt, units, calendar='365_day')
         else:
-            output = nt.date2num(timeobj, units, calendar='365_day')
+            output = nt.date2num(timeobj, units,
+                                 calendar='365_day').astype(float)
         output += np.abs(output) * muleps
     elif (calendar == '366_day') or (calendar == 'all_leap'):
-        if not units: units = 'days since 0001-01-01 00:00:00'
+        if not units:
+            units = 'days since 0001-01-01 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
-            for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='366_day')
+            for ii, tt in enumerate(timeobj):
+                output[ii] = nt.date2num(tt, units, calendar='366_day')
         else:
-            output = nt.date2num(timeobj, units, calendar='366_day')
+            output = nt.date2num(timeobj, units,
+                                 calendar='366_day').astype(float)
         output += np.abs(output) * muleps
     elif calendar == '360_day':
-        if not units: units = 'days since 0001-01-01 00:00:00'
+        if not units:
+            units = 'days since 0001-01-01 00:00:00'
         if is121 and (nt.__version__ < '1.2.2'):
-            for ii, tt in enumerate(timeobj): output[ii] = nt.date2num(tt, units, calendar='360_day')
+            for ii, tt in enumerate(timeobj):
+                output[ii] = nt.date2num(tt, units, calendar='360_day')
         else:
-            output = nt.date2num(timeobj, units, calendar='360_day')
+            output = nt.date2num(timeobj, units,
+                                 calendar='360_day').astype(float)
         output += np.abs(output) * muleps
     elif calendar == 'decimal':
         ntime = np.size(yr)
-        leap  = np.array((((yr%4)==0) & ((yr%100)!=0)) | ((yr%400)==0)).astype(np.int)
-        tdy   = np.array(dy, dtype=np.float)
-        diy   = np.array([ [-9,0, 31, 59, 90,120,151,181,212,243,273,304,334,365],
-                           [-9,0, 31, 60, 91,121,152,182,213,244,274,305,335,366] ])
+        leap  = np.array((((yr % 4) == 0) & ((yr % 100) != 0)) |
+                         ((yr % 400) == 0)).astype(int)
+        tdy   = np.array(dy, dtype=float)
+        diy   = np.array([ [-9, 0, 31, 59,  90, 120, 151, 181, 212,
+                            243, 273, 304, 334, 365],
+                           [-9, 0, 31, 60,  91, 121, 152, 182, 213,
+                            244, 274, 305, 335, 366] ])
         for i in range(ntime):
-            tdy[i] = tdy[i] + np.array(diy[leap[i],mo[i]], dtype=np.float)
+            tdy[i] = tdy[i] + np.array(diy[leap[i], mo[i]], dtype=float)
         days_year = 365.
-        output    = ( np.array(yr, dtype=np.float) +
-                      ((tdy-1.)*24. + np.array(hr, dtype=np.float) +
-                       np.array(mi, dtype=np.float)/60. +
-                       np.array(sc, dtype=np.float)/3600.) /
-                       ((days_year+np.array(leap, dtype=np.float))*24.) )
+        output    = ( np.array(yr, dtype=float) +
+                      ((tdy - 1.) * 24. + np.array(hr, dtype=float) +
+                       np.array(mi, dtype=float) / 60. +
+                       np.array(sc, dtype=float) / 3600.) /
+                      ((days_year + np.array(leap, dtype=float)) * 24.) )
         # for numerical stability, i.e. back and forth transforms
-        output += 1e-08 # 1/3 sec
+        output += 1e-08  # 1/3 sec
     elif calendar == 'decimal360':
         ntime = np.size(yr)
-        tdy   = np.array(dy, dtype=np.float)
-        diy   = np.array([-9,  0, 30, 60, 90,120,150,180,210,240,270,300,330,360])
+        tdy   = np.array(dy, dtype=float)
+        diy   = np.array([-9,  0, 30, 60, 90, 120, 150, 180, 210, 240, 270,
+                          300, 330, 360])
         for i in range(ntime):
-            tdy[i] = tdy[i] + np.array(diy[mo[i]], dtype=np.float)
+            tdy[i] = tdy[i] + np.array(diy[mo[i]], dtype=float)
         days_year = 360.
-        output    = ( np.array(yr, dtype=np.float) +
-                      ((tdy-1.)*24. + np.array(hr, dtype=np.float) +
-                       np.array(mi, dtype=np.float)/60. +
-                       np.array(sc, dtype=np.float)/3600.) /
-                       (days_year*24.) )
+        output    = ( np.array(yr, dtype=float) +
+                      ((tdy - 1.) * 24. + np.array(hr, dtype=float) +
+                       np.array(mi, dtype=float) / 60. +
+                       np.array(sc, dtype=float) / 3600.) /
+                      (days_year * 24.) )
         # for numerical stability, i.e. back and forth transforms
-        output += 1e-08 # 1/3 sec
+        output += 1e-08  # 1/3 sec
     else:
         raise ValueError("date2dec error: calendar not implemented; should have been catched before.")
-
 
     # return of reshaped output
     output = np.reshape(output, outshape)
     if isarr == 0:
-        output = np.float(output)
+        output = float(output)
     else:
         if islist:
             ns = np.size(outshape)
             if ns == 1:
                 output = [i for i in output]
             else:
-                loutput = [ i for i in output[:,0]]
-                for i in range(np.size(output[:,0])):
-                    loutput[i] = list(np.squeeze(output[i,:]))
+                loutput = [ i for i in output[:, 0]]
+                for i in range(np.size(output[:, 0])):
+                    loutput[i] = list(np.squeeze(output[i, :]))
                 output = loutput
 
     return output

@@ -357,6 +357,8 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
              Matthias Cuntz, May 2020 - numpy docstring format
              Matthias Cuntz, Jul 2020 - en for eng
              Matthias Cuntz, Jul 2020 - use proleptic_gregorian for Excel dates
+             Matthias Cuntz, May 2021 - rm np.int and np.float
+                                      - (almost) flake8 compatible
     """
     #
     # Constants
@@ -373,24 +375,27 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
         try:
             import netcdftime as nt
             if ((nt.__version__ <= '0.9.2') & (calendar == '360_day')):
-                raise ValueError("date2dec error: Your version of netcdftime.py is equal"
-                                 " or below 0.9.2. The 360_day calendar does not work with"
-                                 " arrays here. Please download a newer one.")
+                raise ValueError(
+                    "date2dec error: Your version of netcdftime.py is equal"
+                    " or below 0.9.2. The 360_day calendar does not work with"
+                    " arrays here. Please download a newer one.")
         except:
             import cftime as nt
     #
     calendar = calendar.lower()
     if (calendar not in calendars):
-        raise ValueError("dec2date error: Wrong calendar! Choose: "+''.join([i+' ' for i in calendars]))
+        raise ValueError("dec2date error: Wrong calendar! Choose: " +
+                         ''.join([i + ' ' for i in calendars]))
     if refdate and units:
         raise ValueError("dec2date error: either refdate or units can be given.")
     # obsolete eng
     if en and eng:
         raise ValueError("dec2date error: 'eng' was succeeded by 'en'. Only one can be given.")
-    if eng and (not en): en = eng
+    if eng and (not en):
+        en = eng
     #
     # Default
-    if np.sum(np.array([yr,mo,dy,hr,mi,sc])) >= 1:
+    if np.sum(np.array([yr, mo, dy, hr, mi, sc])) >= 1:
         ii = True
     else:
         ii = False
@@ -398,7 +403,7 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
         fulldate = False
     if ((not (ascii | en | ii)) and (not fulldate)):
         fulldate = True
-    if fulldate == True:
+    if fulldate:
         yr = True
         mo = True
         dy = True
@@ -406,9 +411,9 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
         mi = True
         sc = True
         # Further checks
-    if np.sum(np.array([ascii,fulldate,en])) > 1:
+    if np.sum(np.array([ascii, fulldate, en])) > 1:
         raise ValueError("dec2date error: Only one of ascii, fulldate, or en can be chosen.")
-    if np.sum(np.array([ascii,en,ii])) > 1:
+    if np.sum(np.array([ascii, en, ii])) > 1:
         raise ValueError("dec2date error: If ascii, fulldate or en then no special selection yr,mo,dy,hr,mi,sc possible.")
     #
     # Input size and shape
@@ -416,78 +421,86 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
     isarr = np.ndim(indata)
     if (islist & (isarr > 2)):
         raise ValueError("dec2date error: input is list > 2D; Use array input")
-    if isarr == 0: indata = np.array([indata])
-    else: indata = np.array(indata)
+    if isarr == 0:
+        indata = np.array([indata])
+    else:
+        indata = np.array(indata)
     insize  = indata.size
     inshape = indata.shape
     indata  = indata.flatten()
     #
     # depending on chosen calendar and optional set of the time refdate
     # calendar date is calculated
-    if units=='day as %Y%m%d.%f':
-        fdy    = indata % 1. # day fraction
+    if units == 'day as %Y%m%d.%f':
+        fdy    = indata % 1.  # day fraction
         indata = indata - fdy
-        day    = np.rint(indata % 100.).astype(np.int)
+        day    = np.rint(indata % 100.).astype(int)
         indata = indata - day
         tmp    = indata % 10000.
-        month  = np.rint(tmp / 100.).astype(np.int)
+        month  = np.rint(tmp / 100.).astype(int)
         indata = indata - tmp
-        year   = np.rint(indata / 10000.).astype(np.int)
+        year   = np.rint(indata / 10000.).astype(int)
         secs   = np.rint(fdy * 86400.)
-        hour   = np.floor(secs/3600.).astype(np.int)
-        secs   = secs - 3600.*hour
-        minute = np.floor(secs/60.).astype(np.int)
-        second = np.rint(secs - 60.*minute).astype(np.int)
-    elif units=='month as %Y%m.%f':
-        fmo    = indata % 1. # month fraction
+        hour   = np.floor(secs / 3600.).astype(int)
+        secs   = secs - 3600. * hour
+        minute = np.floor(secs / 60.).astype(int)
+        second = np.rint(secs - 60. * minute).astype(int)
+    elif units == 'month as %Y%m.%f':
+        fmo    = indata % 1.  # month fraction
         indata = indata - fmo
-        month  = np.rint(indata % 100.).astype(np.int)
+        month  = np.rint(indata % 100.).astype(int)
         indata = indata - month
-        year   = np.rint(indata / 100.).astype(np.int)
-        leap   = np.where((((year%4)==0) & ((year%100)!=0)) | ((year%400)==0), 1, 0)
-        dim    = np.array([[-9,31,28,31,30,31,30,31,31,30,31,30,31],
-                           [-9,31,29,31,30,31,30,31,31,30,31,30,31]])
-        indata = dim[(leap,month)] * fmo
-        fdy    = indata % 1. # day fraction
+        year   = np.rint(indata / 100.).astype(int)
+        leap   = np.where((((year % 4) == 0) & ((year % 100) != 0)) |
+                          ((year % 400) == 0), 1, 0)
+        dim    = np.array([[-9, 31, 28, 31, 30, 31, 30,
+                            31, 31, 30, 31, 30, 31],
+                           [-9, 31, 29, 31, 30, 31, 30,
+                            31, 31, 30, 31, 30, 31]])
+        indata = dim[(leap, month)] * fmo
+        fdy    = indata % 1.  # day fraction
         indata = indata - fdy
-        day    = np.rint(indata % 100.).astype(np.int)
+        day    = np.rint(indata % 100.).astype(int)
         secs   = np.rint(fdy * 86400.)
-        hour   = np.floor(secs/3600.).astype(np.int)
-        secs   = secs - 3600.*hour
-        minute = np.floor(secs/60.).astype(np.int)
-        second = np.rint(secs - 60.*minute).astype(np.int)
-    elif units=='year as %Y.%f':
-        fyr    = indata % 1. # year fraction
-        year   = np.rint(indata - fyr).astype(np.int)
-        leap   = np.where((((year%4)==0) & ((year%100)!=0)) | ((year%400)==0), 1, 0)
-        dsiy   = np.array([365,366])
+        hour   = np.floor(secs / 3600.).astype(int)
+        secs   = secs - 3600. * hour
+        minute = np.floor(secs / 60.).astype(int)
+        second = np.rint(secs - 60. * minute).astype(int)
+    elif units == 'year as %Y.%f':
+        fyr    = indata % 1.  # year fraction
+        year   = np.rint(indata - fyr).astype(int)
+        leap   = np.where((((year % 4) == 0) & ((year % 100) != 0)) |
+                          ((year % 400) == 0), 1, 0)
+        dsiy   = np.array([365, 366])
         indata = dsiy[leap] * fyr
-        fdy    = indata % 1. # day fraction
-        doy    = np.rint(indata - fdy).astype(np.int)
-        diy    = np.array([ [-9,0, 31, 59, 90,120,151,181,212,243,273,304,334,365],
-                            [-9,0, 31, 60, 91,121,152,182,213,244,274,305,335,366] ])
-        month = np.zeros(insize, dtype=np.int)
-        day   = np.zeros(insize, dtype=np.int)
+        fdy    = indata % 1.  # day fraction
+        doy    = np.rint(indata - fdy).astype(int)
+        diy    = np.array([ [-9, 0, 31, 59, 90, 120, 151, 181,
+                             212, 243, 273, 304, 334, 365],
+                            [-9, 0, 31, 60, 91, 121, 152, 182,
+                             213, 244, 274, 305, 335, 366] ])
+        month = np.zeros(insize, dtype=int)
+        day   = np.zeros(insize, dtype=int)
         for i in range(insize):
-            month[i] = np.where(doy[i] > np.squeeze(diy[leap[i],:]))[0][-1]
-            day[i]   = doy[i] - diy[leap[i],month[i]]
+            month[i] = np.where(doy[i] > np.squeeze(diy[leap[i], :]))[0][-1]
+            day[i]   = doy[i] - diy[leap[i], month[i]]
         secs   = np.rint(fdy * 86400.)
-        hour   = np.floor(secs/3600.).astype(np.int)
-        secs   = secs - 3600.*hour
-        minute = np.floor(secs/60.).astype(np.int)
-        second = np.rint(secs - 60.*minute).astype(np.int)
+        hour   = np.floor(secs / 3600.).astype(int)
+        secs   = secs - 3600. * hour
+        minute = np.floor(secs / 60.).astype(int)
+        second = np.rint(secs - 60. * minute).astype(int)
     else:
         if (calendar == 'standard') or (calendar == 'gregorian'):
             dec0 = 0
             if units:
                 unit = units
             elif refdate:
-                #unit = 'days since %s' % (refdate)
+                # unit = 'days since %s' % (refdate)
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 0001-01-01 12:00:00'
                 dec0 = 1721424
-            timeobj = nt.num2date(indata-dec0, unit, calendar='gregorian')
+            timeobj = nt.num2date(indata - dec0, unit, calendar='gregorian')
         elif calendar == 'julian':
             dec0 = 0
             if units:
@@ -497,7 +510,7 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
             else:
                 unit = 'days since 0001-01-01 12:00:00'
                 dec0 = 1721424
-            timeobj = nt.num2date(indata-dec0, unit, calendar='julian')
+            timeobj = nt.num2date(indata - dec0, unit, calendar='julian')
         elif calendar == 'proleptic_gregorian':
             if units:
                 unit = units
@@ -505,7 +518,7 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 0001-01-01 00:00:00'
-            timeobj = nt.num2date(indata, unit, calendar = 'proleptic_gregorian')
+            timeobj = nt.num2date(indata, unit, calendar='proleptic_gregorian')
         elif calendar == 'excel1900':
             doerr = False
             if units:
@@ -514,12 +527,15 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 1899-12-31 00:00:00'
-                if excelerr: doerr = True
+                if excelerr:
+                    doerr = True
             if doerr:
-                indata1 = np.where(indata >= 61., indata-1, indata)
-                timeobj = nt.num2date(indata1, unit, calendar = 'proleptic_gregorian')
+                indata1 = np.where(indata >= 61., indata - 1, indata)
+                timeobj = nt.num2date(indata1, unit,
+                                      calendar='proleptic_gregorian')
             else:
-                timeobj = nt.num2date(indata, unit, calendar = 'proleptic_gregorian')
+                timeobj = nt.num2date(indata, unit,
+                                      calendar='proleptic_gregorian')
         elif calendar == 'excel1904':
             if units:
                 unit = units
@@ -527,7 +543,7 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 1903-12-31 00:00:00'
-            timeobj = nt.num2date(indata, unit, calendar = 'proleptic_gregorian')
+            timeobj = nt.num2date(indata, unit, calendar='proleptic_gregorian')
         elif (calendar == '365_day') or (calendar == 'noleap'):
             if units:
                 unit = units
@@ -535,7 +551,7 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 0001-01-01 00:00:00'
-            timeobj = nt.num2date(indata, unit, calendar = '365_day')
+            timeobj = nt.num2date(indata, unit, calendar='365_day')
         elif (calendar == '366_day') or (calendar == 'all_leap'):
             if units:
                 unit = units
@@ -543,7 +559,7 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 0001-01-01 00:00:00'
-            timeobj = nt.num2date(indata, unit, calendar = '366_day')
+            timeobj = nt.num2date(indata, unit, calendar='366_day')
         elif calendar == '360_day':
             if units:
                 unit = units
@@ -551,83 +567,94 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
                 unit = 'days since {0:s}'.format(refdate)
             else:
                 unit = 'days since 0001-01-01 00:00:00'
-            timeobj = nt.num2date(indata, unit, calendar = '360_day')
+            timeobj = nt.num2date(indata, unit, calendar='360_day')
         elif calendar == 'decimal':
             fyear = np.trunc(indata)
-            year  = np.array(fyear, dtype=np.int)
-            leap  = ((((year%4)==0) & ((year%100)!=0)) | ((year%400)==0)).astype(np.int)
-            fleap = leap.astype(np.float)
-            fract_date = indata-fyear
+            year  = np.array(fyear, dtype=int)
+            leap  = ((((year % 4) == 0) & ((year % 100) != 0)) |
+                     ((year % 400) == 0)).astype(int)
+            fleap = leap.astype(float)
+            fract_date = indata - fyear
             days_year  = 365.
             # date in hours
-            fhoy  = fract_date*(days_year+fleap)*24.
+            fhoy  = fract_date * (days_year + fleap) * 24.
             fihoy = np.trunc(fhoy)
-            ihoy  = np.array(fihoy, dtype=np.int)
+            ihoy  = np.array(fihoy, dtype=int)
             # minutes
-            fmoy    = (fhoy-fihoy)*60.
+            fmoy    = (fhoy - fihoy) * 60.
             fminute = np.trunc(fmoy)
-            minute  = np.array(fminute, dtype=np.int)
+            minute  = np.array(fminute, dtype=int)
             # seconds
-            second = np.array(np.trunc((fmoy-fminute)*60.), dtype=np.int)
+            second = np.array(np.trunc((fmoy - fminute) * 60.), dtype=int)
             # months
-            fdoy  = (fihoy/24.)+1.
+            fdoy  = (fihoy / 24.) + 1.
             fidoy = np.trunc(fdoy)
-            idoy  = np.array(fidoy, dtype=np.int)
-            month = np.zeros(insize, dtype=np.int)
-            diy   = np.array([ [-9,0, 31, 59, 90,120,151,181,212,243,273,304,334,365],
-                               [-9,0, 31, 60, 91,121,152,182,213,244,274,305,335,366] ])
+            idoy  = np.array(fidoy, dtype=int)
+            month = np.zeros(insize, dtype=int)
+            diy   = np.array([ [-9, 0, 31, 59, 90, 120, 151, 181,
+                                212, 243, 273, 304, 334, 365],
+                               [-9, 0, 31, 60, 91, 121, 152, 182,
+                                213, 244, 274, 305, 335, 366] ])
             for i in range(insize):
-                ii = np.squeeze(np.where(idoy[i] > np.squeeze(diy[leap[i],:])))
+                ii = np.squeeze(
+                    np.where(idoy[i] > np.squeeze(diy[leap[i], :])))
                 month[i] = ii[-1]
             # days
-            fday = np.zeros(insize, dtype=np.float)
+            fday = np.zeros(insize, dtype=float)
             for i in range(insize):
-                fday[i] = np.trunc(fdoy[i] - np.float(diy[leap[i],month[i]]))
-            day = np.array(fday, dtype=np.int)
+                fday[i] = np.trunc(fdoy[i] - float(diy[leap[i], month[i]]))
+            day = np.array(fday, dtype=int)
             # hours
             hour = ihoy % 24
         elif calendar == 'decimal360':
             fyear = np.trunc(indata)
-            year  = np.array(fyear, dtype=np.int)
-            fract_date = indata-fyear
+            year  = np.array(fyear, dtype=int)
+            fract_date = indata - fyear
             days_year  = 360.
             # date in hours
-            fhoy  = fract_date*days_year*24.
+            fhoy  = fract_date * days_year * 24.
             fihoy = np.trunc(fhoy)
-            ihoy  = np.array(fihoy, dtype=np.int)
+            ihoy  = np.array(fihoy, dtype=int)
             # minutes
-            fmoy    = (fhoy-fihoy)*60.
+            fmoy    = (fhoy - fihoy) * 60.
             fminute = np.trunc(fmoy)
-            minute  = np.array(fminute, dtype=np.int)
+            minute  = np.array(fminute, dtype=int)
             # seconds
-            second = np.array(np.trunc((fmoy-fminute)*60.), dtype=np.int)
+            second = np.array(np.trunc((fmoy - fminute) * 60.), dtype=int)
             # months
-            fdoy  = (fihoy/24.)+1.
+            fdoy  = (fihoy / 24.) + 1.
             fidoy = np.trunc(fdoy)
-            idoy  = np.array(fidoy, dtype=np.int)
-            month = np.zeros(insize, dtype=np.int)
-            diy   = np.array([ -9, 0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360 ])
+            idoy  = np.array(fidoy, dtype=int)
+            month = np.zeros(insize, dtype=int)
+            diy   = np.array([ -9, 0, 30, 60, 90, 120, 150, 180,
+                               210, 240, 270, 300, 330, 360 ])
             for i in range(insize):
                 ii = np.squeeze(np.where(idoy[i] > diy))
                 month[i] = ii[-1]
             # days
-            fday = np.zeros(insize, dtype=np.float)
+            fday = np.zeros(insize, dtype=float)
             for i in range(insize):
-                fday[i] = np.trunc(fdoy[i] - np.float(diy[month[i]]))
-            day = np.array(fday, dtype=np.int)
+                fday[i] = np.trunc(fdoy[i] - float(diy[month[i]]))
+            day = np.array(fday, dtype=int)
             # hours
             hour = ihoy % 24
         else:
             raise ValueError("dec2date error: calendar not implemented; should have been catched before.")
 
-        if (calendar not in ['decimal','decimal360']):
+        if (calendar not in ['decimal', 'decimal360']):
             timeobjfl = timeobj.flatten()
-            year   = np.array([timeobjfl[i].year for i in range(insize)], dtype=np.int)
-            month  = np.array([timeobjfl[i].month for i in range(insize)], dtype=np.int)
-            day    = np.array([timeobjfl[i].day for i in range(insize)], dtype=np.int)
-            hour   = np.array([timeobjfl[i].hour for i in range(insize)], dtype=np.int)
-            minute = np.array([timeobjfl[i].minute for i in range(insize)], dtype=np.int)
-            second = np.array([timeobjfl[i].second for i in range(insize)], dtype=np.int)
+            year   = np.array([timeobjfl[i].year
+                               for i in range(insize)], dtype=int)
+            month  = np.array([timeobjfl[i].month
+                               for i in range(insize)], dtype=int)
+            day    = np.array([timeobjfl[i].day
+                               for i in range(insize)], dtype=int)
+            hour   = np.array([timeobjfl[i].hour
+                               for i in range(insize)], dtype=int)
+            minute = np.array([timeobjfl[i].minute
+                               for i in range(insize)], dtype=int)
+            second = np.array([timeobjfl[i].second
+                               for i in range(insize)], dtype=int)
             if (calendar == 'excel1900') & excelerr:
                 ii  = np.where((indata >= 60.) & (indata < 61.))[0]
                 if np.size(ii) > 0:
@@ -636,17 +663,19 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
     #
     # Ascii output
     if ascii:
-        output = ( ['%02d.%02d.%04d %02d:%02d:%02d' %
-                      (day[i], month[i], year[i], hour[i], minute[i], second[i]) for i in range(insize)] )
+        output = [ '%02d.%02d.%04d %02d:%02d:%02d' %
+                   (day[i], month[i], year[i], hour[i], minute[i], second[i])
+                   for i in range(insize) ]
         output = np.reshape(output, inshape)
-        if isarr==0:
+        if isarr == 0:
             output = output[0]
     # Ascii english output
     elif en:
-        output = ( ['%04d-%02d-%02d %02d:%02d:%02d' %
-                    (year[i], month[i], day[i], hour[i], minute[i], second[i]) for i in range(insize)] )
+        output = ['%04d-%02d-%02d %02d:%02d:%02d' %
+                  (year[i], month[i], day[i], hour[i], minute[i], second[i])
+                  for i in range(insize) ]
         output = np.reshape(output, inshape)
-        if isarr==0:
+        if isarr == 0:
             output = output[0]
     else:
         # Individual output
@@ -658,21 +687,27 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
         hour   = np.reshape(hour, inshape)
         minute = np.reshape(minute, inshape)
         second = np.reshape(second, inshape)
-        if isarr==0:
-            year   = np.int(year)
-            month  = np.int(month)
-            day    = np.int(day)
-            hour   = np.int(hour)
-            minute = np.int(minute)
-            second = np.int(second)
+        if isarr == 0:
+            year   = int(year)
+            month  = int(month)
+            day    = int(day)
+            hour   = int(hour)
+            minute = int(minute)
+            second = int(second)
         # filling of output list:
         output = []
-        if yr: output += [year]
-        if mo: output += [month]
-        if dy: output += [day]
-        if hr: output += [hour]
-        if mi: output += [minute]
-        if sc: output += [second]
+        if yr:
+            output += [year]
+        if mo:
+            output += [month]
+        if dy:
+            output += [day]
+        if hr:
+            output += [hour]
+        if mi:
+            output += [minute]
+        if sc:
+            output += [second]
         # return output arrays:
         if len(output) == 1:
             output = output[0]
@@ -683,9 +718,9 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
             if ns == 1:
                 output = [i for i in output]
             elif ns == 2:
-                loutput = [ i for i in output[:,0]]
-                for i in range(np.size(output[:,0])):
-                    loutput[i] = list(np.squeeze(output[i,:]))
+                loutput = [ i for i in output[:, 0]]
+                for i in range(np.size(output[:, 0])):
+                    loutput[i] = list(np.squeeze(output[i, :]))
                 output = loutput
             else:
                 raise ValueError("dec2date error: list output > 2D; should have been catched before.")
@@ -696,4 +731,3 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
 if __name__ == '__main__':
     import doctest
     doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
-
