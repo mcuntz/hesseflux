@@ -21,6 +21,8 @@ Released under the MIT License; see LICENSE file for details.
 * Keyword fullday, Apr 2014, Matthias Cuntz
 * Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz
 * Using numpy docstring format, May 2020, Matthias Cuntz
+* error estimates are undef by default, Jun 2021, Matthias Cuntz
+* mean of values for error estimates, Jun 2021, Matthias Cuntz
 
 .. moduleauthor:: Matthias Cuntz
 
@@ -41,7 +43,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
             colhead=None,
             sw_dev=50., ta_dev=2.5, vpd_dev=5.,
             longgap=60, fullday=False, undef=-9999, ddof=1,
-            err=False, verbose=0):
+            err=False, errmean=False, verbose=0):
     """
     Fills gaps in flux data from Eddy covariance measurements with
     Marginal Distribution Sampling (MDS) according to Reichstein et al.
@@ -105,14 +107,18 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
         values having `undef` value are treated as missing values in `dfin`
         (default: -9999)
 
-        np.nan is not allowed (working).
+        np.nan is not allowed (not working).
     ddof : int, optional
         Delta Degrees of Freedom. The divisor used in calculation of standard
         deviation for error estimates (`err=True`) is ``N-ddof``, where ``N``
         represents the number of elements (default: 1).
     err : bool, optional
-        True: fill every data point, i.e. used for error generation
+        True: fill every data point with standard deviation instead of mean,
+        i.e. used for error generation as in Lasslop et al. (Biogeosci 2008)
         (default: False)
+    errmean : bool, optional
+        True: also return mean value of values for error estimate
+        `if err == True` (default: False)
     shape : bool or tuple, optional
         True: output have the same shape as input data if `dfin` is
         numpy array; if a tuple is given, then this tuple is used to reshape.
@@ -124,9 +130,11 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
     Returns
     -------
     pandas.Dataframe(s) or numpy array(s)
-        If `err==False`: filled_data, quality_class
+        `if not err:` filled_data, quality_class
 
-        If `err==True`:  err_data
+        `if err and not errmean:` err_estimate
+
+        `if err and errmean:` err_estimate, mean_estimate
 
         pandas.Dataframe(s) will be returned if `dfin` was Dataframe.
 
@@ -134,15 +142,21 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
 
     Notes
     -----
-    If `err==True`, there is no error estimate if there are no meteorological
-    conditions in the vicinity of the data point.
+    If `err`, there is no error estimate if there are no meteorological
+    conditions in the vicinity of the data point (first cycle of
+    Reichstein et al. GCB 2005).
 
-    Routine Does not work with `undef=np.nan`.
+    Routine does not work with `undef=np.nan`.
 
     Reichstein et al. (2005)
         On the separation of net ecosystem exchange into assimilation and
-        ecosystem respiration: review and improved algorithm.
+        ecosystem respiration: review and improved algorithm
         Global Change Biology 11, 1424-1439
+
+    Lasslop et al. (2008)
+        Inﬂuences of observation errors in eddy ﬂux data on inverse model
+        parameter estimation
+        Biogeosciences, 5, 1311–1324
 
     Examples
     --------
@@ -167,39 +181,53 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
     >>> dfin = dat[idx,:]
     >>> # flag
     >>> flag = np.where(dfin == undef, 2, 0)
-    >>> flag[0,:] = dat[head1.index('qcNEE'),:].astype(np.int)
-    >>> flag[1,:] = dat[head1.index('qcLE'),:].astype(np.int)
-    >>> flag[2,:] = dat[head1.index('qcH'),:].astype(np.int)
+    >>> flag[0, :] = dat[head1.index('qcNEE'), :].astype(int)
+    >>> flag[1, :] = dat[head1.index('qcLE'), :].astype(int)
+    >>> flag[2, :] = dat[head1.index('qcH'), :].astype(int)
     >>> flag[np.where(flag==1)] = 0
     >>> # date
     >>> day_id  = head1.index('Day')
     >>> hour_id = head1.index('Hour')
     >>> ntime   = dat.shape[1]
-    >>> year  = np.ones(ntime, dtype=np.int) * 1998
-    >>> hh    = dat[hour_id,:].astype(np.int)
-    >>> mn    = np.rint((dat[hour_id,:]-hh)*60.).astype(np.int)
+    >>> year  = np.ones(ntime, dtype=int) * 1998
+    >>> hh    = dat[hour_id, :].astype(int)
+    >>> mn    = np.rint((dat[hour_id,:] - hh) * 60.).astype(int)
     >>> y0    = date2dec(yr=year[0], mo=1, dy=1, hr=hh, mi=mn)
-    >>> jdate = y0 + dat[day_id,:]
+    >>> jdate = y0 + dat[day_id, :]
     >>> adate = dec2date(jdate, eng=True)
     >>> # fill
     >>> dat_f, flag_f = gapfill(dfin, flag=flag, date=adate, colhead=colhead,
     ...                         undef=undef, verbose=0)
-    >>> print('{:d} {:d} {:d} {:d} {:d} {:d}'.format(*flag_f[0,11006:11012]))
+    >>> print('{:d} {:d} {:d} {:d} {:d} {:d}'.format(*flag_f[0, 11006:11012]))
     1 1 1 2 2 2
-    >>> print('{:.2f} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f}'.format(*dat_f[0,11006:11012]))
+    >>> print('{:.2f} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f}'.format(
+    ...       *dat_f[0, 11006:11012]))
     -18.68 -15.63 -19.61 -15.54 -12.40 -15.33
 
     >>> # 1D err
     >>> dat_std = gapfill(dfin, flag=flag, date=adate, colhead=colhead,
     ...                   undef=undef, verbose=0, err=True)
-    >>> print('{:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}'.format(*dat_std[0,11006:11012]))
+    >>> print('{:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}'.format(
+    ...       *dat_std[0, 11006:11012]))
     5.372 13.118 6.477 -9999.000 -9999.000 -9999.000
 
-    >>> dat_err     = np.ones(ndat, dtype=np.int)*(-1)
-    >>> kk          = np.where((dat_std[0,:] != undef) & (dat_f[0,:] != 0.))[0]
-    >>> dat_err[kk] = np.abs(dat_std[0,kk]/dat_f[0,kk]*100.).astype(np.int)
+    >>> dat_err = np.ones(ndat, dtype=int)*(-1)
+    >>> kk      = np.where((dat_std[0, :] != undef) & (dat_f[0, :] != 0.))[0]
+    >>> dat_err[kk] = np.abs(dat_std[0,kk]/dat_f[0,kk]*100.).astype(int)
     >>> print('{:d} {:d} {:d} {:d} {:d} {:d}'.format(*dat_err[11006:11012]))
     28 83 33 -1 -1 -1
+
+    >>> # 1D err + mean
+    >>> dat_std, dat_mean = gapfill(dfin, flag=flag, date=adate,
+    ...                             colhead=colhead, undef=undef, verbose=0,
+    ...                             err=True, errmean=True)
+    >>> print('{:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}'.format(
+    ...       *dat_std[0, 11006:11012]))
+    5.372 13.118 6.477 -9999.000 -9999.000 -9999.000
+    >>> print('{:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}'.format(
+    ...       *dat_mean[0, 11006:11012]))
+    -18.677 -15.633 -19.610 -9999.000 -9999.000 -9999.000
+
 
     History
     -------
@@ -214,6 +242,8 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
               Matthias Cuntz, Apr 2020 - Input can be pandas Dataframe or
                                          numpy array(s)
               Matthias Cuntz, May 2020 - numpy docstring format
+              Matthias Cuntz, Jun 2021 - prefill error estimates with undef
+                                       - errmean
     """
     # Check input
     # numpy or panda
@@ -254,7 +284,9 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
                 fistrans = True
                 ff = pd.DataFrame(flag.T, columns=df.columns.values)
             else:
-                estr = 'flag must have same shape as data array. data: ({:d},{:d}); flag: ({:d},{:d})'.format(dfin.shape[0], dfin.shape[1], flag.shape[0], flag.shape[1])
+                estr  = 'flag must have same shape as data array. data:'
+                estr += ' ({:d},{:d}); flag: ({:d},{:d})'.format(
+                    dfin.shape[0], dfin.shape[1], flag.shape[0], flag.shape[1])
                 raise ValueError(estr)
             ff = ff.set_index(df.index)
         else:
@@ -305,16 +337,21 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
     vpd     = df[vpd_id].to_numpy()
     vpd_flg = ff[vpd_id].to_numpy()
 
-    dfill    = df.copy(deep=True)
-    ffill    = ff.copy(deep=True)
-    ffill[:] = 0
+    # dfill is filled data
+    # ffill is fill flag if not err else error estimate
+    dfill = df.copy(deep=True)
+    if err:
+        ffill = df.copy(deep=True)
+    else:
+        ffill    = ff.copy(deep=True)
+        ffill[:] = 0
 
     # Times
     # number of data points per week; basic factor of the time window
     week    = pd.Timedelta('1 W') / (df.index[1] - df.index[0])
     nperday = week // 7
     hour    = df.index.hour + df.index.minute/60.
-    day     = (df.index.to_julian_date()-0.5).astype(np.int)
+    day     = (df.index.to_julian_date()-0.5).astype(int)
 
     # Filling variables
     ndata = len(df)
@@ -339,10 +376,14 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
         data_f  = dfill[hcol].to_numpy()
         dflag_f = ffill[hcol].to_numpy()
 
+        if err:
+            data_f[:]  = undef
+            dflag_f[:] = undef
+
         # Large margins
 
         # Check for large margins at beginning
-        largegap   = np.zeros(ndata, dtype=np.bool)
+        largegap   = np.zeros(ndata, dtype=bool)
         firstvalid = np.amin(np.where(dflag == 0)[0])
         lastvalid  = np.amax(np.where(dflag == 0)[0])
         nn         = int(nperday*longgap)
@@ -427,8 +468,8 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
                 # search for values around the met-conditions
                 # in a window of time
                 # (one week in the first iteration and odd weeks in the next)
-                j1  = j - np.arange(1, week+1, dtype=np.int) + 1
-                j2  = j + np.arange(1, week, dtype=np.int)
+                j1  = j - np.arange(1, week+1, dtype=int) + 1
+                j2  = j + np.arange(1, week, dtype=int)
                 jj  = np.append(j1, j2)
                 win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
                 # get boolean array where meteo-conditions are in a given width
@@ -443,16 +484,16 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
                     if verbose > 2:
                         print('    m1.1: ', j, win.size, dat.mean(),
                               dat.std(ddof=ddof))
+                    data_f[j] = dat.mean()
                     if err:
-                        data_f[j]  = dat.std(ddof=ddof)
+                        dflag_f[j] = dat.std(ddof=ddof)
                     else:
-                        data_f[j]  = dat.mean()
                         # assign also quality category of gap filling
                         dflag_f[j] = 1
                     continue
                 else:  # --> extend time window to two weeks
-                    j1  = j - np.arange(1, 2*week+1, dtype=np.int) + 1
-                    j2  = j + np.arange(1, 2*week, dtype=np.int)
+                    j1  = j - np.arange(1, 2*week+1, dtype=int) + 1
+                    j2  = j + np.arange(1, 2*week, dtype=int)
                     jj  = np.append(j1, j2)
                     win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
                     conditions = ( (np.abs(sw[win]  - sw[j])  < sw_devmax) &
@@ -465,10 +506,10 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
                         if verbose > 2:
                             print('    m1.2: ', j, win.size, dat.mean(),
                                   dat.std(ddof=ddof))
+                        data_f[j] = dat.mean()
                         if err:
-                            data_f[j]  = dat.std(ddof=ddof)
+                            dflag_f[j] = dat.std(ddof=ddof)
                         else:
-                            data_f[j]  = dat.mean()
                             # assign also quality category of gap filling
                             dflag_f[j] = 1
                         continue
@@ -482,8 +523,8 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
 
             # Method 2: just global radiation available
             if sw_flg[j] == 0:
-                j1  = j - np.arange(1, week+1, dtype=np.int) + 1
-                j2  = j + np.arange(1, week, dtype=np.int)
+                j1  = j - np.arange(1, week+1, dtype=int) + 1
+                j2  = j + np.arange(1, week, dtype=int)
                 jj  = np.append(j1, j2)
                 win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
                 # get boolean array where meteo-conditions are in a given width
@@ -507,8 +548,8 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
             enough = False
             for i in range(2):
                 t_win = (nperday * (2*i+1))//2
-                j1  = j - np.arange(1, t_win+1, dtype=np.int) + 1
-                j2  = j + np.arange(1, t_win, dtype=np.int)
+                j1  = j - np.arange(1, t_win+1, dtype=int) + 1
+                j2  = j + np.arange(1, t_win, dtype=int)
                 jj  = np.append(j1, j2)
                 win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
                 conditions = ( (np.abs(hour[win]-hour[j]) < 1.1)
@@ -535,8 +576,8 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
             # Method 4: same as 1 but for 3-12 weeks
             if meteo_flg[j]:
                 for multi in range(3, 12):
-                    j1  = j - np.arange(1, multi*week+1, dtype=np.int) + 1
-                    j2  = j + np.arange(1, multi*week, dtype=np.int)
+                    j1  = j - np.arange(1, multi*week+1, dtype=int) + 1
+                    j2  = j + np.arange(1, multi*week, dtype=int)
                     jj  = np.append(j1, j2)
                     win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
                     conditions = ( (np.abs(sw[win]  - sw[j])  < sw_devmax) &
@@ -568,8 +609,8 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
             # Method 5: same as 2 but for 2-12 weeks
             if sw_flg[j] == 0:
                 for multi in range(2, 12):
-                    j1  = j - np.arange(1, multi*week+1, dtype=np.int) + 1
-                    j2  = j + np.arange(1, multi*week, dtype=np.int)
+                    j1  = j - np.arange(1, multi*week+1, dtype=int) + 1
+                    j2  = j + np.arange(1, multi*week, dtype=int)
                     jj  = np.append(j1, j2)
                     win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
                     # get boolean array where meteo-conditions are
@@ -598,8 +639,8 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
             # Method 6: same as 3 but for 3-120 days
             for i in range(3, 120):
                 t_win = nperday * (2*i+1)/2
-                j1  = j - np.arange(1, t_win+1, dtype=np.int) + 1
-                j2  = j + np.arange(1, t_win, dtype=np.int)
+                j1  = j - np.arange(1, t_win+1, dtype=int) + 1
+                j2  = j + np.arange(1, t_win, dtype=int)
                 jj  = np.append(j1, j2)
                 win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
                 conditions = ( (np.abs(hour[win]-hour[j]) < 1.1)
@@ -636,7 +677,10 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
         ffout = ffill
 
     if err:
-        return dfout
+        if errmean:
+            return ffout, dfout
+        else:
+            return ffout
     else:
         return dfout, ffout
 
@@ -669,17 +713,17 @@ if __name__ == '__main__':
     # dfin = dat[idx,:]
     # # flag
     # flag = np.where(dfin == undef, 2, 0)
-    # flag[0,:] = dat[head1.index('qcNEE'),:].astype(np.int)
-    # flag[1,:] = dat[head1.index('qcLE'),:].astype(np.int)
-    # flag[2,:] = dat[head1.index('qcH'),:].astype(np.int)
+    # flag[0,:] = dat[head1.index('qcNEE'),:].astype(int)
+    # flag[1,:] = dat[head1.index('qcLE'),:].astype(int)
+    # flag[2,:] = dat[head1.index('qcH'),:].astype(int)
     # flag[np.where(flag==1)] = 0
     # # date
     # day_id  = head1.index('Day')
     # hour_id = head1.index('Hour')
     # ntime   = dat.shape[1]
-    # year  = np.ones(ntime, dtype=np.int) * 1998
-    # hh    = dat[hour_id,:].astype(np.int)
-    # mn    = np.rint((dat[hour_id,:]-hh)*60.).astype(np.int)
+    # year  = np.ones(ntime, dtype=int) * 1998
+    # hh    = dat[hour_id,:].astype(int)
+    # mn    = np.rint((dat[hour_id,:]-hh)*60.).astype(int)
     # y0    = date2dec(yr=year[0], mo=1, dy=1, hr=hh, mi=mn)
     # jdate = y0 + dat[day_id,:]
     # adate = dec2date(jdate, eng=True)
@@ -695,8 +739,8 @@ if __name__ == '__main__':
     # print(astr(dat_std[0,11006:11012],3,pp=True))
     # # ['    5.372' '   13.118' '    6.477' '-9999.000' '-9999.000' '-9999.000']
 
-    # dat_err     = np.ones(ndat, dtype=np.int)*(-1)
+    # dat_err     = np.ones(ndat, dtype=int)*(-1)
     # kk          = np.where((dat_std[0,:] != undef) & (dat_f[0,:] != 0.))[0]
-    # dat_err[kk] = np.abs(dat_std[0,kk]/dat_f[0,kk]*100.).astype(np.int)
+    # dat_err[kk] = np.abs(dat_std[0,kk]/dat_f[0,kk]*100.).astype(int)
     # print(astr(dat_err[11006:11012],pp=True))
     # # [' 28' ' 83' ' 33' ' -1' ' -1' ' -1']

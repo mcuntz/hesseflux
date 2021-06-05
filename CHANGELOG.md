@@ -3,9 +3,11 @@
 All notable changes after its initial release in May 2020 (v2.0) are documented
 in this file.
 
-### v3.2 (Mar 2021)
-    - Detailed comparison with R-package REddyProc.
+### v3.2 (Jun 2021)
     - Preserve trailing whitespace in float and string read functions.
+    - Set error estimates to undef by default.
+    - Optionally return mean of values for error estimates to test
+      goodness of filling algorithm.
 
 ### v3.1 (Feb 2021)
     - Support cftime > v1.3.0 by checking Gregorian calendar with existing
