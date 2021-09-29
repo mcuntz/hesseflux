@@ -24,6 +24,7 @@ Released under the MIT License; see LICENSE file for details.
 * Using numpy docstring format, May 2020, Matthias Cuntz
 * flake8 compatible, Mar 2021, Matthias Cuntz
 * Preserve trailing whitespace column delimiters, Mar 2021, Matthias Cuntz
+* Code refactoring, Sep 2021, Matthias Cuntz
 
 .. moduleauthor:: Matthias Cuntz
 
@@ -511,7 +512,7 @@ def fsread(infile, nc=0, cname=None, snc=0, sname=None, skip=0, cskip=0,
                     svar = svar[0]
         f.close()
         if strarr:
-            var  = np.array(var, dtype=np.str)
+            var  = np.array(var, dtype=str)
             if transpose:
                 var  = var.T
             if squeeze or reform:
@@ -519,7 +520,7 @@ def fsread(infile, nc=0, cname=None, snc=0, sname=None, skip=0, cskip=0,
             if fill:
                 var  = np.where(var == '', fill_value, var)
             if svar is not None:
-                svar = np.array(svar, dtype=np.str)
+                svar = np.array(svar, dtype=str)
                 if transpose:
                     svar = svar.T
                 if squeeze or reform:
@@ -583,8 +584,8 @@ def fsread(infile, nc=0, cname=None, snc=0, sname=None, skip=0, cskip=0,
     if fill:
         var = [ [ fill_value if i == '' else i for i in row ]
                 for row in var ]
-    # var  = np.array(var, dtype=np.float)
-    # svar = np.array(svar, dtype=np.str)
+    # var  = np.array(var, dtype=float)
+    # svar = np.array(svar, dtype=str)
     # if fill:
     #     svar = np.where(svar=='', sfill_value, svar)
     # if squeeze or reform:
@@ -593,13 +594,13 @@ def fsread(infile, nc=0, cname=None, snc=0, sname=None, skip=0, cskip=0,
     # if transpose:
     #     var  = var.T
     #     svar = svar.T
-    var  = np.array(var, dtype=np.float)
+    var  = np.array(var, dtype=float)
     if squeeze or reform:
         var  = var.squeeze()
     if transpose:
         var  = var.T
     if strarr:
-        svar = np.array(svar, dtype=np.str)
+        svar = np.array(svar, dtype=str)
         if transpose:
             svar = svar.T
         if squeeze or reform:

@@ -447,7 +447,7 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True,
                     var = var[0]
         f.close()
         if strarr:
-            var = np.array(var, dtype=np.str)
+            var = np.array(var, dtype=str)
             if transpose:
                 var = var.T
             if squeeze or reform:
@@ -492,7 +492,7 @@ def sread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True,
         null = line2var(res, var, iinc, strip)
     f.close()
     if strarr:
-        var = np.array(var, dtype=np.str)
+        var = np.array(var, dtype=str)
         if transpose:
             var = var.T
         if squeeze or reform:
