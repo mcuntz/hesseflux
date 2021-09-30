@@ -528,20 +528,8 @@ Released under the MIT License; see LICENSE file for details.
 """
 from __future__ import division, absolute_import, print_function
 import numpy as np
-try:        # import package
-    from ..division import division
-    from ..esat     import esat
-    from ..const    import sigma, T0
-except:
-    try:    # e.g. python module.py at main package level
-        from division import division
-        from esat     import esat
-        from const    import sigma, T0
-    except: # python logtools.py
-        division = _div
-        esat     = _esat
-        sigma = 5.67e-08 # Stefan-Boltzmann constant [W m^-2 K^-4]
-        T0    = 273.15   # Celcius <-> Kelvin [K]
+sigma = 5.67e-08  # Stefan-Boltzmann constant [W m^-2 K^-4]
+T0    = 273.15    # Celcius <-> Kelvin [K]
 
 
 __all__ = ['varchs', 'varadd', 'varsub', 'varmul', 'vardiv', 'varsqr',
@@ -683,7 +671,7 @@ def vardiv(a, b, undef=-9999.):
     -------
     Written,  Matthias Cuntz, Jun 2014
     """
-    return np.where((a==undef) | (b==undef), undef, division(a, b, undef))
+    return np.where((a==undef) | (b==undef), undef, _div(a, b, undef))
 
 
 def varsqr(a, undef=-9999.):
@@ -1260,7 +1248,7 @@ def met_alb(swd, swu, swdmin=50., swumin=10., undef=-9999.):
     Written,  Matthias Cuntz, Jun 2014
     """
     return np.where((swd==undef) | (swu==undef) | (swd<swdmin) | (swu<swumin),
-                    undef, division(swu*100., swd, undef))
+                    undef, _div(swu*100., swd, undef))
 
 
 def met_albl(swd, swu, swdmin, swumin, undef=-9999.):
@@ -1298,7 +1286,7 @@ def met_albl(swd, swu, swdmin, swumin, undef=-9999.):
     Written,  Matthias Cuntz, Jun 2014
     """
     return np.where((swd==undef) | (swu==undef) | (swd<swdmin) | (swu<swumin),
-                    undef, division(swu*100., swd, undef))
+                    undef, _div(swu*100., swd, undef))
 
 
 def met_vpmax(temp, undef=-9999.):
@@ -1325,7 +1313,7 @@ def met_vpmax(temp, undef=-9999.):
     -------
     Written,  Matthias Cuntz, Jun 2014
     """
-    es = esat(np.ma.array(temp+T0, mask=(temp==undef)))*0.01
+    es = _esat(np.ma.array(temp+T0, mask=(temp==undef)))*0.01
     return es.filled(undef)
 
 
@@ -1357,7 +1345,7 @@ def met_vpact(temp, rh, undef=-9999.):
     -------
     Written,  Matthias Cuntz, Jun 2014
     """
-    es = esat(np.ma.array(temp+T0, mask=((temp==undef)|(rh==undef))))*0.01
+    es = _esat(np.ma.array(temp+T0, mask=((temp==undef)|(rh==undef))))*0.01
     ea = es*rh*0.01
     return ea.filled(undef)
 
@@ -1392,7 +1380,7 @@ def met_vpdef(temp, rh, undef=-9999.):
     -------
     Written,  Matthias Cuntz, Jun 2014
     """
-    es  = esat(np.ma.array(temp+T0, mask=((temp==undef)|(rh==undef))))*0.01
+    es  = _esat(np.ma.array(temp+T0, mask=((temp==undef)|(rh==undef))))*0.01
     ea  = es*rh*0.01
     vpd = es - ea
     return vpd.filled(undef)
@@ -1430,9 +1418,9 @@ def met_sh(temp, rh, p, undef=-9999.):
     -------
     Written,  Matthias Cuntz, Jun 2014
     """
-    es = esat(np.ma.array(temp+T0, mask=((temp==undef)|(rh==undef)|(p==undef))))*0.01
+    es = _esat(np.ma.array(temp+T0, mask=((temp==undef)|(rh==undef)|(p==undef))))*0.01
     ea = es*rh*0.01
-    sh =  division(622.*ea, (p-0.378*ea), undef)
+    sh =  _div(622.*ea, (p-0.378*ea), undef)
     return sh.filled(undef)
 
 
@@ -1462,7 +1450,7 @@ def met_tpot(temp, p, undef=-9999.):
     -------
     Written,  Matthias Cuntz, Jun 2014
     """
-    return np.where((temp==undef) | (p==undef), undef, (temp+T0)*division(1000.,p)**0.286)
+    return np.where((temp==undef) | (p==undef), undef, (temp+T0)*_div(1000.,p)**0.286)
 
 
 def met_rho(temp, rh, p, undef=-9999.):
@@ -1501,11 +1489,11 @@ def met_rho(temp, rh, p, undef=-9999.):
     -------
     Written,  Matthias Cuntz, Jun 2014
     """
-    es  = esat(np.ma.array(temp+T0, mask=((temp==undef)|(rh==undef)|(p==undef))))*0.01
+    es  = _esat(np.ma.array(temp+T0, mask=((temp==undef)|(rh==undef)|(p==undef))))*0.01
     ea  = es*rh*0.01
-    sh  = division(622.*ea, (p-0.378*ea), undef)
+    sh  = _div(622.*ea, (p-0.378*ea), undef)
     Tv  = ((temp+T0)*(1+0.000608*sh)) - T0
-    rho = division(p*100., (287.05*(Tv+T0)), undef)
+    rho = _div(p*100., (287.05*(Tv+T0)), undef)
     return rho.filled(undef)
 
 
@@ -1539,7 +1527,7 @@ def met_dpt(temp, rh, undef=-9999.):
     -------
     Written,  Matthias Cuntz, Jun 2014
     """
-    es = esat(np.ma.array(temp+T0, mask=((temp==undef)|(rh==undef))))*0.01
+    es = _esat(np.ma.array(temp+T0, mask=((temp==undef)|(rh==undef))))*0.01
     ea = es*rh*0.01
     dpt = 234.175 * np.ma.log(ea/6.1078) / (17.08085 - np.ma.log(ea/6.1078))
     return dpt.filled(undef)
@@ -1577,9 +1565,9 @@ def met_h2oc(temp, rh, p, undef=-9999.):
     -------
     Written,  Matthias Cuntz, Jun 2014
     """
-    es = esat(np.ma.array(temp+T0, mask=((temp==undef)|(rh==undef)|(p==undef))))*0.01
+    es = _esat(np.ma.array(temp+T0, mask=((temp==undef)|(rh==undef)|(p==undef))))*0.01
     ea = es*rh*0.01
-    c  = division(1000.*ea, p, undef)
+    c  = _div(1000.*ea, p, undef)
     return c.filled(undef)
 
 
@@ -1621,7 +1609,7 @@ def met_h2oc_rh(temp, h, p, undef=-9999.):
     -------
     Written,  Matthias Cuntz, Jun 2014
     """
-    es = esat(np.ma.array(temp+T0, mask=((temp==undef)|(h==undef)|(p==undef))))*0.01
+    es = _esat(np.ma.array(temp+T0, mask=((temp==undef)|(h==undef)|(p==undef))))*0.01
     ea = 0.001 * h * p
     c  = 100.*ea/es
     return c.filled(undef)

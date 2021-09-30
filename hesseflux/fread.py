@@ -8,7 +8,7 @@ Research - UFZ, Leipzig, Germany, and continued while at Institut
 National de Recherche pour l'Agriculture, l'Alimentation et
 l'Environnement (INRAE), Nancy, France.
 
-Copyright (c) 2009-2020 Matthias Cuntz - mc (at) macu (dot) de
+Copyright (c) 2009-2021 Matthias Cuntz - mc (at) macu (dot) de
 Released under the MIT License; see LICENSE file for details.
 
 * Written Jul 2009 by Matthias Cuntz (mc (at) macu (dot) de)
@@ -30,6 +30,7 @@ Released under the MIT License; see LICENSE file for details.
 * Using numpy docstring format, May 2020, Matthias Cuntz
 * flake8 compatible, Mar 2021, Matthias Cuntz
 * Preserve trailing whitespace column delimiters, Mar 2021, Matthias Cuntz
+* Code refactoring, Sep 2021, Matthias Cuntz
 
 .. moduleauthor:: Matthias Cuntz
 
@@ -502,7 +503,7 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True,
             f.close()
             return var
         if strarr:
-            var = np.array(var, dtype=np.str)
+            var = np.array(var, dtype=str)
             if transpose:
                 var = var.T
             if squeeze or reform:
@@ -551,7 +552,7 @@ def fread(infile, nc=0, cname=None, skip=0, cskip=0, hskip=0, hstrip=True,
     if fill:
         var = [ [ fill_value if i == '' else i for i in row ]
                 for row in var ]
-    var = np.array(var, dtype=np.float)
+    var = np.array(var, dtype=float)
     if squeeze or reform:
         var = var.squeeze()
     if transpose:

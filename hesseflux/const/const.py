@@ -27,50 +27,50 @@ l'Environnement (INRAE), Nancy, France.
 
 Examples
 --------
->>> print({:.3f}.format(Pi))
+>>> print('{:.3f}'.format(Pi))
 3.142
 
->>> print({:.3f}.format(Sqrt2))
+>>> print('{:.3f}'.format(Sqrt2))
 1.414
 
->>> print({:.3f}.format(Gravity))
+>>> print('{:.3f}'.format(Gravity))
 9.810
 
->>> print({:.3f}.format(T0))
+>>> print('{:.3f}'.format(T0))
 273.150
 
->>> print({:.3f}.format(sigma))
+>>> print('{:.3e}'.format(sigma))
 5.670e-08
 
->>> print({:.3f}.format(R13VPDB))
+>>> print('{:.3f}'.format(R13VPDB))
 0.011
 
->>> print({:.3f}.format(tiny))
-1.000e-06
+>>> print('{:.3e}'.format(tiny))
+2.225e-308
 
->>> print({:.3f}.format(REarth))
-6371000.000
+>>> print('{:.3f}'.format(REarth))
+6371009.000
 
->>> print({:.3f}.format(mmol_h2o))
+>>> print('{:.3f}'.format(mmol_h2o))
 18.015
 
->>> print({:.3f}.format(mmol_air))
+>>> print('{:.3f}'.format(mmol_air))
 28.964
 
->>> print({:.3f}.format(density_quartz))
+>>> print('{:.3f}'.format(density_quartz))
 2.650
 
->>> print({:.3f}.format(cheat_quartz))
+>>> print('{:.3f}'.format(cheat_quartz))
 800.000
 
->>> print({:.3f}.format(cheat_water))
+>>> print('{:.3f}'.format(cheat_water))
 4180.000
 
->>> print({:.3f}.format(cheat_air))
+>>> print('{:.3f}'.format(cheat_air))
 1010.000
 
->>> print({:.3f}.format(latentheat_vaporization))
-2.450e+06
+>>> print('{:.3f}'.format(latentheat_vaporization))
+2450000.000
 
 Copyright (c) 2012-2020 Matthias Cuntz - mc (at) macu (dot) de
 Released under the MIT License; see LICENSE file for details.
@@ -176,9 +176,9 @@ R18VSMOW = 2005.2e-6     # 18O isotope ratio of VSMOW
 R2VSMOW  = 155.76e-6     # 2H  isotope ratio of VSMOW
 
 # Computational
-eps  = np.finfo(np.float).eps
-huge = np.finfo(np.float).max
-tiny = np.finfo(np.float).tiny
+eps  = np.finfo(float).eps
+huge = np.finfo(float).max
+tiny = np.finfo(float).tiny
 
 
 if __name__ == '__main__':
