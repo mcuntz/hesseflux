@@ -71,14 +71,14 @@ class TestSATestFunctions(unittest.TestCase):
         mm = fmorris(np.linspace(0,2*(npars-1),npars)/float(2*npars-1),
                      beta0, beta1, beta2, beta3, beta4)
         self.assertEqual(np.around(mm,3), -82.711)
-        mm = fmorris(np.arange(2*npars,dtype=np.float).reshape((npars,2))/float(2*npars-1),
+        mm = fmorris(np.arange(2*npars,dtype=float).reshape((npars,2))/float(2*npars-1),
                      beta0, beta1, beta2, beta3, beta4)
         self.assertEqual(list(np.around(mm,3)), [-82.711, -60.589])
 
         mm = morris(np.linspace(0,2*(npars-1),npars)/float(2*npars-1),
                     beta0, beta1, beta2, beta3, beta4)
         self.assertEqual(np.around(mm,3), -82.711)
-        mm = morris(np.arange(2*npars,dtype=np.float).reshape((npars,2))/float(2*npars-1),
+        mm = morris(np.arange(2*npars,dtype=float).reshape((npars,2))/float(2*npars-1),
                     beta0, beta1, beta2, beta3, beta4)
         self.assertEqual(list(np.around(mm,3)), [-82.711, -60.589])
 

@@ -273,12 +273,13 @@ if __name__ == '__main__':
         if len(hout) == 2:  # take FC if NEE not in input file
             hfilt = ['FC', 'USTAR', 'TA_']
             hout  = _findfirststart(hfilt, df.columns)
-        assert len(hout) == 3, 'Could not find CO2 flux (NEE or FC), USTAR or TA in input file.'
+        estr = 'Could not find CO2 flux (NEE, FC), USTAR or TA in input file.'
+        assert len(hout) == 3, estr
         hout = _findfirststart(hfilt, df.columns)
         print('  Using', hout)
         ffsave = dff[hout[0]].to_numpy()
         iic    = np.where((~isday) & (df[hout[0]] < 0.))[0]
-        dff.iloc[iic, list(df.columns).index(hout[0])] = 4
+        dff.loc[iic, hout[0]] = 4
         ustars, flag = hf.ustarfilter(df[hout], flag=dff[hout],
                                       isday=isday, undef=undef,
                                       ustarmin=ustarmin, nboot=nboot,
@@ -316,7 +317,8 @@ if __name__ == '__main__':
             hpart = ['FC', 'SW_IN', 'TA_', 'VPD']
             hout  = _findfirststart(hpart, df.columns)
         print('  Using', hout)
-        astr = 'Could not find CO2 flux (NEE or FC), SW_IN, TA, or VPD in input file.'
+        astr = ('Could not find CO2 flux (NEE, FC), SW_IN, TA,'
+                ' or VPD in input file.')
         assert len(hout) == 4, astr
         # nighttime method
         print('  Nighttime partitioning')
