@@ -95,12 +95,13 @@
 
 <span class="sd">    It uses either</span>
 
-<span class="sd">      1. a fit of Reco vs. temperature to all nighttime data (`method=&#39;falge&#39;`), or</span>
+<span class="sd">      1. a fit of Reco vs. temperature to all nighttime data [1]_</span>
+<span class="sd">         (`method=&#39;falge&#39;`), or</span>
 
 <span class="sd">      2. several fits over the season of Reco vs. temperature as in Reichstein</span>
-<span class="sd">         et al. (2005) (`method=&#39;reichstein&#39;`), or</span>
+<span class="sd">         et al. (2005) [2]_ (`method=&#39;reichstein&#39;`), or</span>
 
-<span class="sd">      3. the daytime method of Lasslop et al. (2010) (`method=&#39;lasslop&#39;`),</span>
+<span class="sd">      3. the daytime method of Lasslop et al. (2010) [3]_ (`method=&#39;lasslop&#39;`),</span>
 
 <span class="sd">    in order to calculate Reco and then GPP = Reco - NEE.</span>
 
@@ -177,15 +178,15 @@
 <span class="sd">       Gap filling strategies for defensible annual sums of net ecosystem exchange,</span>
 <span class="sd">       Acricultural and Forest Meteorology 107, 43-69</span>
 
-<span class="sd">    .. [2] Lasslop et al. (2010)</span>
-<span class="sd">       Separation of net ecosystem exchange into assimilation and respiration using</span>
-<span class="sd">       a light response curve approach: critical issues and global evaluation,</span>
-<span class="sd">       Global Change Biology 16, 187-208</span>
-
-<span class="sd">    .. [3] Reichstein et al. (2005)</span>
+<span class="sd">    .. [2] Reichstein et al. (2005)</span>
 <span class="sd">       On the separation of net ecosystem exchange into assimilation and ecosystem</span>
 <span class="sd">       respiration: review and improved algorithm,</span>
 <span class="sd">       Global Change Biology 11, 1424-1439</span>
+
+<span class="sd">    .. [3] Lasslop et al. (2010)</span>
+<span class="sd">       Separation of net ecosystem exchange into assimilation and respiration using</span>
+<span class="sd">       a light response curve approach: critical issues and global evaluation,</span>
+<span class="sd">       Global Change Biology 16, 187-208</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -344,9 +345,9 @@
 <span class="c1"># ----------------------------------------------------------------------</span>
 <span class="k">def</span> <span class="nf">_nee2gpp_falge</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ff</span><span class="p">,</span> <span class="n">isday</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mi">9999</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from original</span>
-<span class="sd">    Eddy flux data, using a fit of Reco vs. temperature to all nighttime data,</span>
-<span class="sd">    in order to calculate Reco and then GPP = Reco - NEE.</span>
+<span class="sd">    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from</span>
+<span class="sd">    original Eddy flux data, using a fit of Reco vs. temperature to all</span>
+<span class="sd">    nighttime data [1]_, in order to calculate Reco and then GPP = Reco - NEE.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -463,10 +464,10 @@
 <span class="c1"># ----------------------------------------------------------------------</span>
 <span class="k">def</span> <span class="nf">_nee2gpp_reichstein</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ff</span><span class="p">,</span> <span class="n">isday</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span> <span class="n">nogppnight</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from original</span>
-<span class="sd">    Eddy flux data, using several fits of Reco vs. temperature of nighttime data</span>
-<span class="sd">    over the season, as in Reichstein et al. (2005), in order to calculate Reco</span>
-<span class="sd">    and then GPP = Reco - NEE.</span>
+<span class="sd">    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from</span>
+<span class="sd">    original Eddy flux data, using several fits of Reco vs. temperature of</span>
+<span class="sd">    nighttime data over the season, as in Reichstein et al. (2005) [2]_, in</span>
+<span class="sd">    order to calculate Reco and then GPP = Reco - NEE.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -497,7 +498,7 @@
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    .. [3] Reichstein et al. (2005)</span>
+<span class="sd">    .. [2] Reichstein et al. (2005)</span>
 <span class="sd">       On the separation of net ecosystem exchange into assimilation and ecosystem</span>
 <span class="sd">       respiration: review and improved algorithm,</span>
 <span class="sd">       Global Change Biology 11, 1424-1439</span>
@@ -719,9 +720,9 @@
 <span class="c1"># ----------------------------------------------------------------------</span>
 <span class="k">def</span> <span class="nf">_nee2gpp_lasslop</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ff</span><span class="p">,</span> <span class="n">isday</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span> <span class="n">nogppnight</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from original</span>
-<span class="sd">    Eddy flux data, using the daytime method of Lasslop et al. (2010),</span>
-<span class="sd">    in order to calculate Reco and then GPP = Reco - NEE.</span>
+<span class="sd">    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from</span>
+<span class="sd">    original Eddy flux data, using the daytime method of Lasslop et al. (2010)</span>
+<span class="sd">    [3]_, in order to calculate Reco and then GPP = Reco - NEE.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -755,7 +756,7 @@
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    .. [2] Lasslop et al. (2010)</span>
+<span class="sd">    .. [3] Lasslop et al. (2010)</span>
 <span class="sd">       Separation of net ecosystem exchange into assimilation and respiration using</span>
 <span class="sd">       a light response curve approach: critical issues and global evaluation,</span>
 <span class="sd">       Global Change Biology 16, 187-208</span>

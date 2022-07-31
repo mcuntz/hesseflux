@@ -60,12 +60,13 @@ def nee2gpp(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:%M:%
 
     It uses either
 
-      1. a fit of Reco vs. temperature to all nighttime data (`method='falge'`), or
+      1. a fit of Reco vs. temperature to all nighttime data [1]_
+         (`method='falge'`), or
 
       2. several fits over the season of Reco vs. temperature as in Reichstein
-         et al. (2005) (`method='reichstein'`), or
+         et al. (2005) [2]_ (`method='reichstein'`), or
 
-      3. the daytime method of Lasslop et al. (2010) (`method='lasslop'`),
+      3. the daytime method of Lasslop et al. (2010) [3]_ (`method='lasslop'`),
 
     in order to calculate Reco and then GPP = Reco - NEE.
 
@@ -142,15 +143,15 @@ def nee2gpp(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:%M:%
        Gap filling strategies for defensible annual sums of net ecosystem exchange,
        Acricultural and Forest Meteorology 107, 43-69
 
-    .. [2] Lasslop et al. (2010)
-       Separation of net ecosystem exchange into assimilation and respiration using
-       a light response curve approach: critical issues and global evaluation,
-       Global Change Biology 16, 187-208
-
-    .. [3] Reichstein et al. (2005)
+    .. [2] Reichstein et al. (2005)
        On the separation of net ecosystem exchange into assimilation and ecosystem
        respiration: review and improved algorithm,
        Global Change Biology 11, 1424-1439
+
+    .. [3] Lasslop et al. (2010)
+       Separation of net ecosystem exchange into assimilation and respiration using
+       a light response curve approach: critical issues and global evaluation,
+       Global Change Biology 16, 187-208
 
     Examples
     --------
@@ -309,9 +310,9 @@ def nee2gpp(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:%M:%
 # ----------------------------------------------------------------------
 def _nee2gpp_falge(df, ff, isday, undef=-9999):
     """
-    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from original
-    Eddy flux data, using a fit of Reco vs. temperature to all nighttime data,
-    in order to calculate Reco and then GPP = Reco - NEE.
+    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from
+    original Eddy flux data, using a fit of Reco vs. temperature to all
+    nighttime data [1]_, in order to calculate Reco and then GPP = Reco - NEE.
 
     Parameters
     ----------
@@ -428,10 +429,10 @@ def _nee2gpp_falge(df, ff, isday, undef=-9999):
 # ----------------------------------------------------------------------
 def _nee2gpp_reichstein(df, ff, isday, undef=-9999, nogppnight=False):
     """
-    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from original
-    Eddy flux data, using several fits of Reco vs. temperature of nighttime data
-    over the season, as in Reichstein et al. (2005), in order to calculate Reco
-    and then GPP = Reco - NEE.
+    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from
+    original Eddy flux data, using several fits of Reco vs. temperature of
+    nighttime data over the season, as in Reichstein et al. (2005) [2]_, in
+    order to calculate Reco and then GPP = Reco - NEE.
 
     Parameters
     ----------
@@ -462,7 +463,7 @@ def _nee2gpp_reichstein(df, ff, isday, undef=-9999, nogppnight=False):
 
     References
     ----------
-    .. [3] Reichstein et al. (2005)
+    .. [2] Reichstein et al. (2005)
        On the separation of net ecosystem exchange into assimilation and ecosystem
        respiration: review and improved algorithm,
        Global Change Biology 11, 1424-1439
@@ -684,9 +685,9 @@ def _nee2gpp_reichstein(df, ff, isday, undef=-9999, nogppnight=False):
 # ----------------------------------------------------------------------
 def _nee2gpp_lasslop(df, ff, isday, undef=-9999, nogppnight=False):
     """
-    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from original
-    Eddy flux data, using the daytime method of Lasslop et al. (2010),
-    in order to calculate Reco and then GPP = Reco - NEE.
+    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from
+    original Eddy flux data, using the daytime method of Lasslop et al. (2010)
+    [3]_, in order to calculate Reco and then GPP = Reco - NEE.
 
     Parameters
     ----------
@@ -720,7 +721,7 @@ def _nee2gpp_lasslop(df, ff, isday, undef=-9999, nogppnight=False):
 
     References
     ----------
-    .. [2] Lasslop et al. (2010)
+    .. [3] Lasslop et al. (2010)
        Separation of net ecosystem exchange into assimilation and respiration using
        a light response curve approach: critical issues and global evaluation,
        Global Change Biology 16, 187-208

@@ -81,17 +81,20 @@ The easiest way to install is via `pip`:
 
    pip install hesseflux
 
-or via `conda`:
+..
+   or via `conda`:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-   conda install -c conda-forge hesseflux
+      conda install -c conda-forge hesseflux
 
 Requirements
     * numpy_
     * scipy_
     * pandas_
-    * pyjams_
+
+    ..
+       * pyjams_
 
 
 License
