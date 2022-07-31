@@ -204,7 +204,7 @@ htmlhelp_basename = "hessefluxdoc"
 # latex_logo = "pics/logo.png"
 
 # latex_show_urls = 'footnote'
-# http://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-latex-output
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-latex-output
 latex_elements = {
     "preamble": r"""
 \setcounter{secnumdepth}{1}

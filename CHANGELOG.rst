@@ -4,7 +4,10 @@ Changelog
 All notable changes after its initial release in May 2020 (v2.0) are documented
 in this file.
 
-v4.0 (Aug 2022)
+v5.0 (??? 2022)
+    * Use all tools from ``pyjams`` rather than local copies.
+
+v4.0 (Jul 2022)
     * Move to new pip structure using `pyproject.toml`.
     * Move to Github actions.
     * Change Markdown to reStructured text.

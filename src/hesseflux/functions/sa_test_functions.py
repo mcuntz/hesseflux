@@ -38,7 +38,7 @@ Current functions are:
     fmorris / morris      After Morris (1991)
 
     oakley_ohagan         Oakley and O'Hagan (2004), parameters given in Saltelli et al. (2008)
-                          or on http://www.jeremy-oakley.staff.shef.ac.uk/psa_example.txt
+                          or on https://www.jeremy-oakley.staff.shef.ac.uk/psa_example.txt
 
 This module was written by Matthias Cuntz & Juliane Mai while at
 Department of Computational Hydrosystems, Helmholtz Centre for

@@ -12,7 +12,7 @@ described in `Papale et al. (Biogeosciences, 2006) <https://doi.org/10.5194/bg-3
 some extensions such as the daytime method of flux partitioning (`Lasslop et al., Global Change
 Biology 2010 <https://doi.org/10.1111/j.1365-2486.2009.02041.x>`_) and the estimation of
 uncertainties on the fluxes as in `Lasslop et al. (Biogeosci, 2008)
-<http://doi.org/10.5194/bg-5-1311-2008>`_.
+<https://doi.org/10.5194/bg-5-1311-2008>`_.
 
 Only the post-processing steps are described here. We are happy to discuss any processing or
 post-processing directly. Contact us at mc (at) macu (dot) de.
@@ -22,12 +22,12 @@ europe-fluxdata.eu file format
 ==============================
 
 The first processing steps at the ICOS ecosystem site FR-Hes (not shown) brings the data in a
-format that can be submitted to the database `europe-fluxdata.eu <http://www.europe-fluxdata.eu>`_.
+format that can be submitted to the database `europe-fluxdata.eu <https://www.europe-fluxdata.eu>`_.
 The database predates ICOS and is somewhat a precursor of the ICOS data processing.
 
 The file format of europe-fluxdata.eu is hence very similar to the ICOS format. The only known
 difference to us is the unit of atmospheric pressure, which is in hPa in `europe-fluxdata.eu
-<http://www.europe-fluxdata.eu>`_ and in kPa in `ICOS ecosystems <http://www.icos-etc.eu>`_. The
+<https://www.europe-fluxdata.eu>`_ and in kPa in `ICOS ecosystems <https://www.icos-etc.eu>`_. The
 file format has notably one header line with variable names. There are no units in the file.
 ``hesseflux`` provides a little helper script `europe-fluxdata_units.py` in the `bin`
 directory that adds a second header line with units. The script can be run on the output as:
@@ -41,7 +41,7 @@ Post-processing Eddy covariance data
 ====================================
 
 The script `postproc_europe-fluxdata.py` in the `example` directory provides a template for
-post-processing data that is in the `europe-fluxdata.eu <http://www.europe-fluxdata.eu>`_ file
+post-processing data that is in the `europe-fluxdata.eu <https://www.europe-fluxdata.eu>`_ file
 format. It basically makes all steps described in `Papale et al. (Biogeosciences, 2006)
 <https://doi.org/10.5194/bg-3-571-2006>`_. The script is governed by a configuration file in
 Python's standard :mod:`configparser` format. The example configuration file
@@ -337,7 +337,7 @@ derivatives. A spike has normally a strong curvature and hence a large second de
 is currently not implemented. `deriv=0` applies the filter to the raw time series. This might be
 useful to find outliers in smooth time series such as soil moisture. `deriv=0` is also used on the
 20 Hz Eddy raw data in the quality and uncertainty strategy of `Mauder et al. (Agric Forest
-Meteo, 2013) <http://doi.org/10.1016/j.agrformet.2012.09.006>`_.
+Meteo, 2013) <https://doi.org/10.1016/j.agrformet.2012.09.006>`_.
 
 The default values, if option are not given in the configuration file, are `nscan=15`, `nfill=1`,
 `z=7`, and `deriv=2`.
@@ -437,9 +437,9 @@ Partitioning of Net Ecosystem Exchange
 
 If `partition=True` is set in the configuration file, two estimates of Gross Primary Productivity
 (GPP) and Ecosystem Respiration (RECO) are calculated: firstly with the method of `Reichstein et
-al. (Glob Change Biolo, 2005) <http://doi.org/10.1111/j.1365-2486.2005.001002.x>`_ using nighttime
+al. (Glob Change Biolo, 2005) <https://doi.org/10.1111/j.1365-2486.2005.001002.x>`_ using nighttime
 data only, and secondly with the method of `Lasslop et al. (Glob Change Biolo, 2010)
-<http://doi.org/10.1111/j.1365-2486.2009.02041.x>`_ using a light-response curve on 'daytime' data.
+<https://doi.org/10.1111/j.1365-2486.2009.02041.x>`_ using a light-response curve on 'daytime' data.
 The configuration `hesseflux_example.cfg` gives only one option in this section:
 
 .. code-block:: python
@@ -485,7 +485,7 @@ Gap-filling / Imputation
 ------------------------
 
 Marginal Distribution Sampling (MDS) of `Reichstein et al. (Glob Change Biolo, 2005)
-<http://doi.org/10.1111/j.1365-2486.2005.001002.x>`_ is implemented as imputation or called
+<https://doi.org/10.1111/j.1365-2486.2005.001002.x>`_ is implemented as imputation or called
 gap-filling algorithm. The algorithm looks for similar conditions in the vicinity of a missing data
 point, if option `fill=True`. The configuration file is:
 
@@ -509,7 +509,7 @@ If a flux data point is missing, times with incoming shortwave radiation in the 
 around the actual shortwave radiation will be looked for, as well as air temperatures within
 `ta_dev` and air vapour pressure deficit within `vpd_dev`. The function does not fill long gaps
 longer than `longgap` days. A good summary is given in Fig. A1 of `Reichstein et al. (Glob Change
-Biolo, 2005) <http://doi.org/10.1111/j.1365-2486.2005.001002.x>`_.
+Biolo, 2005) <https://doi.org/10.1111/j.1365-2486.2005.001002.x>`_.
 
 The script invokes MDS as:
 
@@ -543,7 +543,7 @@ are translated to quality flags 1-3.
 Uncertainty estimates of flux data
 ----------------------------------
 
-`Lasslop et al. (Biogeosci, 2008) <http://doi.org/10.5194/bg-5-1311-2008>`_ presented an algorithm
+`Lasslop et al. (Biogeosci, 2008) <https://doi.org/10.5194/bg-5-1311-2008>`_ presented an algorithm
 to estimate uncertainties of Eddy covariance fluxes using Marginal Distribution Sampling (MDS). The
 gap-filling function :func:`gapfill` can be used for uncertainty estimation giving the keyword
 `err=True`. The same thresholds as for gap-filling are used.
@@ -581,7 +581,7 @@ uncertainties like:
 
 We recommend, however, to calculate flux uncertainties with the Eddy covariance raw data as
 described in `Mauder et al. (Agric Forest Meteo, 2013)
-<http://doi.org/10.1016/j.agrformet.2012.09.006>`_. This is, for example, implemented in the
+<https://doi.org/10.1016/j.agrformet.2012.09.006>`_. This is, for example, implemented in the
 processing software EddyPro\ :sup:`(R)`.
 
 

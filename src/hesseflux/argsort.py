@@ -347,8 +347,8 @@ def argsort(a, *args, **kwargs):
     Notes
     -----
     argsort for iterables was taken from
-    http://stackoverflow.com/questions/3382352/equivalent-of-numpy-argsort-in-basic-python
-    http://stackoverflow.com/questions/3071415/efficient-method-to-calculate-the-rank-vector-of-a-list-in-python
+    https://stackoverflow.com/questions/3382352/equivalent-of-numpy-argsort-in-basic-python
+    https://stackoverflow.com/questions/3071415/efficient-method-to-calculate-the-rank-vector-of-a-list-in-python
 
     History
     -------

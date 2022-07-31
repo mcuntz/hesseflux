@@ -12,6 +12,7 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -34,7 +35,7 @@
           <div class="body" role="main">
             
   <div class="section" id="module-hesseflux.dec2date">
-<span id="dec2date"></span><h1>dec2date<a class="headerlink" href="#module-hesseflux.dec2date" title="Permalink to this headline">¶</a></h1>
+<span id="dec2date"></span><h1>dec2date<a class="headerlink" href="#module-hesseflux.dec2date" title="Permalink to this heading">¶</a></h1>
 <p>dec2date : Converts decimal dates to calendar dates.</p>
 <p>This module was written by Arndt Piayda and then enhanced and
 maintained by Matthias Cuntz while at Department of Computational
@@ -65,7 +66,7 @@ Released under the MIT License; see LICENSE file for details.</p>
 <li><p>proleptic_gregorian instead of gregorian calendar for Excel dates, Jul 2020, Matthias Cuntz</p></li>
 </ul>
 <p>The following functions are provided</p>
-<table class="longtable docutils align-default">
+<table class="autosummary longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -120,9 +121,217 @@ with origin at 01.01.0001 00:00:00.</p>
 <p>’decimal’ = decimal year instead of decimal days.</p>
 <p>’decimal360’ = decimal year with a year of 360 days, i.e. 12 month with 30 days each.</p>
 </p></li>
+<li><p><strong>refdate</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Reference date for ‘days since refdate’ can be set by user. Input must be a
+string in the format ‘yyyy-mm-dd hh:mm:ss’.
+Default values for different <cite>calendars</cite> are set automatically.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Units of the the time stamp can be given. This can only be the following two:</p>
+<p>’day as %Y%m%d.%f’, or</p>
+<p>’days since refdate’, with refdate in the format ‘yyyy-mm-dd hh:mm:ss’.</p>
+<p>If <cite>units=’day as %Y%m%d.%f’</cite> then <cite>calendar</cite> is ignored and the dates will be returned
+assuming that %f is fractional date from 00:00:00 h.</p>
+</p></li>
+<li><p><strong>excelerr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – <p>In Excel, the year 1900 is normally considered a leap year,
+which it was not. By default, this error is taken into account
+if calendar=’excel1900’ (default: True).</p>
+<p>1900 is not considered a leap year if excelerr=False.</p>
+</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p><cite>fulldate</cite> -&gt; output arrays with year, month, day, hour, minute, second</p>
+<blockquote>
+<div><p>Default fulldate is overwritten by selection of special output <cite>yr</cite>,`mn`,`dy`,`hr`,`mi`,`sc`</p>
+</div></blockquote>
+<p><cite>yr</cite>       -&gt; output array with year</p>
+<p><cite>mo</cite>       -&gt; output array with month</p>
+<p><cite>dy</cite>       -&gt; output array with day</p>
+<p><cite>hr</cite>       -&gt; output array with hour</p>
+<p><cite>mi</cite>       -&gt; output array with minute</p>
+<p><cite>sc</cite>       -&gt; output array with second</p>
+<p><cite>ascii</cite>    -&gt; output array with strings of the format ‘dd.mm.yyyy hh:mm:ss’</p>
+<p><cite>en</cite>      -&gt; output array with strings of the format ‘yyyy-mm-dd hh:mm:ss’</p>
+<p><cite>eng</cite>     -&gt; Same as en: obsolete.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of array_like</p>
+</dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>Most versions of <cite>datetime do</cite> not support negative years,
+i.e. Julian days &lt; 1721423.5 = 01.01.0001 00:00.</p>
+<dl class="simple">
+<dt>There is an issue in <cite>netcdftime</cite> version &lt; 0.9.5 in proleptic_gregorian for dates before year 301:</dt><dd><dl class="simple">
+<dt>dec2date(date2dec(ascii=’01.01.0300 00:00:00’, calendar=’proleptic_gregorian’), calendar=’proleptic_gregorian’)</dt><dd><p>[300, 1, 2, 0, 0, 0]</p>
+</dd>
+<dt>dec2date(date2dec(ascii=’01.01.0301 00:00:00’, calendar=’proleptic_gregorian’), calendar=’proleptic_gregorian’)</dt><dd><p>[301, 1, 1, 0, 0, 0]</p>
+</dd>
+</dl>
+</dd>
+<dt>Requires <cite>netcdftime.py</cite> from module netcdftime available at:</dt><dd><p><a class="reference external" href="http://netcdf4-python.googlecode.com">http://netcdf4-python.googlecode.com</a></p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p># Some implementations of datetime have problems with negative years
+&gt;&gt;&gt; import datetime
+&gt;&gt;&gt; if datetime.MINYEAR &gt; 0:
+…     print(‘The minimum year in your datetime implementation is ‘, datetime.MINYEAR)
+…     print(‘i.e. it does not support negative years (BC).’)
+The minimum year in your datetime implementation is  1
+i.e. it does not support negative years (BC).</p>
+<p>#calendar = ‘standard’
+&gt;&gt;&gt; year   = np.array([2000,1810,1630,1510,1271,619,1])
+&gt;&gt;&gt; month  = np.array([1,4,7,9,3,8,1])
+&gt;&gt;&gt; day    = np.array([5,24,15,20,18,27,1])
+&gt;&gt;&gt; hour   = np.array([12,16,10,14,19,11,12])
+&gt;&gt;&gt; minute = np.array([30,15,20,35,41,8,0])
+&gt;&gt;&gt; second = np.array([15,10,40,50,34,37,0])
+&gt;&gt;&gt; from date2dec import date2dec
+&gt;&gt;&gt; decimal = date2dec(calendar=’standard’, yr=year, mo=month, dy=day, hr=hour, mi=minute, sc=second)
+&gt;&gt;&gt; year1, month1, day1, hour1, minute1, second1 = dec2date(decimal, calendar= ‘standard’, fulldate=True)
+&gt;&gt;&gt; print(year1)
+[2000 1810 1630 1510 1271  619    1]
+&gt;&gt;&gt; print(month1)
+[1 4 7 9 3 8 1]
+&gt;&gt;&gt; print(day1)
+[ 5 24 15 20 18 27  1]
+&gt;&gt;&gt; print(hour1)
+[12 16 10 14 19 11 12]
+&gt;&gt;&gt; print(minute1)
+[30 15 20 35 41  8  0]
+&gt;&gt;&gt; print(second1)
+[15 10 40 50 34 37  0]</p>
+<p># calendar = ‘julian’
+&gt;&gt;&gt; decimal = date2dec(calendar=’julian’, yr=year, mo=month, dy=day, hr=hour, mi=minute, sc=second)
+&gt;&gt;&gt; year1 = dec2date(decimal, calendar=’julian’, yr=True)
+&gt;&gt;&gt; print(year1)
+[2000 1810 1630 1510 1271  619    1]</p>
+<p># calendar = ‘proleptic_gregorian’
+&gt;&gt;&gt; decimal = date2dec(calendar=’proleptic_gregorian’, yr=year, mo=month, dy=day, hr=hour, mi=minute, sc=second)
+&gt;&gt;&gt; ascii = dec2date(decimal, calendar=’proleptic_gregorian’, ascii=True)
+&gt;&gt;&gt; print(ascii[::4])
+[‘05.01.2000 12:30:15’ ‘18.03.1271 19:41:34’]</p>
+<p># calendar = ‘excel1900’ WITH excelerr = True -&gt; 1900 considered as leap year
+&gt;&gt;&gt; decimal = date2dec(calendar=’excel1900’, yr=year, mo=month, dy=day, hr=hour, mi=minute, sc=second)
+&gt;&gt;&gt; year1, day1 = dec2date(decimal, calendar=’excel1900’, yr=True, dy=True)
+&gt;&gt;&gt; print(year1)
+[2000 1810 1630 1510 1271  619    1]
+&gt;&gt;&gt; print(day1)
+[ 5 24 15 20 18 27  1]</p>
+<p># calendar = ‘excel1900’ WITH excelerr = False -&gt; 1900 considered as NO leap year
+# Older versions of netcdftime.py produced unnecessary output (Line 262)
+# &gt;&gt;&gt; decimal = date2dec(calendar=’excel1900’,yr=year,mo=month,dy=day,hr=hour,mi=minute,sc=second,excelerr=False)
+# &gt;&gt;&gt; if nt.__version__ &lt; ‘0.9.4’:
+# …     asciidate = dec2date(decimal, calendar=’excel1900’, ascii = True, excelerr = False)
+# … elif nt.__version__ == ‘0.9.4’:
+# …     asciidate = dec2date(decimal, calendar=’excel1900’, ascii = True, excelerr = False)
+# …     for i in range(3):
+# …         print(‘0 300’)
+# … else:
+# …     asciidate = dec2date(decimal, calendar=’excel1900’, ascii = True, excelerr = False)
+# …     for i in range(7):
+# …         print(‘0 300’)
+# 0 300
+# 0 300
+# 0 300
+# 0 300
+# 0 300
+# 0 300
+# 0 300</p>
+<p># &gt;&gt;&gt; print(asciidate[::4])
+# [‘05.01.2000 12:30:15’ ‘18.03.1271 19:41:34’]</p>
+<p># calendar = ‘excel1904’
+&gt;&gt;&gt; decimal = date2dec(calendar=’excel1904’, yr=year, mo=month, dy=day, hr=hour, mi=minute, sc=second)
+&gt;&gt;&gt; asciidate = dec2date(decimal, calendar=’excel1904’, ascii = True)
+&gt;&gt;&gt; print(asciidate[::4])
+[‘05.01.2000 12:30:15’ ‘18.03.1271 19:41:34’]
+&gt;&gt;&gt; asciidate = dec2date(decimal, calendar=’excel1904’, ascii=True, refdate=’1909-12-31 00:00:00’)
+&gt;&gt;&gt; print(asciidate[::4])
+[‘05.01.2006 12:30:15’ ‘18.03.1277 19:41:34’]
+&gt;&gt;&gt; print(dec2date(decimal[::4], calendar=’excel1904’, ascii=True, units=’days since 1909-12-31 00:00:00’))
+[‘05.01.2006 12:30:15’ ‘18.03.1277 19:41:34’]
+&gt;&gt;&gt; print(dec2date(decimal[::4], calendar=’excel1904’, ascii=True, units=’days since 1910-01-01 00:00:00’))
+[‘06.01.2006 12:30:15’ ‘19.03.1277 19:41:34’]</p>
+<p># check especially 1900 (no) leap year in Excel
+&gt;&gt;&gt; year1   = np.array([1900,1900,1900,1900])
+&gt;&gt;&gt; month1  = np.array([2,2,3,1])
+&gt;&gt;&gt; day1    = np.array([28,29,1,1])
+&gt;&gt;&gt; decimal = date2dec(calendar=’excel1900’, yr=year1, mo=month1, dy=day1)
+&gt;&gt;&gt; month2, day2 = dec2date(decimal, calendar=’excel1900’, mo=True, dy=True)
+&gt;&gt;&gt; print(month2)
+[2 2 3 1]
+&gt;&gt;&gt; print(day2)
+[28 29  1  1]
+&gt;&gt;&gt; decimal = date2dec(calendar=’excel1900’, yr=year1, mo=month1, dy=day1, excelerr=False)
+&gt;&gt;&gt; month2, day2 = dec2date(decimal, calendar=’excel1900’, mo=True, dy=True, excelerr=False)
+&gt;&gt;&gt; print(month2)
+[2 3 3 1]
+&gt;&gt;&gt; print(day2)
+[28  1  1  1]
+&gt;&gt;&gt; decimal = date2dec(calendar=’excel1904’, yr=year1, mo=month1, dy=day1)
+&gt;&gt;&gt; month2, day2 = dec2date(decimal, calendar=’excel1904’, mo=True, dy=True)
+&gt;&gt;&gt; print(month2)
+[2 3 3 1]
+&gt;&gt;&gt; print(day2)
+[28  1  1  1]</p>
+<p># calendar = ‘365_day’
+&gt;&gt;&gt; decimal = date2dec(calendar=’365_day’,yr=year,mo=month,dy=day,hr=hour,mi=minute,sc=second)
+&gt;&gt;&gt; asciidate = dec2date(decimal, calendar=’365_day’, ascii = True)
+&gt;&gt;&gt; print(asciidate[::4])
+[‘05.01.2000 12:30:15’ ‘18.03.1271 19:41:34’]</p>
+<p># calendar = ‘366_day’
+&gt;&gt;&gt; decimal = date2dec(calendar=’366_day’,yr=year,mo=month,dy=day,hr=hour,mi=minute,sc=second)
+&gt;&gt;&gt; asciidate = dec2date(decimal, calendar=’366_day’, ascii = True)
+&gt;&gt;&gt; print(asciidate[::4])
+[‘05.01.2000 12:30:15’ ‘18.03.1271 19:41:34’]</p>
+<p># calendar = ‘360_day’
+&gt;&gt;&gt; decimal = date2dec(calendar=’360_day’,yr=year,mo=month,dy=day,hr=hour,mi=minute,sc=second)
+&gt;&gt;&gt; asciidate = dec2date(decimal, calendar=’360_day’, ascii = True)
+&gt;&gt;&gt; print(asciidate[::4])
+[‘05.01.2000 12:30:15’ ‘18.03.1271 19:41:34’]</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dec2date</span><span class="p">(</span><span class="mf">719644.52101</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;proleptic_gregorian&#39;</span><span class="p">,</span> <span class="n">ascii</span> <span class="o">=</span> <span class="kc">True</span><span class="p">))</span>
+<span class="go">28.04.1971 12:30:15</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dec</span> <span class="o">=</span> <span class="n">date2dec</span><span class="p">(</span><span class="n">ascii</span><span class="o">=</span><span class="s1">&#39;02.03.1910 03:44:55&#39;</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dec2date</span><span class="p">(</span><span class="n">dec</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal&#39;</span><span class="p">,</span> <span class="n">ascii</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="go">02.03.1910 03:44:55</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dec</span> <span class="o">=</span> <span class="n">date2dec</span><span class="p">(</span><span class="n">ascii</span><span class="o">=</span><span class="s1">&#39;02.03.1910 03:44:55&#39;</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal360&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dec2date</span><span class="p">(</span><span class="n">dec</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal360&#39;</span><span class="p">,</span> <span class="n">ascii</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="go">02.03.1910 03:44:55</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dec2date</span><span class="p">([</span><span class="n">dec</span><span class="p">,</span><span class="n">dec</span><span class="p">],</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal360&#39;</span><span class="p">,</span> <span class="n">ascii</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="go">[&#39;02.03.1910 03:44:55&#39;, &#39;02.03.1910 03:44:55&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dec2date</span><span class="p">([[</span><span class="n">dec</span><span class="p">,</span><span class="n">dec</span><span class="p">],[</span><span class="n">dec</span><span class="p">,</span><span class="n">dec</span><span class="p">],[</span><span class="n">dec</span><span class="p">,</span><span class="n">dec</span><span class="p">]],</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal360&#39;</span><span class="p">,</span> <span class="n">ascii</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+<span class="go">[&#39;02.03.1910 03:44:55&#39;, &#39;02.03.1910 03:44:55&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dec2date</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dec</span><span class="p">,</span><span class="n">dec</span><span class="p">]),</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal360&#39;</span><span class="p">,</span> <span class="n">ascii</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="go">[&#39;02.03.1910 03:44:55&#39; &#39;02.03.1910 03:44:55&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dec2date</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">dec</span><span class="p">,</span><span class="n">dec</span><span class="p">],[</span><span class="n">dec</span><span class="p">,</span><span class="n">dec</span><span class="p">],[</span><span class="n">dec</span><span class="p">,</span><span class="n">dec</span><span class="p">]]),</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal360&#39;</span><span class="p">,</span> <span class="n">ascii</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+<span class="go">[&#39;02.03.1910 03:44:55&#39; &#39;02.03.1910 03:44:55&#39;]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">absolut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">20070102.0034722</span><span class="p">,</span> <span class="mf">20070102.0069444</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dec2date</span><span class="p">(</span><span class="n">absolut</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;day as %Y%m</span><span class="si">%d</span><span class="s1">.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ascii</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="go">[&#39;02.01.2007 00:05:00&#39; &#39;02.01.2007 00:10:00&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">absolut</span> <span class="o">=</span> <span class="p">[</span><span class="mf">20070102.0034722</span><span class="p">,</span> <span class="mf">20070102.0069444</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dec2date</span><span class="p">(</span><span class="n">absolut</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;day as %Y%m</span><span class="si">%d</span><span class="s1">.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ascii</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="go">[&#39;02.01.2007 00:05:00&#39;, &#39;02.01.2007 00:10:00&#39;]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">absolut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">200401.5</span><span class="p">,</span> <span class="mf">200402.5</span><span class="p">,</span> <span class="mf">201011.5</span><span class="p">,</span> <span class="mf">201002.5</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dec2date</span><span class="p">(</span><span class="n">absolut</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;month as %Y%m.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ascii</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="go">[&#39;15.01.2004 12:00:00&#39; &#39;14.02.2004 12:00:00&#39; &#39;15.11.2010 00:00:00&#39; &#39;14.02.2010 00:00:00&#39;]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">absolut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2004.5</span><span class="p">,</span> <span class="mf">2010.5</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dec2date</span><span class="p">(</span><span class="n">absolut</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;year as %Y.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ascii</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="go">[&#39;01.07.2004 00:00:00&#39; &#39;01.07.2010 12:00:00&#39;]</span>
+</pre></div>
+</div>
+<p># en, eng
+&gt;&gt;&gt; print(dec2date(719644.52101, calendar=’proleptic_gregorian’, en=True))
+1971-04-28 12:30:15
+&gt;&gt;&gt; print(dec2date(719644.52101, calendar=’proleptic_gregorian’, eng=True))
+1971-04-28 12:30:15</p>
 </dd></dl>
 
 </div>
@@ -213,7 +422,7 @@ with origin at 01.01.0001 00:00:00.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -222,7 +431,7 @@ with origin at 01.01.0001 00:00:00.</p>
       &copy;2009-2022, Matthias Cuntz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

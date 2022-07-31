@@ -12,6 +12,7 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -34,15 +35,15 @@
           <div class="body" role="main">
             
   <div class="section" id="hesseflux">
-<span id="readme"></span><h1>hesseflux<a class="headerlink" href="#hesseflux" title="Permalink to this headline">¶</a></h1>
+<span id="readme"></span><h1>hesseflux<a class="headerlink" href="#hesseflux" title="Permalink to this heading">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">hesseflux</span></code> provides functions used in the processing and post-processing of
 the Eddy covariance flux data of the <a class="reference external" href="https://www.icos-cp.eu/">ICOS</a> ecosystem site <a class="reference external" href="https://www.icos-france.fr/en/static3/the-network">FR-Hes</a>.</p>
 <a class="reference external image-reference" href="https://doi.org/10.5281/zenodo.3831488"><img alt="Zenodo DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.3831488.svg" /></a>
 <a class="reference external image-reference" href="https://badge.fury.io/py/hesseflux"><img alt="PyPI version" src="https://badge.fury.io/py/hesseflux.svg" /></a>
-<a class="reference external image-reference" href="https://github.com/mcuntz/hesseflux/blob/master/LICENSE"><img alt="License" src="http://img.shields.io/badge/license-MIT-blue.svg?style=flat" /></a>
+<a class="reference external image-reference" href="https://github.com/mcuntz/hesseflux/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat" /></a>
 <a class="reference external image-reference" href="https://github.com/mcuntz/hesseflux/actions"><img alt="Build Status" src="https://github.com/mcuntz/hesseflux/workflows/Continuous%20Integration/badge.svg?branch=main" /></a>
 <div class="section" id="about-hesseflux">
-<h2>About hesseflux<a class="headerlink" href="#about-hesseflux" title="Permalink to this headline">¶</a></h2>
+<h2>About hesseflux<a class="headerlink" href="#about-hesseflux" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">hesseflux</span></code> collects functions used for processing Eddy covariance data of the
 <a class="reference external" href="https://www.icos-cp.eu/">ICOS</a> ecosystem site <a class="reference external" href="https://www.icos-france.fr/en/static3/the-network">FR-Hes</a>.</p>
 <p>The post-processing functionality for Eddy flux data is similar to the R-package
@@ -51,16 +52,16 @@ the Eddy covariance flux data of the <a class="reference external" href="https:/
 partitioning (<a class="reference external" href="https://doi.org/10.1111/j.1365-2486.2009.02041.x">Lasslop et al., Global Change Biology 2010</a>).</p>
 </div>
 <div class="section" id="documentation">
-<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">¶</a></h2>
 <p>The complete documentation for <code class="docutils literal notranslate"><span class="pre">hesseflux</span></code> is available at:</p>
 <blockquote>
 <div><p><a class="reference external" href="https://mcuntz.github.io/hesseflux/">https://mcuntz.github.io/hesseflux/</a></p>
 </div></blockquote>
 </div>
 <div class="section" id="quick-usage-guide">
-<h2>Quick usage guide<a class="headerlink" href="#quick-usage-guide" title="Permalink to this headline">¶</a></h2>
+<h2>Quick usage guide<a class="headerlink" href="#quick-usage-guide" title="Permalink to this heading">¶</a></h2>
 <div class="section" id="post-processing-eddy-covariance-data-that-is-in-europe-fluxdata-eu-format">
-<h3>Post-processing Eddy covariance data that is in europe-fluxdata.eu format<a class="headerlink" href="#post-processing-eddy-covariance-data-that-is-in-europe-fluxdata-eu-format" title="Permalink to this headline">¶</a></h3>
+<h3>Post-processing Eddy covariance data that is in europe-fluxdata.eu format<a class="headerlink" href="#post-processing-eddy-covariance-data-that-is-in-europe-fluxdata-eu-format" title="Permalink to this heading">¶</a></h3>
 <p>An example script that makes all the steps described in <a class="reference external" href="https://doi.org/10.5194/bg-3-571-2006">Papale et al.
 (Biogeosciences, 2006)</a> is given in the example directory. It is simply called:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python postproc_europe-fluxdata.py hesseflux_example.cfg
@@ -73,7 +74,7 @@ script and the configuration file.</p>
 </div>
 </div>
 <div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h2>
 <p>The easiest way to install is via <cite>pip</cite>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install hesseflux
 </pre></div>
@@ -93,7 +94,7 @@ script and the configuration file.</p>
 </dl>
 </div>
 <div class="section" id="license">
-<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<h2>License<a class="headerlink" href="#license" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">hesseflux</span></code> is distributed under the MIT License. See the <a class="reference internal" href="#license">LICENSE</a> file for
 details.</p>
 <p>Copyright (c) 2009-2022 Matthias Cuntz</p>
@@ -168,7 +169,7 @@ by <a class="reference external" href="https://github.com/MuellerSeb">Sebastian 
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -177,7 +178,7 @@ by <a class="reference external" href="https://github.com/MuellerSeb">Sebastian 
       &copy;2009-2022, Matthias Cuntz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -136,21 +136,21 @@ def nee2gpp(dfin, flag=None, isday=None, date=None, timeformat='%Y-%m-%d %H:%M:%
     -----
     Negative respiration possible at night if GPP is forced to 0 with `nogppnight=True`.
 
-    Literature
+    References
     ----------
-    Falge et al. (2001)
-        Gap filling strategies for defensible annual sums of net ecosystem exchange,
-        Acricultural and Forest Meteorology 107, 43-69
+    .. [1] Falge et al. (2001)
+       Gap filling strategies for defensible annual sums of net ecosystem exchange,
+       Acricultural and Forest Meteorology 107, 43-69
 
-    Lasslop et al. (2010)
-        Separation of net ecosystem exchange into assimilation and respiration using
-        a light response curve approach: critical issues and global evaluation,
-        Global Change Biology 16, 187-208
+    .. [2] Lasslop et al. (2010)
+       Separation of net ecosystem exchange into assimilation and respiration using
+       a light response curve approach: critical issues and global evaluation,
+       Global Change Biology 16, 187-208
 
-    Reichstein et al. (2005)
-        On the separation of net ecosystem exchange into assimilation and ecosystem
-        respiration: review and improved algorithm,
-        Global Change Biology 11, 1424-1439
+    .. [3] Reichstein et al. (2005)
+       On the separation of net ecosystem exchange into assimilation and ecosystem
+       respiration: review and improved algorithm,
+       Global Change Biology 11, 1424-1439
 
     Examples
     --------
@@ -338,11 +338,11 @@ def _nee2gpp_falge(df, ff, isday, undef=-9999):
         pandas.Dataframe with two columns 'GPP' and 'RECO' with estimated
         photosynthesis and ecosystem respiration.
 
-    Literature
+    References
     ----------
-    Falge et al. (2001)
-        Gap filling strategies for defensible annual sums of net ecosystem exchange,
-        Acricultural and Forest Meteorology 107, 43-69
+    .. [1] Falge et al. (2001)
+       Gap filling strategies for defensible annual sums of net ecosystem exchange,
+       Acricultural and Forest Meteorology 107, 43-69
 
     Examples
     --------
@@ -460,12 +460,12 @@ def _nee2gpp_reichstein(df, ff, isday, undef=-9999, nogppnight=False):
         pandas.Dataframe with two columns 'GPP' and 'RECO' with estimated
         photosynthesis and ecosystem respiration.
 
-    Literature
+    References
     ----------
-    Reichstein et al. (2005)
-        On the separation of net ecosystem exchange into assimilation and ecosystem
-        respiration: review and improved algorithm,
-        Global Change Biology 11, 1424-1439
+    .. [3] Reichstein et al. (2005)
+       On the separation of net ecosystem exchange into assimilation and ecosystem
+       respiration: review and improved algorithm,
+       Global Change Biology 11, 1424-1439
 
     Examples
     --------
@@ -718,12 +718,12 @@ def _nee2gpp_lasslop(df, ff, isday, undef=-9999, nogppnight=False):
         pandas.Dataframe with two columns 'GPP' and 'RECO' with estimated
         photosynthesis and ecosystem respiration.
 
-    Literature
+    References
     ----------
-    Lasslop et al. (2010)
-        Separation of net ecosystem exchange into assimilation and respiration using
-        a light response curve approach: critical issues and global evaluation,
-        Global Change Biology 16, 187-208
+    .. [2] Lasslop et al. (2010)
+       Separation of net ecosystem exchange into assimilation and respiration using
+       a light response curve approach: critical issues and global evaluation,
+       Global Change Biology 16, 187-208
 
     Examples
     --------

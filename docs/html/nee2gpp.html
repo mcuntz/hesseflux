@@ -12,6 +12,7 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -34,7 +35,7 @@
           <div class="body" role="main">
             
   <div class="section" id="module-hesseflux.nee2gpp">
-<span id="nee2gpp"></span><h1>nee2gpp<a class="headerlink" href="#module-hesseflux.nee2gpp" title="Permalink to this headline">¶</a></h1>
+<span id="nee2gpp"></span><h1>nee2gpp<a class="headerlink" href="#module-hesseflux.nee2gpp" title="Permalink to this heading">¶</a></h1>
 <dl class="simple">
 <dt>nee2gpp<span class="classifier">Estimates photosynthesis (GPP) and ecosystem respiration (RECO)</span></dt><dd><p>from Eddy covariance CO2 flux data.</p>
 </dd>
@@ -60,7 +61,7 @@ Released under the MIT License; see LICENSE file for details.</p>
 <li><p>Using numpy docstring format, May 2020, Matthias Cuntz</p></li>
 </ul>
 <p>The following functions are provided</p>
-<table class="longtable docutils align-default">
+<table class="autosummary longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -73,7 +74,7 @@ Released under the MIT License; see LICENSE file for details.</p>
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.nee2gpp.nee2gpp">
-<span class="sig-name descname"><span class="pre">nee2gpp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isday</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeformat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%Y-%m-%d</span> <span class="pre">%H:%M:%S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colhead</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'reichstein'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nogppnight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swthr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/nee2gpp.html#nee2gpp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.nee2gpp.nee2gpp" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">nee2gpp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isday</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeformat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%Y-%m-%d</span> <span class="pre">%H:%M:%S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colhead</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'reichstein'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nogppnight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swthr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/nee2gpp.html#nee2gpp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.nee2gpp.nee2gpp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate photosynthesis (GPP) and ecosystem respiration (RECO)
 from Eddy covariance CO2 flux data.</p>
 <p>It uses either</p>
@@ -143,6 +144,93 @@ photosynthesis and ecosystem respiration, or two numpy arrays
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
 <p>Negative respiration possible at night if GPP is forced to 0 with <cite>nogppnight=True</cite>.</p>
+</div>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r96ce4f7eeaf9-1"><span class="brackets">1</span></dt>
+<dd><p>Falge et al. (2001)
+Gap filling strategies for defensible annual sums of net ecosystem exchange,
+Acricultural and Forest Meteorology 107, 43-69</p>
+</dd>
+<dt class="label" id="r96ce4f7eeaf9-2"><span class="brackets">2</span></dt>
+<dd><p>Lasslop et al. (2010)
+Separation of net ecosystem exchange into assimilation and respiration using
+a light response curve approach: critical issues and global evaluation,
+Global Change Biology 16, 187-208</p>
+</dd>
+<dt class="label" id="r96ce4f7eeaf9-3"><span class="brackets">3</span></dt>
+<dd><p>Reichstein et al. (2005)
+On the separation of net ecosystem exchange into assimilation and ecosystem
+respiration: review and improved algorithm,
+Global Change Biology 11, 1424-1439</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fread</span> <span class="kn">import</span> <span class="n">fread</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">date2dec</span> <span class="kn">import</span> <span class="n">date2dec</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dec2date</span> <span class="kn">import</span> <span class="n">dec2date</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ifile</span> <span class="o">=</span> <span class="s1">&#39;test_nee2gpp.csv&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">undef</span> <span class="o">=</span> <span class="o">-</span><span class="mf">9999.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dat</span>   <span class="o">=</span> <span class="n">fread</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ndat</span>  <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">head</span>  <span class="o">=</span> <span class="n">fread</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">head1</span> <span class="o">=</span> <span class="n">head</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># date</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jdate</span> <span class="o">=</span> <span class="n">date2dec</span><span class="p">(</span><span class="n">dy</span><span class="o">=</span><span class="n">dat</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span> <span class="n">mo</span><span class="o">=</span><span class="n">dat</span><span class="p">[</span><span class="mi">1</span><span class="p">,:],</span> <span class="n">yr</span><span class="o">=</span><span class="n">dat</span><span class="p">[</span><span class="mi">2</span><span class="p">,:],</span> <span class="n">hr</span><span class="o">=</span><span class="n">dat</span><span class="p">[</span><span class="mi">3</span><span class="p">,:],</span> <span class="n">mi</span><span class="o">=</span><span class="n">dat</span><span class="p">[</span><span class="mi">4</span><span class="p">,:])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adate</span> <span class="o">=</span> <span class="n">dec2date</span><span class="p">(</span><span class="n">jdate</span><span class="p">,</span> <span class="n">eng</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># colhead</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">idx</span>   <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">head1</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;NEE&#39;</span><span class="p">,</span> <span class="s1">&#39;rg&#39;</span><span class="p">,</span> <span class="s1">&#39;Tair&#39;</span><span class="p">,</span> <span class="s1">&#39;VPD&#39;</span><span class="p">]:</span> <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">colhead</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FC&#39;</span><span class="p">,</span> <span class="s1">&#39;SW_IN&#39;</span><span class="p">,</span> <span class="s1">&#39;TA&#39;</span><span class="p">,</span> <span class="s1">&#39;VPD&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfin</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">idx</span><span class="p">,:]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfin</span><span class="p">[</span><span class="mi">2</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dfin</span><span class="p">[</span><span class="mi">2</span><span class="p">,:]</span> <span class="o">==</span> <span class="n">undef</span><span class="p">,</span> <span class="n">undef</span><span class="p">,</span> <span class="n">dfin</span><span class="p">[</span><span class="mi">2</span><span class="p">,:]</span><span class="o">+</span><span class="mf">273.15</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfin</span><span class="p">[</span><span class="mi">3</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dfin</span><span class="p">[</span><span class="mi">3</span><span class="p">,:]</span> <span class="o">==</span> <span class="n">undef</span><span class="p">,</span> <span class="n">undef</span><span class="p">,</span> <span class="n">dfin</span><span class="p">[</span><span class="mi">3</span><span class="p">,:]</span><span class="o">*</span><span class="mf">100.</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># flag</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dfin</span> <span class="o">==</span> <span class="n">undef</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># partition</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GPP</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
+<span class="go">[-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+<span class="go">  8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">Reco</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
+<span class="go">[1.68311981 1.81012431 1.9874173  2.17108871 2.38759152 2.64372415</span>
+<span class="go"> 2.90076664 3.18592735]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GPP</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
+<span class="go">[-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+<span class="go">  8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;global&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GPP</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
+<span class="go">[-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.33166157e+00</span>
+<span class="go">  8.18228013e+00  1.04092252e+01  8.19395317e+00  1.08427448e+01]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Reichstein&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GPP</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
+<span class="go">[-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+<span class="go">  8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;reichstein&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GPP</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
+<span class="go">[-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+<span class="go">  8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;day&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GPP</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
+<span class="go">[-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  2.78457540e+00</span>
+<span class="go">  6.63212545e+00  8.88902165e+00  6.74243873e+00  9.51364527e+00]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">Reco</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
+<span class="go">[0.28786696 0.34594516 0.43893276 0.5495954  0.70029545 0.90849165</span>
+<span class="go"> 1.15074873 1.46137527]</span>
+</pre></div>
 </div>
 </dd></dl>
 
@@ -234,7 +322,7 @@ photosynthesis and ecosystem respiration, or two numpy arrays
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -243,7 +331,7 @@ photosynthesis and ecosystem respiration, or two numpy arrays
       &copy;2009-2022, Matthias Cuntz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

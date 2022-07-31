@@ -104,10 +104,6 @@ def dec2date(indata, calendar='standard', refdate=None, units=None,
         'decimal' = decimal year instead of decimal days.
 
         'decimal360' = decimal year with a year of 360 days, i.e. 12 month with 30 days each.
-
-
-    Optional Arguments
-    ------------------
     refdate : str, optional
         Reference date for 'days since refdate' can be set by user. Input must be a
         string in the format 'yyyy-mm-dd hh:mm:ss'.

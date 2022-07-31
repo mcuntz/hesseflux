@@ -12,6 +12,7 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -34,22 +35,22 @@
           <div class="body" role="main">
             
   <div class="section" id="user-guide">
-<h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">¶</a></h1>
+<h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this heading">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">hesseflux</span></code> collects functions used for processing Eddy covariance data of the <a class="reference external" href="https://www.icos-cp.eu/">ICOS</a> ecosystem site <a class="reference external" href="https://www.icos-france.fr/en/static3/the-network">FR-Hes</a>.</p>
 <p>The post-processing functionality for Eddy flux data is similar to the R-package <a class="reference external" href="https://cran.r-project.org/web/packages/REddyProc/index.html">REddyProc</a> and includes basically the steps
 described in <a class="reference external" href="https://doi.org/10.5194/bg-3-571-2006">Papale et al. (Biogeosciences, 2006)</a> plus
 some extensions such as the daytime method of flux partitioning (<a class="reference external" href="https://doi.org/10.1111/j.1365-2486.2009.02041.x">Lasslop et al., Global Change
 Biology 2010</a>) and the estimation of
-uncertainties on the fluxes as in <a class="reference external" href="http://doi.org/10.5194/bg-5-1311-2008">Lasslop et al. (Biogeosci, 2008)</a>.</p>
+uncertainties on the fluxes as in <a class="reference external" href="https://doi.org/10.5194/bg-5-1311-2008">Lasslop et al. (Biogeosci, 2008)</a>.</p>
 <p>Only the post-processing steps are described here. We are happy to discuss any processing or
 post-processing directly. Contact us at mc (at) macu (dot) de.</p>
 <div class="section" id="europe-fluxdata-eu-file-format">
-<h2>europe-fluxdata.eu file format<a class="headerlink" href="#europe-fluxdata-eu-file-format" title="Permalink to this headline">¶</a></h2>
+<h2>europe-fluxdata.eu file format<a class="headerlink" href="#europe-fluxdata-eu-file-format" title="Permalink to this heading">¶</a></h2>
 <p>The first processing steps at the ICOS ecosystem site FR-Hes (not shown) brings the data in a
-format that can be submitted to the database <a class="reference external" href="http://www.europe-fluxdata.eu">europe-fluxdata.eu</a>.
+format that can be submitted to the database <a class="reference external" href="https://www.europe-fluxdata.eu">europe-fluxdata.eu</a>.
 The database predates ICOS and is somewhat a precursor of the ICOS data processing.</p>
 <p>The file format of europe-fluxdata.eu is hence very similar to the ICOS format. The only known
-difference to us is the unit of atmospheric pressure, which is in hPa in <a class="reference external" href="http://www.europe-fluxdata.eu">europe-fluxdata.eu</a> and in kPa in <a class="reference external" href="http://www.icos-etc.eu">ICOS ecosystems</a>. The
+difference to us is the unit of atmospheric pressure, which is in hPa in <a class="reference external" href="https://www.europe-fluxdata.eu">europe-fluxdata.eu</a> and in kPa in <a class="reference external" href="https://www.icos-etc.eu">ICOS ecosystems</a>. The
 file format has notably one header line with variable names. There are no units in the file.
 <code class="docutils literal notranslate"><span class="pre">hesseflux</span></code> provides a little helper script <cite>europe-fluxdata_units.py</cite> in the <cite>bin</cite>
 directory that adds a second header line with units. The script can be run on the output as:</p>
@@ -58,9 +59,9 @@ directory that adds a second header line with units. The script can be run on th
 </div>
 </div>
 <div class="section" id="post-processing-eddy-covariance-data">
-<h2>Post-processing Eddy covariance data<a class="headerlink" href="#post-processing-eddy-covariance-data" title="Permalink to this headline">¶</a></h2>
+<h2>Post-processing Eddy covariance data<a class="headerlink" href="#post-processing-eddy-covariance-data" title="Permalink to this heading">¶</a></h2>
 <p>The script <cite>postproc_europe-fluxdata.py</cite> in the <cite>example</cite> directory provides a template for
-post-processing data that is in the <a class="reference external" href="http://www.europe-fluxdata.eu">europe-fluxdata.eu</a> file
+post-processing data that is in the <a class="reference external" href="https://www.europe-fluxdata.eu">europe-fluxdata.eu</a> file
 format. It basically makes all steps described in <a class="reference external" href="https://doi.org/10.5194/bg-3-571-2006">Papale et al. (Biogeosciences, 2006)</a>. The script is governed by a configuration file in
 Python’s standard <a class="reference external" href="https://docs.python.org/3/library/configparser.html#module-configparser" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">configparser</span></code></a> format. The example configuration file
 <cite>hesseflux_example.cfg</cite> in the <cite>example</cite> directory is highly commented and should be (almost)
@@ -72,7 +73,7 @@ self-explanatory. The script is called like:</p>
 post-processing steps.</p>
 <p>Here we describe the main parts of the post-processing script.</p>
 <div class="section" id="reading-the-configuration-file">
-<h3>Reading the configuration file<a class="headerlink" href="#reading-the-configuration-file" title="Permalink to this headline">¶</a></h3>
+<h3>Reading the configuration file<a class="headerlink" href="#reading-the-configuration-file" title="Permalink to this heading">¶</a></h3>
 <p>The script <cite>postproc_europe-fluxdata.py</cite> starts by reading the configuration file <cite>hesseflux_example.cfg</cite>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">configparser</span>
@@ -120,7 +121,7 @@ file. All post-processing steps except uncertainty estimation of flux data would
 the given example.</p>
 </div>
 <div class="section" id="read-the-data">
-<h3>Read the data<a class="headerlink" href="#read-the-data" title="Permalink to this headline">¶</a></h3>
+<h3>Read the data<a class="headerlink" href="#read-the-data" title="Permalink to this heading">¶</a></h3>
 <p>The script would then read in the data. The section in the configuration file is:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">POSTIO</span><span class="p">]</span>
 <span class="c1"># can be comma separated list or single file</span>
@@ -179,7 +180,7 @@ filenames, and they will be read with the same command above. The <a class="refe
 will simply be appended.</p>
 </div>
 <div class="section" id="the-flag-dataframe">
-<h3>The flag dataframe<a class="headerlink" href="#the-flag-dataframe" title="Permalink to this headline">¶</a></h3>
+<h3>The flag dataframe<a class="headerlink" href="#the-flag-dataframe" title="Permalink to this heading">¶</a></h3>
 <p>All Not-a-Number (NaN) values will be set to <cite>undef</cite> and will be ignored in the following.</p>
 <p>This happens via a second dataframe (<cite>dff</cite>), having the same columns and index as the input
 dataframe <cite>df</cite>, representing quality flags. All cells that have a value other than <cite>0</cite> in the flag
@@ -196,7 +197,7 @@ will be set to <cite>2</cite> in <cite>dff</cite> immediately:</p>
 </div>
 </div>
 <div class="section" id="day-night">
-<h3>Day / night<a class="headerlink" href="#day-night" title="Permalink to this headline">¶</a></h3>
+<h3>Day / night<a class="headerlink" href="#day-night" title="Permalink to this heading">¶</a></h3>
 <p>Most post-processing routines differentiate between daytime and nighttime data. <a class="reference external" href="https://doi.org/10.5194/bg-3-571-2006">Papale et al.
 (Biogeosciences, 2006)</a> use a threshold of 20 W m<sup>-2</sup> of global radiation to distinguish between day and night. <a class="reference external" href="https://cran.r-project.org/web/packages/REddyProc/index.html">REddyProc</a> uses incoming shortwave radiation
 greater than 10 W m<sup>2</sup> as daytime. The shortwave raditan threshold <cite>swthr</cite> (same name as in
@@ -208,7 +209,7 @@ column <cite>SW_IN_1_1_1</cite> has to exist in the input data.</p>
 </div>
 </div>
 <div class="section" id="data-check">
-<h3>Data check<a class="headerlink" href="#data-check" title="Permalink to this headline">¶</a></h3>
+<h3>Data check<a class="headerlink" href="#data-check" title="Permalink to this heading">¶</a></h3>
 <p><cite>postproc_europe-fluxdata.py</cite> checks the units of air temperature (i.e. the first column
 starting with <cite>TA_</cite>).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check Ta in Kelvin</span>
@@ -278,7 +279,7 @@ steps per day <cite>ntday</cite>.</p>
 </div>
 </div>
 <div class="section" id="spike-outlier-flagging">
-<h3>Spike / outlier flagging<a class="headerlink" href="#spike-outlier-flagging" title="Permalink to this headline">¶</a></h3>
+<h3>Spike / outlier flagging<a class="headerlink" href="#spike-outlier-flagging" title="Permalink to this heading">¶</a></h3>
 <p>If <cite>outlier=True</cite> is set in the configuration file, spikes will be detected with the method given
 in <a class="reference external" href="https://doi.org/10.5194/bg-3-571-2006">Papale et al. (Biogeosciences, 2006)</a>. A median
 absolute deviation (MAD) filter will be used on the second derivatives of the time series in
@@ -308,7 +309,7 @@ the fill day will be used for the robust statistic. However, only spikes detecte
 derivatives. A spike has normally a strong curvature and hence a large second derivative. <cite>deriv=1</cite>
 is currently not implemented. <cite>deriv=0</cite> applies the filter to the raw time series. This might be
 useful to find outliers in smooth time series such as soil moisture. <cite>deriv=0</cite> is also used on the
-20 Hz Eddy raw data in the quality and uncertainty strategy of <a class="reference external" href="http://doi.org/10.1016/j.agrformet.2012.09.006">Mauder et al. (Agric Forest
+20 Hz Eddy raw data in the quality and uncertainty strategy of <a class="reference external" href="https://doi.org/10.1016/j.agrformet.2012.09.006">Mauder et al. (Agric Forest
 Meteo, 2013)</a>.</p>
 <p>The default values, if option are not given in the configuration file, are <cite>nscan=15</cite>, <cite>nfill=1</cite>,
 <cite>z=7</cite>, and <cite>deriv=2</cite>.</p>
@@ -328,7 +329,7 @@ flagged as 2. The scripts sets the corresponding columns in the flag dataframe <
 to keep track where the flag was set).</p>
 </div>
 <div class="section" id="u-filtering">
-<h3>u* filtering<a class="headerlink" href="#u-filtering" title="Permalink to this headline">¶</a></h3>
+<h3>u* filtering<a class="headerlink" href="#u-filtering" title="Permalink to this heading">¶</a></h3>
 <p>If <cite>ustar=True</cite> is set in the configuration file, a u*-filter will be applied following <a class="reference external" href="https://doi.org/10.5194/bg-3-571-2006">Papale et
 al. (Biogeosciences, 2006)</a>.</p>
 <p>The section in <cite>hesseflux_example.cfg</cite> looks like:</p>
@@ -389,11 +390,11 @@ like:</p>
 </div>
 </div>
 <div class="section" id="partitioning-of-net-ecosystem-exchange">
-<h3>Partitioning of Net Ecosystem Exchange<a class="headerlink" href="#partitioning-of-net-ecosystem-exchange" title="Permalink to this headline">¶</a></h3>
+<h3>Partitioning of Net Ecosystem Exchange<a class="headerlink" href="#partitioning-of-net-ecosystem-exchange" title="Permalink to this heading">¶</a></h3>
 <p>If <cite>partition=True</cite> is set in the configuration file, two estimates of Gross Primary Productivity
-(GPP) and Ecosystem Respiration (RECO) are calculated: firstly with the method of <a class="reference external" href="http://doi.org/10.1111/j.1365-2486.2005.001002.x">Reichstein et
+(GPP) and Ecosystem Respiration (RECO) are calculated: firstly with the method of <a class="reference external" href="https://doi.org/10.1111/j.1365-2486.2005.001002.x">Reichstein et
 al. (Glob Change Biolo, 2005)</a> using nighttime
-data only, and secondly with the method of <a class="reference external" href="http://doi.org/10.1111/j.1365-2486.2009.02041.x">Lasslop et al. (Glob Change Biolo, 2010)</a> using a light-response curve on ‘daytime’ data.
+data only, and secondly with the method of <a class="reference external" href="https://doi.org/10.1111/j.1365-2486.2009.02041.x">Lasslop et al. (Glob Change Biolo, 2010)</a> using a light-response curve on ‘daytime’ data.
 The configuration <cite>hesseflux_example.cfg</cite> gives only one option in this section:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">POSTPARTITION</span><span class="p">]</span>
 <span class="c1"># partitioning, see help(hesseflux.nee2gpp)</span>
@@ -431,8 +432,8 @@ all variability of the net fluxes.</p>
 </div>
 </div>
 <div class="section" id="gap-filling-imputation">
-<h3>Gap-filling / Imputation<a class="headerlink" href="#gap-filling-imputation" title="Permalink to this headline">¶</a></h3>
-<p>Marginal Distribution Sampling (MDS) of <a class="reference external" href="http://doi.org/10.1111/j.1365-2486.2005.001002.x">Reichstein et al. (Glob Change Biolo, 2005)</a> is implemented as imputation or called
+<h3>Gap-filling / Imputation<a class="headerlink" href="#gap-filling-imputation" title="Permalink to this heading">¶</a></h3>
+<p>Marginal Distribution Sampling (MDS) of <a class="reference external" href="https://doi.org/10.1111/j.1365-2486.2005.001002.x">Reichstein et al. (Glob Change Biolo, 2005)</a> is implemented as imputation or called
 gap-filling algorithm. The algorithm looks for similar conditions in the vicinity of a missing data
 point, if option <cite>fill=True</cite>. The configuration file is:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">POSTGAP</span><span class="p">]</span>
@@ -453,7 +454,7 @@ point, if option <cite>fill=True</cite>. The configuration file is:</p>
 <p>If a flux data point is missing, times with incoming shortwave radiation in the range of <cite>sw_dev</cite>
 around the actual shortwave radiation will be looked for, as well as air temperatures within
 <cite>ta_dev</cite> and air vapour pressure deficit within <cite>vpd_dev</cite>. The function does not fill long gaps
-longer than <cite>longgap</cite> days. A good summary is given in Fig. A1 of <a class="reference external" href="http://doi.org/10.1111/j.1365-2486.2005.001002.x">Reichstein et al. (Glob Change
+longer than <cite>longgap</cite> days. A good summary is given in Fig. A1 of <a class="reference external" href="https://doi.org/10.1111/j.1365-2486.2005.001002.x">Reichstein et al. (Glob Change
 Biolo, 2005)</a>.</p>
 <p>The script invokes MDS as:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hfill</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;H_&#39;</span><span class="p">,</span> <span class="s1">&#39;LE&#39;</span><span class="p">,</span> <span class="s1">&#39;FC&#39;</span><span class="p">,</span>       <span class="c1"># assume *_PI variables after raw variables, e.g. LE before LE_PI</span>
@@ -482,8 +483,8 @@ columns <cite>dff_f</cite> indicating fill quality. Fill quality A-C of Reichste
 are translated to quality flags 1-3.</p>
 </div>
 <div class="section" id="uncertainty-estimates-of-flux-data">
-<h3>Uncertainty estimates of flux data<a class="headerlink" href="#uncertainty-estimates-of-flux-data" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="http://doi.org/10.5194/bg-5-1311-2008">Lasslop et al. (Biogeosci, 2008)</a> presented an algorithm
+<h3>Uncertainty estimates of flux data<a class="headerlink" href="#uncertainty-estimates-of-flux-data" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference external" href="https://doi.org/10.5194/bg-5-1311-2008">Lasslop et al. (Biogeosci, 2008)</a> presented an algorithm
 to estimate uncertainties of Eddy covariance fluxes using Marginal Distribution Sampling (MDS). The
 gap-filling function <code class="xref py py-func docutils literal notranslate"><span class="pre">gapfill()</span></code> can be used for uncertainty estimation giving the keyword
 <cite>err=True</cite>. The same thresholds as for gap-filling are used.</p>
@@ -517,11 +518,11 @@ uncertainties like:</p>
 </pre></div>
 </div>
 <p>We recommend, however, to calculate flux uncertainties with the Eddy covariance raw data as
-described in <a class="reference external" href="http://doi.org/10.1016/j.agrformet.2012.09.006">Mauder et al. (Agric Forest Meteo, 2013)</a>. This is, for example, implemented in the
+described in <a class="reference external" href="https://doi.org/10.1016/j.agrformet.2012.09.006">Mauder et al. (Agric Forest Meteo, 2013)</a>. This is, for example, implemented in the
 processing software EddyPro<sup>(R)</sup>.</p>
 </div>
 <div class="section" id="writing-the-output-file">
-<h3>Writing the output file<a class="headerlink" href="#writing-the-output-file" title="Permalink to this headline">¶</a></h3>
+<h3>Writing the output file<a class="headerlink" href="#writing-the-output-file" title="Permalink to this heading">¶</a></h3>
 <p>The dataframe is written to the output file with <a class="reference external" href="https://pandas.pydata.org/docs/index.html#module-pandas" title="(in pandas v1.4.3)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pandas</span></code></a> <code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.Dataframe.to_csv()</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">,</span> <span class="n">na_rep</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">undef</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">date_format</span><span class="o">=</span><span class="n">timeformat</span><span class="p">)</span>
 </pre></div>
@@ -641,7 +642,7 @@ if gap-filling was performed: option <cite>fill=True</cite>.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -650,7 +651,7 @@ if gap-filling was performed: option <cite>fill=True</cite>.</p>
       &copy;2009-2022, Matthias Cuntz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

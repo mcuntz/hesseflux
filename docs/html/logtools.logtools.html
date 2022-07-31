@@ -12,6 +12,7 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -34,7 +35,7 @@
           <div class="body" role="main">
             
   <div class="section" id="module-hesseflux.logtools.logtools">
-<span id="logtools-logtools"></span><h1>logtools.logtools<a class="headerlink" href="#module-hesseflux.logtools.logtools" title="Permalink to this headline">¶</a></h1>
+<span id="logtools-logtools"></span><h1>logtools.logtools<a class="headerlink" href="#module-hesseflux.logtools.logtools" title="Permalink to this heading">¶</a></h1>
 <p>logtools is a Python port of the Control File Functions of
 Logtools, the Logger Tools Software of Olaf Kolle, MPI-BGC Jena, (c) 2012.</p>
 <p>Some functions are renamed compared to the original logger tools:</p>
@@ -420,7 +421,7 @@ Released under the MIT License; see LICENSE file for details.</p>
 <li><p>Corrected type in met_tpot, Jun 2014, Corinna Rebmann</p></li>
 <li><p>Changed to Sphinx docstring and numpydoc, May 2020, Matthias Cuntz</p></li>
 </ul>
-<table class="longtable docutils align-default">
+<table class="autosummary longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -602,7 +603,7 @@ Negative b’s is not implemented.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.cubic">
-<span class="sig-name descname"><span class="pre">cubic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#cubic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.cubic" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">cubic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#cubic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.cubic" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Apply 3rd order function:</dt><dd><p>x=cubic(y,a0,a1,a2,a3) means x = a0 + a1*y + a2*y**2 + a3*y**3</p>
 </dd>
@@ -632,7 +633,7 @@ Negative b’s is not implemented.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.hms">
-<span class="sig-name descname"><span class="pre">hms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#hms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.hms" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">hms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#hms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.hms" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculate fraction of day from hours, minutes and seconds:</dt><dd><p>x = hms(h, m, s) means x = (h + m/60 + s/3600)/24</p>
 </dd>
@@ -838,7 +839,7 @@ Negative b’s is not implemented.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.limits">
-<span class="sig-name descname"><span class="pre">limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mini</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#limits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.limits" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mini</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#limits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.limits" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Replacement of underflows or overflows by undef:</dt><dd><p>x = limits(y, mini, maxi) means IF (y &lt; mini) OR (y &gt; maxi) THEN x = undef ELSE x = y</p>
 </dd>
@@ -868,7 +869,7 @@ Negative b’s is not implemented.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.lin">
-<span class="sig-name descname"><span class="pre">lin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#lin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.lin" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">lin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#lin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.lin" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Apply linear function:</dt><dd><p>x = lin(y, a0, a1) means x = a0 + a1 * y</p>
 </dd>
@@ -896,7 +897,7 @@ Negative b’s is not implemented.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.maxi">
-<span class="sig-name descname"><span class="pre">maxi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#maxi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.maxi" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">maxi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#maxi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.maxi" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculation of maximum value:</dt><dd><p>x = maxi(y) means x = max(y[0],y[1],…,y[n-1])</p>
 </dd>
@@ -905,7 +906,7 @@ Negative b’s is not implemented.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
-<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><em>None</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><em>tuple of ints</em><em>, </em><em>optional</em>) – <p>Axis or axes along which the maximum are computed.
+<li><p><strong>axis</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><em>tuple of ints</em><em>, </em><em>optional</em>) – <p>Axis or axes along which the maximum are computed.
 The default is to compute the maximum of the flattened array.</p>
 <p>If this is a tuple of ints, a maximum is performed over multiple axes,
 instead of a single axis or all the axes as before.</p>
@@ -927,7 +928,7 @@ instead of a single axis or all the axes as before.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.mean">
-<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.mean" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.mean" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculation of mean value:</dt><dd><p>x = mean(y) means x = (y[0] + y[1] + … + y[n-1])/n</p>
 </dd>
@@ -936,7 +937,7 @@ instead of a single axis or all the axes as before.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
-<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><em>None</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><em>tuple of ints</em><em>, </em><em>optional</em>) – <p>Axis or axes along which the means are computed.
+<li><p><strong>axis</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><em>tuple of ints</em><em>, </em><em>optional</em>) – <p>Axis or axes along which the means are computed.
 The default is to compute the mean of the flattened array.</p>
 <p>If this is a tuple of ints, a mean is performed over multiple axes,
 instead of a single axis or all the axes as before.</p>
@@ -958,7 +959,7 @@ instead of a single axis or all the axes as before.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_alb">
-<span class="sig-name descname"><span class="pre">met_alb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swdmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swumin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_alb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_alb" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_alb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swdmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swumin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_alb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_alb" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculation of albedo from short wave downward and upward radiation:</dt><dd><p>x = met_alb(swd, swu)</p>
 </dd>
@@ -990,7 +991,7 @@ instead of a single axis or all the axes as before.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_albl">
-<span class="sig-name descname"><span class="pre">met_albl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swdmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swumin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_albl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_albl" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_albl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swdmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swumin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_albl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_albl" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculation of albedo from short wave downward and upward radiation with limits:</dt><dd><p>x=met_albl(swd,swu,swdmin,swumin)</p>
 </dd>
@@ -1023,7 +1024,7 @@ instead of a single axis or all the axes as before.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_dpt">
-<span class="sig-name descname"><span class="pre">met_dpt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_dpt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_dpt" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_dpt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_dpt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_dpt" title="Permalink to this definition">¶</a></dt>
 <dd><dl>
 <dt>Calculation of dew point temperature:</dt><dd><p>x = met_dpt(T, rh)</p>
 </dd>
@@ -1054,7 +1055,7 @@ instead of a single axis or all the axes as before.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_h2oc">
-<span class="sig-name descname"><span class="pre">met_h2oc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_h2oc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_h2oc" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_h2oc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_h2oc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_h2oc" title="Permalink to this definition">¶</a></dt>
 <dd><dl>
 <dt>Calculation of water vapour concentration:</dt><dd><p>x = met_h2oc(T, rh, p)</p>
 </dd>
@@ -1086,7 +1087,7 @@ instead of a single axis or all the axes as before.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_h2oc_rh">
-<span class="sig-name descname"><span class="pre">met_h2oc_rh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_h2oc_rh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_h2oc_rh" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_h2oc_rh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_h2oc_rh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_h2oc_rh" title="Permalink to this definition">¶</a></dt>
 <dd><dl>
 <dt>Calculation of relative humidity from water vapour concentration:</dt><dd><p>x = met_h2oc_rh(T, [H2O], p)</p>
 </dd>
@@ -1118,7 +1119,7 @@ instead of a single axis or all the axes as before.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_lwrad">
-<span class="sig-name descname"><span class="pre">met_lwrad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_lwrad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_lwrad" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_lwrad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_lwrad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_lwrad" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculation of long wave radiation from net radiometer:</dt><dd><p>x = met_lwrad(y, Tp)</p>
 </dd>
@@ -1150,7 +1151,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_rho">
-<span class="sig-name descname"><span class="pre">met_rho</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_rho"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_rho" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_rho</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_rho"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_rho" title="Permalink to this definition">¶</a></dt>
 <dd><dl>
 <dt>Calculation of air density:</dt><dd><p>x = met_rho(T, rh, p)</p>
 </dd>
@@ -1184,7 +1185,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_sh">
-<span class="sig-name descname"><span class="pre">met_sh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_sh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_sh" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_sh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_sh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_sh" title="Permalink to this definition">¶</a></dt>
 <dd><dl>
 <dt>Calculation of specific humidity:</dt><dd><p>x = met_sh(T, rh, p)</p>
 </dd>
@@ -1216,7 +1217,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_tpot">
-<span class="sig-name descname"><span class="pre">met_tpot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_tpot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_tpot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_tpot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_tpot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_tpot" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculation of potential temperature:</dt><dd><p>x = met_tpot(T, p)</p>
 </dd>
@@ -1245,7 +1246,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_trad">
-<span class="sig-name descname"><span class="pre">met_trad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Rl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_trad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_trad" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_trad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Rl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_trad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_trad" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculation of radiation temperature from long wave radiation:</dt><dd><p>x = met_trad(Rl, epsilon)</p>
 </dd>
@@ -1275,7 +1276,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_urot">
-<span class="sig-name descname"><span class="pre">met_urot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_urot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_urot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_urot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_urot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_urot" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Rotation of u-component of wind vector:</dt><dd><p>x = met_urot(u, v, a)</p>
 </dd>
@@ -1305,7 +1306,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_uv_wd">
-<span class="sig-name descname"><span class="pre">met_uv_wd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_uv_wd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_uv_wd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_uv_wd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_uv_wd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_uv_wd" title="Permalink to this definition">¶</a></dt>
 <dd><dl>
 <dt>Calculation of wind direction from u- and v-component of wind vector:</dt><dd><p>x = met_uv_wd(u, v)</p>
 </dd>
@@ -1338,7 +1339,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_uv_wv">
-<span class="sig-name descname"><span class="pre">met_uv_wv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_uv_wv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_uv_wv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_uv_wv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_uv_wv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_uv_wv" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculation of wind velocity from u- and v-component of wind vector:</dt><dd><p>x = met_uv_wv(u, v)</p>
 </dd>
@@ -1367,7 +1368,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_vpact">
-<span class="sig-name descname"><span class="pre">met_vpact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_vpact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_vpact" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_vpact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_vpact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_vpact" title="Permalink to this definition">¶</a></dt>
 <dd><dl>
 <dt>Calculation of actual water vapour pressure:</dt><dd><p>x = met_vpact(T,rh)</p>
 </dd>
@@ -1397,7 +1398,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_vpdef">
-<span class="sig-name descname"><span class="pre">met_vpdef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_vpdef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_vpdef" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_vpdef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_vpdef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_vpdef" title="Permalink to this definition">¶</a></dt>
 <dd><dl>
 <dt>Calculation of water vapour pressure deficit:</dt><dd><p>x = met_vpdef(T, rh)</p>
 </dd>
@@ -1428,7 +1429,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_vpmax">
-<span class="sig-name descname"><span class="pre">met_vpmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_vpmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_vpmax" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_vpmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_vpmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_vpmax" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculation of saturation water vapour pressure:</dt><dd><p>x = met_vpmax(T) where</p>
 </dd>
@@ -1456,7 +1457,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_vrot">
-<span class="sig-name descname"><span class="pre">met_vrot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_vrot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_vrot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_vrot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_vrot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_vrot" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Rotation of v-component of wind vector:</dt><dd><p>x = met_vrot(u, v, a)</p>
 </dd>
@@ -1486,7 +1487,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_wdrot">
-<span class="sig-name descname"><span class="pre">met_wdrot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_wdrot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_wdrot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_wdrot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_wdrot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_wdrot" title="Permalink to this definition">¶</a></dt>
 <dd><dl>
 <dt>Rotation of wind direction:</dt><dd><p>x = met_wdrot(wd, a)</p>
 </dd>
@@ -1517,7 +1518,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_wvwd_u">
-<span class="sig-name descname"><span class="pre">met_wvwd_u</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_wvwd_u"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_wvwd_u" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_wvwd_u</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_wvwd_u"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_wvwd_u" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculation of u-component of wind vector from wind velocity and wind direction:</dt><dd><p>x = met_wvwd_u(wv, wd)</p>
 </dd>
@@ -1546,7 +1547,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_wvwd_v">
-<span class="sig-name descname"><span class="pre">met_wvwd_v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_wvwd_v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_wvwd_v" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">met_wvwd_v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_wvwd_v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_wvwd_v" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculation of v-component of wind vector from wind velocity and wind direction:</dt><dd><p>x = met_wvwd_v(wv, wd)</p>
 </dd>
@@ -1575,7 +1576,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.mini">
-<span class="sig-name descname"><span class="pre">mini</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#mini"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.mini" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mini</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#mini"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.mini" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Calculation of minimum value:</dt><dd><p>x = mini(y) means x = min(y[0],y[1],…,y[n-1])</p>
 </dd>
@@ -1584,7 +1585,7 @@ fl is the factor for long wave radiation (reciprocal value of sensitivity) in W 
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
-<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><em>None</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><em>tuple of ints</em><em>, </em><em>optional</em>) – <p>Axis or axes along which the minimum are computed.
+<li><p><strong>axis</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><em>tuple of ints</em><em>, </em><em>optional</em>) – <p>Axis or axes along which the minimum are computed.
 The default is to compute the minimum of the flattened array.</p>
 <p>If this is a tuple of ints, a minimum is performed over multiple axes,
 instead of a single axis or all the axes as before.</p>
@@ -1606,7 +1607,7 @@ instead of a single axis or all the axes as before.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.quad">
-<span class="sig-name descname"><span class="pre">quad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#quad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.quad" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">quad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#quad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.quad" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Apply 2nd order function:</dt><dd><p>x=quad(y,a0,a1,a2) means x = a0 + a1*y + a2*y**2</p>
 </dd>
@@ -1635,7 +1636,7 @@ instead of a single axis or all the axes as before.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.sethigh">
-<span class="sig-name descname"><span class="pre">sethigh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ishigh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#sethigh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.sethigh" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">sethigh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ishigh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#sethigh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.sethigh" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Replacement of overflows by new value:</dt><dd><p>x = sethigh(y,high,ishigh) means IF (y &gt; high) THEN x = ishigh ELSE x = y</p>
 </dd>
@@ -1647,7 +1648,7 @@ instead of a single axis or all the axes as before.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
 <li><p><strong>high</strong> (<em>ndarray</em>) – upper threshold</p></li>
-<li><p><strong>ishigh</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><em>None</em></a><em> or </em><em>ndarray</em><em>, </em><em>optional</em>) – if not None, use ishigh in case of y &gt; high</p></li>
+<li><p><strong>ishigh</strong> (<em>None</em><em> or </em><em>ndarray</em><em>, </em><em>optional</em>) – if not None, use ishigh in case of y &gt; high</p></li>
 <li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
 </ul>
 </dd>
@@ -1665,7 +1666,7 @@ instead of a single axis or all the axes as before.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.setlow">
-<span class="sig-name descname"><span class="pre">setlow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">islow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#setlow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.setlow" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">setlow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">islow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#setlow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.setlow" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Replacement of underflows by new value:</dt><dd><p>x = setlow(y,low,islow) means IF (y &lt; low) THEN x = islow ELSE x = y</p>
 </dd>
@@ -1678,7 +1679,7 @@ during nighttime to zero values.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
 <li><p><strong>low</strong> (<em>ndarray</em>) – lower threshold</p></li>
-<li><p><strong>islow</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><em>None</em></a><em> or </em><em>ndarray</em><em>, </em><em>optional</em>) – if not None, use islow in case of y &lt; low</p></li>
+<li><p><strong>islow</strong> (<em>None</em><em> or </em><em>ndarray</em><em>, </em><em>optional</em>) – if not None, use islow in case of y &lt; low</p></li>
 <li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
 </ul>
 </dd>
@@ -1696,7 +1697,7 @@ during nighttime to zero values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.varadd">
-<span class="sig-name descname"><span class="pre">varadd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varadd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varadd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">varadd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varadd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varadd" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Addition:</dt><dd><p>x = varadd(a, b) means x = a + b, where a and b are ndarray or float.</p>
 </dd>
@@ -1723,7 +1724,7 @@ during nighttime to zero values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.varchs">
-<span class="sig-name descname"><span class="pre">varchs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varchs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varchs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">varchs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varchs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varchs" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Change sign:</dt><dd><p>x = varchs(a) means x = -a, where a is ndarray or float.</p>
 </dd>
@@ -1749,7 +1750,7 @@ during nighttime to zero values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.vardiv">
-<span class="sig-name descname"><span class="pre">vardiv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#vardiv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.vardiv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">vardiv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#vardiv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.vardiv" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Division:</dt><dd><p>x = vardiv(a, b) means x = a/b, where a and b are ndarray or float.</p>
 </dd>
@@ -1776,7 +1777,7 @@ during nighttime to zero values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.varexp">
-<span class="sig-name descname"><span class="pre">varexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varexp" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">varexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varexp" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Exponentiation of e:</dt><dd><p>x = varexp(a) means x = exp(a), where a is ndarray or float.</p>
 </dd>
@@ -1802,7 +1803,7 @@ during nighttime to zero values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.varlog">
-<span class="sig-name descname"><span class="pre">varlog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varlog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varlog" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">varlog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varlog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varlog" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Natural logarithm:</dt><dd><p>x = varlog(a) means x = ln(a), where a is ndarray or float.</p>
 </dd>
@@ -1828,7 +1829,7 @@ during nighttime to zero values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.varmul">
-<span class="sig-name descname"><span class="pre">varmul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varmul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varmul" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">varmul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varmul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varmul" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Multiplication:</dt><dd><p>x = varmul(a, b) means x = a * b, where a and b are ndarray or float.</p>
 </dd>
@@ -1855,7 +1856,7 @@ during nighttime to zero values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.varpot">
-<span class="sig-name descname"><span class="pre">varpot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varpot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varpot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">varpot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varpot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varpot" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Exponentiation:</dt><dd><p>x = varpot(a, b) means x = a**b, where a and b are ndarray or float.</p>
 </dd>
@@ -1882,7 +1883,7 @@ during nighttime to zero values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.varsqr">
-<span class="sig-name descname"><span class="pre">varsqr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varsqr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varsqr" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">varsqr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varsqr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varsqr" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Square root:</dt><dd><p>x = varsqr(a) means x = sqrt(a), where a is ndarray or float.</p>
 </dd>
@@ -1908,7 +1909,7 @@ during nighttime to zero values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.varsqrt">
-<span class="sig-name descname"><span class="pre">varsqrt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varsqrt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varsqrt" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">varsqrt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varsqrt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varsqrt" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Square root:</dt><dd><p>x = varsqrt(a) means x = sqrt(a), where a is ndarray or float.</p>
 </dd>
@@ -1934,7 +1935,7 @@ during nighttime to zero values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.logtools.logtools.varsub">
-<span class="sig-name descname"><span class="pre">varsub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varsub"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varsub" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">varsub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varsub"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varsub" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Subtraction:</dt><dd><p>x = varsub(a, b) means x = a - b, where a and b are ndarray or float.</p>
 </dd>
@@ -2047,7 +2048,7 @@ during nighttime to zero values.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -2056,7 +2057,7 @@ during nighttime to zero values.</p>
       &copy;2009-2022, Matthias Cuntz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

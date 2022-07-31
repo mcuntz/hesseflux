@@ -12,6 +12,7 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -34,7 +35,7 @@
           <div class="body" role="main">
             
   <div class="section" id="module-hesseflux.date2dec">
-<span id="date2dec"></span><h1>date2dec<a class="headerlink" href="#module-hesseflux.date2dec" title="Permalink to this headline">¶</a></h1>
+<span id="date2dec"></span><h1>date2dec<a class="headerlink" href="#module-hesseflux.date2dec" title="Permalink to this heading">¶</a></h1>
 <p>date2dec : Converts calendar dates into decimal dates.</p>
 <p>This module was written by Arndt Piayda and then enhanced and
 maintained by Matthias Cuntz while at Department of Computational
@@ -64,7 +65,7 @@ Released under the MIT License; see LICENSE file for details.</p>
 <li><p>proleptic_gregorian instead of gregorian calendar for Excel dates, Jul 2020, Matthias Cuntz</p></li>
 </ul>
 <p>The following functions are provided</p>
-<table class="longtable docutils align-default">
+<table class="autosummary longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -164,7 +165,7 @@ dec2date(date2dec(ascii=’01.01.0301 00:00:00’, calendar=’proleptic_gregori
 [301, 1, 1, 0, 0, 0]</p>
 <p>List input is only supported up to 2 dimensions.</p>
 <p>Requires <cite>netcdftime.py</cite> from module <cite>netcdftime</cite> available at:
-<a class="reference external" href="http://netcdf4-python.googlecode.com">http://netcdf4-python.googlecode.com</a></p>
+<a class="reference external" href="https://netcdf4-python.googlecode.com">https://netcdf4-python.googlecode.com</a></p>
 </div>
 <p class="rubric">Examples</p>
 <p># Some implementations of datetime do not support negative years
@@ -375,7 +376,7 @@ i.e. it does not support negative years (BC).</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -384,7 +385,7 @@ i.e. it does not support negative years (BC).</p>
       &copy;2009-2022, Matthias Cuntz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

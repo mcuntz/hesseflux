@@ -88,7 +88,7 @@ def esat(T, liquid=False, formula='GoffGratch'):
 
     Notes
     -----
-    From Holger Voemel: http://cires.colorado.edu/~voemel/vp.html
+    From Holger Voemel: https://cires.colorado.edu/~voemel/vp.html
 
     Referred literature cited in code.
 

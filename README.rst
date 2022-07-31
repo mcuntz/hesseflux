@@ -19,7 +19,7 @@ the Eddy covariance flux data of the ICOS_ ecosystem site FR-Hes_.
       :target: https://anaconda.org/conda-forge/pyjams
       :alt: Conda version
 
-.. image:: http://img.shields.io/badge/license-MIT-blue.svg?style=flat
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg?style=flat
    :target: https://github.com/mcuntz/hesseflux/blob/master/LICENSE
    :alt: License
 

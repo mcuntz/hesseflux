@@ -6,15 +6,15 @@ to the ICOS format (the only known difference is the unit of pressure,
 which is hPa in europe-fluxdata.eu and kPa in ICOS).
 
 The script covers the following steps:
-- spike / outlier detection with mean absolute deviation filter
-  after Papale et al. (Biogeosci, 2006)
-- ustar filtering after Papale et al. (Biogeosci, 2006)
-- carbon flux partitioning with the nighttime method
-  of Reichstein et al. (Global Change Biolo, 2005) and
-  the daytime method of Lasslop et al. (Global Change Biolo, 2010)
-- gap filling with marginal distribution sampling (MDS)
-  of Reichstein et al. (Global Change Biolo, 2005)
-- flux error estimates using MDS after Lasslop et al. (Biogeosci, 2008)
+    - spike / outlier detection with mean absolute deviation filter
+      after Papale et al. (Biogeosci, 2006)
+    - ustar filtering after Papale et al. (Biogeosci, 2006)
+    - carbon flux partitioning with the nighttime method
+      of Reichstein et al. (Global Change Biolo, 2005) and
+      the daytime method of Lasslop et al. (Global Change Biolo, 2010)
+    - gap filling with marginal distribution sampling (MDS)
+      of Reichstein et al. (Global Change Biolo, 2005)
+    - flux error estimates using MDS after Lasslop et al. (Biogeosci, 2008)
 
 The script is controlled by a config file in Python's standard configparser
 format. The config file includes all possible parameters of used routines.
@@ -39,6 +39,7 @@ python postproc_europe-fluxdata.py hesseflux_example.cfg
 History
 -------
 Written, Matthias Cuntz, April 2020
+
 """
 from __future__ import division, absolute_import, print_function
 import time as ptime
@@ -88,37 +89,37 @@ if __name__ == '__main__':
     config = configparser.ConfigParser(interpolation=None)
     config.read(configfile)
     # file path
-    outdir    = config['GENERAL'].get('outdir', ".")
+    outdir = config['GENERAL'].get('outdir', ".")
     # program switches
-    outlier   = config['POSTSWITCH'].getboolean('outlier',   True)
-    ustar     = config['POSTSWITCH'].getboolean('ustar',     True)
+    outlier = config['POSTSWITCH'].getboolean('outlier',   True)
+    ustar = config['POSTSWITCH'].getboolean('ustar',     True)
     partition = config['POSTSWITCH'].getboolean('partition', True)
-    fill      = config['POSTSWITCH'].getboolean('fill',      True)
-    fluxerr   = config['POSTSWITCH'].getboolean('fluxerr',   True)
+    fill = config['POSTSWITCH'].getboolean('fill',      True)
+    fluxerr = config['POSTSWITCH'].getboolean('fluxerr',   True)
     # input file
-    eufluxfile  = config['POSTIO'].get('inputfile',  '')
-    timeformat  = config['POSTIO'].get('timeformat', '%Y%m%d%H%M')
-    sep         = config['POSTIO'].get('sep',        ',')
-    skiprows    = config['POSTIO'].get('skiprows',   '')
-    undef       = config['POSTIO'].getfloat('undef', -9999.)
-    swthr       = config['POSTIO'].getfloat('swthr', 10.)
-    outputfile  = config['POSTIO'].get('outputfile'  '')
-    outundef    = config['POSTSWITCH'].getboolean('outundef',    True)
+    eufluxfile = config['POSTIO'].get('inputfile',  '')
+    timeformat = config['POSTIO'].get('timeformat', '%Y%m%d%H%M')
+    sep = config['POSTIO'].get('sep',        ',')
+    skiprows = config['POSTIO'].get('skiprows',   '')
+    undef = config['POSTIO'].getfloat('undef', -9999.)
+    swthr = config['POSTIO'].getfloat('swthr', 10.)
+    outputfile = config['POSTIO'].get('outputfile'  '')
+    outundef = config['POSTSWITCH'].getboolean('outundef',    True)
     outflagcols = config['POSTSWITCH'].getboolean('outflagcols', False)
     # mad
     nscan = config['POSTMAD'].getint('nscan', 15)
     nfill = config['POSTMAD'].getint('nfill',  1)
-    z     = config['POSTMAD'].getfloat('z',    7)
+    z = config['POSTMAD'].getfloat('z',    7)
     deriv = config['POSTMAD'].getint('deriv',  2)
     # ustar
-    ustarmin       = config['POSTUSTAR'].getfloat('ustarmin',    0.1)
-    nboot          = config['POSTUSTAR'].getint('nboot',         1)
-    plateaucrit    = config['POSTUSTAR'].getfloat('plateaucrit', 0.95)
-    seasonout      = config['POSTUSTAR'].getboolean('seasonout', False)
+    ustarmin = config['POSTUSTAR'].getfloat('ustarmin',    0.1)
+    nboot = config['POSTUSTAR'].getint('nboot',         1)
+    plateaucrit = config['POSTUSTAR'].getfloat('plateaucrit', 0.95)
+    seasonout = config['POSTUSTAR'].getboolean('seasonout', False)
     applyustarflag = config['POSTUSTAR'].getboolean('applyflag', False)
     # gap-filling
-    sw_dev  = config['POSTGAP'].getfloat('sw_dev',  50.)
-    ta_dev  = config['POSTGAP'].getfloat('ta_dev',  2.5)
+    sw_dev = config['POSTGAP'].getfloat('sw_dev',  50.)
+    ta_dev = config['POSTGAP'].getfloat('ta_dev',  2.5)
     vpd_dev = config['POSTGAP'].getfloat('vpd_dev', 5.0)
     longgap = config['POSTGAP'].getint('longgap',   60)
     # partitioning
@@ -148,7 +149,7 @@ if __name__ == '__main__':
         skiprows = json.loads(skiprows.replace('(', '[').replace(')', ']'))
 
     # ----------------------------------------------------------------
-    # Read input files into Panda data frame and check variable availability
+    # Read input files into Pandas data frame and check variable availability
 
     print('Read data ', eufluxfile)
     t01 = ptime.time()
@@ -158,20 +159,21 @@ if __name__ == '__main__':
     parser = lambda date: dt.datetime.strptime(date, timeformat)
 
     infile = eufluxfile[0]
-    df = pd.read_csv(infile, sep, skiprows=skiprows, parse_dates=[0],
+    df = pd.read_csv(infile, sep=sep, skiprows=skiprows, parse_dates=[0],
                      date_parser=parser, index_col=0, header=0)
 
     if len(eufluxfile) > 1:
         for infile in eufluxfile[1:]:
-            df1 = pd.read_csv(infile, sep, skiprows=skiprows, parse_dates=[0],
-                              date_parser=parser, index_col=0, header=0)
-            df  = df.append(df1, sort=False)
+            df1 = pd.read_csv(infile, sep=sep, skiprows=skiprows,
+                              parse_dates=[0], date_parser=parser, index_col=0,
+                              header=0)
+            df = df.append(df1, sort=False)
     df.fillna(undef, inplace=True)
     # df.replace(-9999., np.nan, inplace=True)
 
     # Flag
-    dff              = df.copy(deep=True).astype(int)
-    dff[:]           = 0
+    dff = df.copy(deep=True).astype(int)
+    dff[:] = 0
     dff[df == undef] = 2
     # dff[df.isna()]   = 2
 
@@ -188,7 +190,7 @@ if __name__ == '__main__':
     # add tkelvin only where not flagged
     df.loc[dff[hout[0]] == 0, hout[0]] += tkelvin
 
-    # add vpd if not given
+    # add VPD if not given
     hvpd = ['VPD']
     hout = _findfirststart(hvpd, df.columns)
     if len(hout) == 0:
@@ -226,13 +228,13 @@ if __name__ == '__main__':
     df.loc[dff[hout[0]] == 0, hout[0]] *= vpdpa
 
     # time stepping
-    dsec  = (df.index[1] - df.index[0]).seconds
-    ntday = np.rint(86400 / dsec).astype(np.int)
+    dsec = (df.index[1] - df.index[0]).seconds
+    ntday = np.rint(86400 / dsec).astype(int)
 
-    t02   = ptime.time()
-    strin = ( '[m]: {:.1f}'.format((t02 - t01) / 60.)
-              if (t02 - t01) > 60.
-              else '[s]: {:d}'.format(int(t02 - t01)) )
+    t02 = ptime.time()
+    strin = ('[m]: {:.1f}'.format((t02 - t01) / 60.)
+             if (t02 - t01) > 60.
+             else '[s]: {:d}'.format(int(t02 - t01)))
     print('   in ', strin)
 
     # ----------------------------------------------------------------
@@ -256,10 +258,10 @@ if __name__ == '__main__':
         for ii, hh in enumerate(hout):
             dff.loc[sflag[hh] == 2, hh] = 3
 
-        t12   = ptime.time()
-        strin = ( '[m]: {:.1f}'.format((t12 - t11) / 60.)
-                  if (t12 - t11) > 60.
-                  else '[s]: {:d}'.format(int(t12 - t11)) )
+        t12 = ptime.time()
+        strin = ('[m]: {:.1f}'.format((t12 - t11) / 60.)
+                 if (t12 - t11) > 60.
+                 else '[s]: {:d}'.format(int(t12 - t11)))
         print('   in ', strin)
 
     # ----------------------------------------------------------------
@@ -269,17 +271,16 @@ if __name__ == '__main__':
         print('u* filtering')
         t21 = ptime.time()
         hfilt = ['NEE', 'USTAR', 'TA_']
-        hout  = _findfirststart(hfilt, df.columns)
+        hout = _findfirststart(hfilt, df.columns)
         if len(hout) == 2:  # take FC if NEE not in input file
             hfilt = ['FC', 'USTAR', 'TA_']
-            hout  = _findfirststart(hfilt, df.columns)
+            hout = _findfirststart(hfilt, df.columns)
         estr = 'Could not find CO2 flux (NEE, FC), USTAR or TA in input file.'
         assert len(hout) == 3, estr
         hout = _findfirststart(hfilt, df.columns)
         print('  Using', hout)
         ffsave = dff[hout[0]].to_numpy()
-        iic    = np.where((~isday) & (df[hout[0]] < 0.))[0]
-        dff.loc[iic, hout[0]] = 4
+        dff.loc[(~isday) & (df[hout[0]] < 0.), hout[0]] = 4
         ustars, flag = hf.ustarfilter(df[hout], flag=dff[hout],
                                       isday=isday, undef=undef,
                                       ustarmin=ustarmin, nboot=nboot,
@@ -287,8 +288,8 @@ if __name__ == '__main__':
                                       seasonout=seasonout,
                                       plot=True)
         dff[hout[0]] = ffsave
-        df  = df.assign(USTAR_TEST_1_1_1=flag)
-        dff = dff.assign(USTAR_TEST_1_1_1=np.zeros(df.shape[0], dtype=np.int))
+        df = df.assign(USTAR_TEST_1_1_1=flag)
+        dff = dff.assign(USTAR_TEST_1_1_1=np.zeros(df.shape[0], dtype=int))
         if applyustarflag:
             # assume *_PI variables after raw variables, e.g. LE before LE_PI
             # if available
@@ -299,10 +300,10 @@ if __name__ == '__main__':
             for ii, hh in enumerate(hout):
                 dff.loc[flag == 2, hh] = 5
 
-        t22   = ptime.time()
-        strin = ( '[m]: {:.1f}'.format((t22 - t21) / 60.)
-                  if (t22 - t21) > 60.
-                  else '[s]: {:d}'.format(int(t22 - t21)) )
+        t22 = ptime.time()
+        strin = ('[m]: {:.1f}'.format((t22 - t21) / 60.)
+                 if (t22 - t21) > 60.
+                 else '[s]: {:d}'.format(int(t22 - t21)))
         print('   in ', strin)
 
     # ----------------------------------------------------------------
@@ -312,10 +313,10 @@ if __name__ == '__main__':
         print('Flux partitioning')
         t41 = ptime.time()
         hpart = ['NEE', 'SW_IN', 'TA_', 'VPD']
-        hout  = _findfirststart(hpart, df.columns)
+        hout = _findfirststart(hpart, df.columns)
         if len(hout) == 3:  # take FC if NEE not in input file
             hpart = ['FC', 'SW_IN', 'TA_', 'VPD']
-            hout  = _findfirststart(hpart, df.columns)
+            hout = _findfirststart(hpart, df.columns)
         print('  Using', hout)
         astr = ('Could not find CO2 flux (NEE, FC), SW_IN, TA,'
                 ' or VPD in input file.')
@@ -346,10 +347,10 @@ if __name__ == '__main__':
             for gg in ['GPP', 'RECO']:
                 dff[df[gg + suff + dn] == undef] = 2
 
-        t42   = ptime.time()
-        strin = ( '[m]: {:.1f}'.format((t42 - t41) / 60.)
-                  if (t42 - t41) > 60.
-                  else '[s]: {:d}'.format(int(t42 - t41)) )
+        t42 = ptime.time()
+        strin = ('[m]: {:.1f}'.format((t42 - t41) / 60.)
+                 if (t42 - t41) > 60.
+                 else '[s]: {:d}'.format(int(t42 - t41)))
         print('   in ', strin)
 
     # ----------------------------------------------------------------
@@ -359,7 +360,7 @@ if __name__ == '__main__':
         print('Gap-filling')
         t31 = ptime.time()
         hfill = ['SW_IN', 'TA_', 'VPD']
-        hout  = _findfirststart(hfill, df.columns)
+        hout = _findfirststart(hfill, df.columns)
         assert len(hout) == 3, 'Could not find SW_IN, TA or VPD in input file.'
         # assume *_PI variables after raw variables, e.g. LE before LE_PI
         # if available
@@ -371,7 +372,7 @@ if __name__ == '__main__':
                  'GPP_PI_1_1_2', 'RECO_PI_1_1_2',
                  'SW_IN', 'TA_', 'VPD']
         # hfill = ['NEE', 'SW_IN', 'TA_', 'VPD']
-        hout  = _findfirststart(hfill, df.columns)
+        hout = _findfirststart(hfill, df.columns)
         print('  Using', hout)
         df_f, dff_f = hf.gapfill(df[hout], flag=dff[hout],
                                  sw_dev=sw_dev, ta_dev=ta_dev, vpd_dev=vpd_dev,
@@ -386,13 +387,13 @@ if __name__ == '__main__':
             return '_'.join(c.split('_')[:-3] + ['f'] + c.split('_')[-3:])
         df_f.rename(columns=_add_f,  inplace=True)
         dff_f.rename(columns=_add_f, inplace=True)
-        df  = pd.concat([df,  df_f],  axis=1)
+        df = pd.concat([df,  df_f],  axis=1)
         dff = pd.concat([dff, dff_f], axis=1)
 
-        t32   = ptime.time()
-        strin = ( '[m]: {:.1f}'.format((t32 - t31) / 60.)
-                  if (t32 - t31) > 60.
-                  else '[s]: {:d}'.format(int(t32 - t31)) )
+        t32 = ptime.time()
+        strin = ('[m]: {:.1f}'.format((t32 - t31) / 60.)
+                 if (t32 - t31) > 60.
+                 else '[s]: {:d}'.format(int(t32 - t31)))
         print('   in ', strin)
 
     # ----------------------------------------------------------------
@@ -402,7 +403,7 @@ if __name__ == '__main__':
         print('Flux error estimates')
         t51 = ptime.time()
         hfill = ['SW_IN', 'TA_', 'VPD']
-        hout  = _findfirststart(hfill, df.columns)
+        hout = _findfirststart(hfill, df.columns)
         assert len(hout) == 3, 'Could not find SW_IN, TA or VPD in input file.'
         # assume *_PI variables after raw variables, e.g. LE before LE_PI
         # if available
@@ -437,10 +438,10 @@ if __name__ == '__main__':
         for cc in range(len(colin)):
             dff[colout[cc]] = dff[colin[cc]]
 
-        t52   = ptime.time()
-        strin = ( '[m]: {:.1f}'.format((t52 - t51) / 60.)
-                  if (t52 - t51) > 60.
-                  else '[s]: {:d}'.format(int(t52 - t51)) )
+        t52 = ptime.time()
+        strin = ('[m]: {:.1f}'.format((t52 - t51) / 60.)
+                 if (t52 - t51) > 60.
+                 else '[s]: {:d}'.format(int(t52 - t51)))
         print('   in ', strin)
 
     # ----------------------------------------------------------------
@@ -495,17 +496,17 @@ if __name__ == '__main__':
     df.to_csv(outputfile, sep=sep, na_rep=str(undef), index=True,
               date_format=timeformat)
 
-    t62   = ptime.time()
-    strin = ( '[m]: {:.1f}'.format((t62 - t61) / 60.)
-              if (t62 - t61) > 60.
-              else '[s]: {:d}'.format(int(t62 - t61)) )
+    t62 = ptime.time()
+    strin = ('[m]: {:.1f}'.format((t62 - t61) / 60.)
+             if (t62 - t61) > 60.
+             else '[s]: {:d}'.format(int(t62 - t61)))
     print('   in ', strin)
 
     # ----------------------------------------------------------------
     # Finish
 
-    t2    = ptime.time()
-    strin = ( '[m]: {:.1f}'.format((t2 - t1) / 60.)
-              if (t2 - t1) > 60.
-              else '[s]: {:d}'.format(int(t2 - t1)) )
+    t2 = ptime.time()
+    strin = ('[m]: {:.1f}'.format((t2 - t1) / 60.)
+             if (t2 - t1) > 60.
+             else '[s]: {:d}'.format(int(t2 - t1)))
     print('Time elapsed', strin)

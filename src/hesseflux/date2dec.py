@@ -159,7 +159,7 @@ def date2dec(calendar = 'standard', units=None,
     List input is only supported up to 2 dimensions.
 
     Requires `netcdftime.py` from module `netcdftime` available at:
-    http://netcdf4-python.googlecode.com
+    https://netcdf4-python.googlecode.com
 
     Examples
     --------
