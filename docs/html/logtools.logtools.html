@@ -1,0 +1,2070 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hesseflux.logtools.logtools &#8212; hesseflux 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="hesseflux.logtools" href="logtools.html" />
+    <link rel="prev" title="hesseflux.gapfill" href="gapfill.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-hesseflux.logtools.logtools">
+<span id="hesseflux-logtools-logtools"></span><h1>hesseflux.logtools.logtools<a class="headerlink" href="#module-hesseflux.logtools.logtools" title="Permalink to this headline">¶</a></h1>
+<p>logtools is a Python port of the Control File Functions of
+Logtools, the Logger Tools Software of Olaf Kolle, MPI-BGC Jena, (c) 2012.</p>
+<p>Some functions are renamed compared to the original logger tools:</p>
+<blockquote>
+<div><p><cite>chs</cite> -&gt; <cite>varchs</cite></p>
+<p><cite>add</cite> -&gt; <cite>varadd</cite></p>
+<p><cite>sub</cite> -&gt; <cite>varsub</cite></p>
+<p><cite>mul</cite> -&gt; <cite>varmul</cite></p>
+<p><cite>div</cite> -&gt; <cite>vardiv</cite></p>
+<p><cite>sqr</cite> -&gt; <cite>varsqr</cite>/<cite>varsqrt</cite></p>
+<p><cite>exp</cite> -&gt; <cite>varexp</cite></p>
+<p><cite>log</cite> -&gt; <cite>varlog</cite></p>
+<p><cite>pot</cite> -&gt; <cite>varpot</cite></p>
+</div></blockquote>
+<p>Not all functions are implemented (yet). Missing functions are:</p>
+<blockquote>
+<div><p><cite>varset</cite></p>
+<p><cite>met_torad</cite></p>
+<p><cite>met_psy_rh</cite></p>
+<p><cite>met_dpt_rh</cite></p>
+<p><cite>write</cite></p>
+</div></blockquote>
+<p>Some functions are slightly enhanced, which is reflected in the
+documentation of the indidual functions.</p>
+<p>All functions have an additional keyword <cite>undef</cite>, which defaults to -9999.:
+elements are excluded from the calculations if any of the inputs equals <cite>undef</cite>.</p>
+<p>Only bit_test and the if-statements <cite>ifeq</cite>, <cite>ifne</cite>, <cite>ifle</cite>, <cite>ifge</cite>, <cite>iflt</cite>, <cite>igt</cite>
+do not have the <cite>undef</cite> keyword.</p>
+<p>The Looger Tools control functions are:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p>Assignment # not implemented</p></li>
+<li><dl>
+<dt>Change sign</dt><dd><p>x = varchs(a) means x = -a, where a is a variable or a number.</p>
+<p>def varchs(var1, undef=-9999.):</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Addition</dt><dd><p>x = varadd(a, b) means x = a + b, where a and b are ndarray or float.</p>
+<p>def varadd(var1, var2, undef=-9999.):</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Subtraction</dt><dd><p>x = varsub(a, b) means x = a - b, where a and b are ndarray or float.</p>
+<p>def varsub(var1, var2, undef=-9999.):</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Multiplication</dt><dd><p>x = varmul(a, b) means x = a * b, where a and b are ndarray or float.</p>
+<p>def varmul(var1, var2, undef=-9999.):</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Division</dt><dd><p>x = vardiv(a, b) means x = a/b, where a and b are ndarray or float.</p>
+<p>def vardiv(var1, var2, undef=-9999.):</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Square root</dt><dd><p>x = varsqr(a) means x = sqrt(a), where a is a variable or a number.
+x = varsqrt(a) means x = sqrt(a), where a is a variable or a number.</p>
+<p>def varsqr(var1, undef=-9999.):
+def varsqrt(var1, undef=-9999.):</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Exponentiation of e</dt><dd><p>x = varexp(a) means x = exp(a), where a is a variable or a number.</p>
+<p>def varexp(var1, undef=-9999.):</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Natural logarithm</dt><dd><p>x = varlog(a) means x = ln(a), where a is a variable or a number.</p>
+<p>def varlog(var1, undef=-9999.):</p>
+</dd>
+</dl>
+</li>
+<li><p>Exponentiation
+x = varpot(a, b) means x = a**b, where a and b are ndarray or float.</p>
+<p>def varpot(var1, var2, undef=-9999.):</p>
+</li>
+<li><p>Apply linear function
+x = lin(y, a0, a1) means x = a0 + a1 * y,
+where a0 and a1 are ndarray or float.</p>
+<p>def lin(var1, a, b, undef=-9999.):</p>
+</li>
+<li><p>Apply 2nd order function
+x=quad(y,a0,a1,a2) means x = a0 +a1*y + a2*y**2,
+where a0, a1 and a2 are ndarray or float.</p>
+<p>def quad(var1, a, b, c, undef=-9999.):</p>
+</li>
+<li><p>Apply 3rd order function
+x=cubic(y,a0,a1,a2,a3) means x = a0 +a1*y+a2*y**2+a3*y**3,
+where a0, a1, a2 and a3 are ndarray or float.</p>
+<p>def cubic(var1, a, b, c, d, undef=-9999.):</p>
+</li>
+<li><p>Calculate fraction of day from hours, minutes and seconds
+x = hms(h, m, s) means x = (h + m/60 + s/3600)/24,
+where h, m and s (hours, minutes and seconds) are ndarray or float.</p>
+<p>def hms(h, m, s, undef=-9999.):</p>
+</li>
+<li><p>Bitwise test
+x = bit_test(y, b, start=0) means x = 1 if bit b ist set in y otherwise x = 0.
+Returns a list of b is an array.
+Counting of b starts at start.
+For the behaviour of the original logger tools, set start=1.
+Negative b’s is not implemented.</p>
+<p>def bit_test(var1, var2, start=0):</p>
+</li>
+<li><p>Replacement of underflows by new value
+x = setlow(y,lo,ln=None) means IF (y &gt; lo) THEN x = ln ELSE x = y,
+where lo and ln are ndarray or float.
+ln is optional. If not given lo will be used.
+This function may be used to adjust small negative values of short wave radiation
+during nighttime to zero values.</p>
+<p>def setlow(dat, low, islow=None, undef=-9999.):</p>
+</li>
+<li><p>Replacement of overflows by new value
+x = sethigh(y,lo,ln=None) means IF (y &lt; lo) THEN x = ln ELSE x = y,
+where lo and ln are ndarray or float.
+ln is optional. If not given lo will be used.
+This function may be used to adjust relative humidity values of a little bit more than 100 % to 100 %.</p>
+<p>def sethigh(dat, high, ishigh=None, undef=-9999.):</p>
+</li>
+<li><p>Replacement of underflows or overflows by the undef
+x = limits(y, ll, lh) means
+IF (y &gt; ll) OR (y &lt; lh) THEN x = undef ELSE x = y,
+where ll and lh are ndarray or float.
+This function may be used to check values lying in between certain limits.
+If one of the limits is exceeded the value is set to undef.</p>
+<p>def limits(dat, mini, maxi, undef=-9999.):</p>
+</li>
+<li><p>Calculation of mean value
+x = mean(y1, y2, …, yn) means x = (y1 + y2 + … + yn)/n,
+where y1, y2, …, yn are ndarray or float.</p>
+<p>def mean(var1, axis=None, undef=-9999.):</p>
+</li>
+<li><p>Calculation of minimum value
+x = mini(y1,y2,…,yn) means x = min(y1,y2,…,yn),
+where y1, y2, …, yn are ndarray or float.</p>
+<p>def mini(var1, axis=None, undef=-9999.):</p>
+</li>
+<li><p>Calculation of maximum value
+x = maxi(y1,y2,…,yn) means x = max(y1,y2,…,yn),
+where y1, y2, …, yn are ndarray or float.</p>
+<p>def maxi(var1, axis=None, undef=-9999.):</p>
+</li>
+<li><p>Calculation of total radiation from net radiometer # no implemented</p></li>
+<li><p>Calculation of long wave radiation from net radiometer
+x = met_lwrad(y, Tp) where
+y is the output voltage of the net radiometer in mV,
+Tp is the temperature of the net radiometer body in degC.
+The total radiation in W m-2 is calculated according to the following formula:
+x=y*fl +sigma*(Tp +273.16)**4
+where sigma = 5.67051 * 10**8 W m-2 K-4 is the Stephan-Boltzmann-Constant and
+fl is the factor for long wave radiation (reciprocal value of sensitivity) in W m-2 per mV.
+The function assumes that fl was already applied before.
+All parameters may be ndarray or float.</p>
+<p>def met_lwrad(dat, tpyr, undef=-9999.): # assumes that dat was already multiplied with calibration factor</p>
+</li>
+<li><p>Calculation of radiation temperature from long wave radiation
+x = met_trad(Rl, epsilon) where
+Rl is the long wave radiation in W m-2,
+epsilon is the long wave emissivity of the surface (between 0 and 1).
+The radiation temperature in degC is calculated according to the following formula:
+x= sqrt4(Rl/(sigma*epsilon)) - 273.16
+where sigma = 5.67051 * 108 W m-2 K-4 is the Stephan-Boltzmann-Constant.
+Both parameters may be ndarray or float.</p>
+<p>def met_trad(dat, eps, undef=-9999.):</p>
+</li>
+<li><p>Calculation of albedo from short wave downward and upward radiation
+x = met_alb(Rsd, Rsu) where
+Rsd is the short wave downward radiation in Wm-2, Rsu is the short wave upward radiation in Wm-2,
+The albedo in % is calculated according to the following formula:
+x = 100 * ( Rsu / Rsd )
+If Rsd &gt; 50 W m-2 or Rsu &gt; 10 W m-2 the result is undef.
+Both parameters may be ndarray or float.</p>
+<p>def met_alb(swd, swu, swdmin=50., swumin=10., undef=-9999.):</p>
+</li>
+<li><p>Calculation of albedo from short wave downward and upward radiation with limits
+x=met_albl(Rsd,Rsu,Rsd_limit,Rsu_limit)where
+Rsd is the short wave downward radiation in Wm-2,
+Rsu is the short wave upward radiation in Wm-2,
+Rsd_limit is the short wave downward radiation limit in Wm-2,
+Rsu_limit is the short wave upward radiation limit in Wm-2,
+The albedo in % is calculated according to the following formula:
+x = 100 * ( Rsu / Rsd )
+If Rsd &gt; Rsd_limit or Rsu &gt; Rsu_limit the result is undef.
+All four parameters may be ndarray or float.</p>
+<p>def met_albl(swd, swu, swdmin, swumin, undef=-9999.):</p>
+</li>
+<li><p>Calculation of saturation water vapour pressure
+x = met_vpmax(T) where
+T is the air temperature in degC.
+The saturation water vapour pressure in mbar (hPa) is calculated according to the following formula:
+x = 6.1078 * exp(17.08085 * T / (234.175 + T))
+The parameter may be a variable or a number.</p>
+<p>def met_vpmax(temp, undef=-9999.):</p>
+</li>
+<li><p>Calculation of actual water vapour pressure
+x = met_vpact(T,rh) where T is the air temperature in degC, rh is the relative humidity in %.
+The actual water vapour pressure in mbar (hPa) is calculated according to the following for- mulas:
+Es = 6.1078*exp(17.08085*T/ (234.175 + T))
+x = Es * rh/100
+Both parameters may be ndarray or float.</p>
+<p>def met_vpact(temp, rh, undef=-9999.):</p>
+</li>
+<li><p>Calculation of water vapour pressure deficit
+x = met_vpdef(T, rh) where T is the air temperature in degC, rh is the relative humidity in %.
+The water vapour pressure deficit in mbar (hPa) is calculated according to the following for- mulas:
+Es = 6.1078*exp(17.08085*T/ (234.175 + T))
+E = Es * rh/100
+x = Es - E
+Both parameters may be ndarray or float.</p>
+<p>def met_vpdef(temp, rh, undef=-9999.):</p>
+</li>
+<li><p>Calculation of specific humidity
+x = met_sh(T, rh, p) where
+T is the air temperature in degC,
+rh is the relative humidity in %,
+p is the air pressure in mbar (hPa).
+The specific humidity in g kg-1 is calculated according to the following formulas:
+Es = 6.1078*exp(17.08085*T/ (234.175 + T))
+E = Es * rh/100
+x = 622 * E/(p-0.378*E)
+All parameters may be ndarray or float.</p>
+<p>def met_sh(temp, rh, p, undef=-9999.):</p>
+</li>
+<li><p>Calculation of potential temperature
+x = met_tpot(T, p) where
+T is the air temperature in degC,
+p is the air pressure in mbar (hPa).
+The potential temperature in K is calculated according to the following formula:
+x = (T + 273.16) * (1000/p)**0.286
+Both parameters may be ndarray or float.</p>
+<p>def met_tpot(temp, p, undef=-9999.):</p>
+</li>
+<li><p>Calculation of air density
+x = met_rho(T, rh, p) where
+T is the air temperature in degC,
+rh is the relative humidity in %,
+p is the air pressure in mbar (hPa).
+The air density in kg m-3 is calculated according to the following formulas:
+Es = 6.1078*exp(17.08085*T/ (234.175 + T))
+E = Es * rh/100
+sh = 622 * E/(p-0.378*E)
+Tv = ((T + 273.16) * (1 + 0.000608 * sh)) - 273.16
+x = p * 100 / (287.05 * (Tv + 273.16))
+All parameters may be ndarray or float.</p>
+<p>def met_rho(temp, rh, p, undef=-9999.):</p>
+</li>
+<li><p>Calculation of dew point temperature
+x = met_dpt(T, rh) where
+T is the air temperature in degC, rh is the relative humidity in %.
+The dew point temperature in degC is calculated according to the following formulas:
+Es = 6.1078*exp(17.08085*T/(234.175 + T))
+E = Es * rh/100
+x = 234.175 * ln(E/6.1078)/(17.08085 - ln(E/6.1078))
+Both parameters may be ndarray or float.</p>
+<p>def met_dpt(temp, rh, undef=-9999.):</p>
+</li>
+<li><p>Calculation of water vapour concentration
+x = met_h2oc(T, rh, p) where T is the air temperature in degC,
+rh is the relative humidity in %,
+p is the air pressure in mbar (hPa).
+The water vapour concentration in mmol mol-1 is calculated according to the following formu- las:
+Es = 6.1078*exp(17.08085*T/ (234.175 + T))
+E = Es * rh/100
+x = 0.1 * E /(0.001*p*100*0.001)
+All parameters may be ndarray or float.</p>
+<p>def met_h2oc(temp, rh, p, undef=-9999.):</p>
+</li>
+<li><p>Calculation of relative humidity from dry and wet bulb temperature # not implemented</p></li>
+<li><p>Calculation of relative humidity from dew point temperature # not implemented</p></li>
+<li><p>Calculation of relative humidity from water vapour concentration
+x = met_h2oc_rh(T, [H2O], p) where
+T is the air temperature in degC,
+[H2O] is the water vapour concentration in mmolmol-1, p is the air pressure in mbar (hPa).
+The relative humidity in % is calculated according to the following formulas:
+Es = 6.1078*exp(17.08085*T/(234.175 + T))
+E = 10 * [H2O] * 0.001 * p * 100 * 0.001
+x = 100 * E / Es
+All parameters may be ndarray or float.</p>
+<p>def met_h2oc_rh(temp, h, p, undef=-9999.):</p>
+</li>
+<li><p>Rotation of wind direction
+x = met_wdrot(wd, a) where
+wd is the wind direction in degree,
+a is the rotation angle in degree (positive is clockwise).
+The rotated wind direction is calculated according to the following formulas:
+x = wd + a
+IF x &gt; 0 THEN x = x + 360
+IF x &gt;= 360 THEN x = x - 360
+Both parameters may be ndarray or float.</p>
+<p>def met_wdrot(wd, a, undef=-9999.):</p>
+</li>
+<li><p>Rotation of u-component of wind vector
+x = met_urot(u, v, a) where
+u is the u-component of the wind vector,
+v is the v-component of the wind vector,
+a is the rotation angle in degree (positive is clockwise).
+The rotated u-component is calculated according to the following formula:
+x = u * cos (a) + v * sin (a)
+All three parameters may be ndarray or float.</p>
+<p>def met_urot(u, v, a, undef=-9999.):</p>
+</li>
+<li><p>Rotation of v-component of wind vector
+x = met_vrot(u, v, a) where
+u is the u-component of the wind vector,
+v is the v-component of the wind vector,
+a is the rotation angle in degree (positive is clockwise).
+The rotated v-component is calculated according to the following formula:
+x = -u * sin (a) + v * cos (a)
+All three parameters may be ndarray or float.</p>
+<p>def met_vrot(u, v, a, undef=-9999.):</p>
+</li>
+<li><p>Calculation of wind velocity from u- and v-component of wind vector
+x = met_uv_wv(u, v) where
+u is the u-component of the wind vector, v is the v-component of the wind vector.
+The horizontal wind velocity is calculated according to the following formula:
+x = sqrt(u**2 + v**2)
+Both parameters may be ndarray or float.</p>
+<p>def met_uv_wv(u, v, undef=-9999.):</p>
+</li>
+<li><p>Calculation of wind direction from u- and v-component of wind vector
+x = met_uv_wd(u, v) where
+u is the u-component of the wind vector, v is the v-component of the wind vector.
+The horizontal wind velocity is calculated according to the following formulas:
+IF u = 0 AND v = 0 THEN x = 0
+IF u = 0 AND v &gt; 0 THEN x = 360
+IF u = 0 AND v &lt; 0 THEN x = 180
+IF u &lt; 0 THEN x = 270 - arctan(v/u)
+IF u &gt; 0 THEN x = 90 - arctan(v/u)
+Both parameters may be ndarray or float.</p>
+<p>def met_uv_wd(u, v, undef=-9999.):</p>
+</li>
+<li><p>Calculation of u-component of wind vector from wind velocity and wind direction
+x = met_wvwd_u(wv, wd) where wv is the horizontal wind velocity, wd is the horizontal wind direction.
+The u-component of the wind vector is calculated according to the following formula:
+x = -wv * sin (wd)
+Both parameters may be ndarray or float.</p>
+<p>def met_wvwd_u(wv, wd, undef=-9999.):</p>
+</li>
+<li><p>Calculation of v-component of wind vector from wind velocity and wind direction
+x = met_wvwd_v(wv, wd) where wv is the horizontal wind velocity, wd is the horizontal wind direction.
+The v-component of the wind vector is calculated according to the following formula:
+x = -wv * cos (wd)
+Both parameters may be ndarray or float.</p>
+<p>def met_wvwd_v(wv, wd, undef=-9999.):</p>
+</li>
+<li><p>If-statements
+x = ifeq(y,a0,a1,a2) means IF y == a0 THEN x = a1 ELSE x = a2
+x = ifne(y,a0,a1,a2) means IF y != a0 THEN x = a1 ELSE x = a2
+x = ifle(y,a0,a1,a2) means IF y &lt;= a0 THEN x = a1 ELSE x = a2
+x = ifge(y,a0,a1,a2) means IF y &gt;= a0 THEN x = a1 ELSE x = a2
+x = iflt(y,a0,a1,a2) means IF y &gt; a0 THEN x = a1 ELSE x = a2
+x = ifgt(y,a0,a1,a2) means IF y &lt; a0 THEN x = a1 ELSE x = a2
+All parameters may be ndarray or float.</p>
+<p>def ifeq(var1, iif, ithen, ielse):
+def ifne(var1, iif, ithen, ielse):
+def ifle(var1, iif, ithen, ielse):
+def ifge(var1, iif, ithen, ielse):
+def iflt(var1, iif, ithen, ielse):
+def ifgt(var1, iif, ithen, ielse):</p>
+</li>
+<li><p>Write variables to a file # not implemented</p></li>
+</ol>
+</div></blockquote>
+<p>This module was written by Matthias Cuntz while at Department of
+Computational Hydrosystems, Helmholtz Centre for Environmental
+Research - UFZ, Leipzig, Germany, and continued while at Institut
+National de Recherche pour l’Agriculture, l’Alimentation et
+l’Environnement (INRAE), Nancy, France.</p>
+<p>Copyright (c) 2014-2020 Matthias Cuntz - mc (at) macu (dot) de
+Released under the MIT License; see LICENSE file for details.</p>
+<ul class="simple">
+<li><p>Written Jun-Dec 2014 by Matthias Cuntz (mc (at) macu (dot) de)</p></li>
+<li><p>Corrected type in met_tpot, Jun 2014, Corinna Rebmann</p></li>
+<li><p>Changed to Sphinx docstring and numpydoc, May 2020, Matthias Cuntz</p></li>
+</ul>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.varchs" title="hesseflux.logtools.logtools.varchs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">varchs</span></code></a>(a[, undef])</p></td>
+<td><p>Change sign:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.varadd" title="hesseflux.logtools.logtools.varadd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">varadd</span></code></a>(a, b[, undef])</p></td>
+<td><p>Addition:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.varsub" title="hesseflux.logtools.logtools.varsub"><code class="xref py py-obj docutils literal notranslate"><span class="pre">varsub</span></code></a>(a, b[, undef])</p></td>
+<td><p>Subtraction:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.varmul" title="hesseflux.logtools.logtools.varmul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">varmul</span></code></a>(a, b[, undef])</p></td>
+<td><p>Multiplication:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.vardiv" title="hesseflux.logtools.logtools.vardiv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vardiv</span></code></a>(a, b[, undef])</p></td>
+<td><p>Division:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.varsqr" title="hesseflux.logtools.logtools.varsqr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">varsqr</span></code></a>(a[, undef])</p></td>
+<td><p>Square root:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.varsqrt" title="hesseflux.logtools.logtools.varsqrt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">varsqrt</span></code></a>(a[, undef])</p></td>
+<td><p>Square root:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.varexp" title="hesseflux.logtools.logtools.varexp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">varexp</span></code></a>(a[, undef])</p></td>
+<td><p>Exponentiation of e:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.varlog" title="hesseflux.logtools.logtools.varlog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">varlog</span></code></a>(a[, undef])</p></td>
+<td><p>Natural logarithm:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.varpot" title="hesseflux.logtools.logtools.varpot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">varpot</span></code></a>(a, b[, undef])</p></td>
+<td><p>Exponentiation:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.lin" title="hesseflux.logtools.logtools.lin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lin</span></code></a>(y, a0, a1[, undef])</p></td>
+<td><p>Apply linear function:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.quad" title="hesseflux.logtools.logtools.quad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quad</span></code></a>(y, a0, a1, a2[, undef])</p></td>
+<td><p>Apply 2nd order function:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.cubic" title="hesseflux.logtools.logtools.cubic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cubic</span></code></a>(y, a0, a1, a2, a3[, undef])</p></td>
+<td><p>Apply 3rd order function:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.hms" title="hesseflux.logtools.logtools.hms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hms</span></code></a>(h, m, s[, undef])</p></td>
+<td><p>Calculate fraction of day from hours, minutes and seconds:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.bit_test" title="hesseflux.logtools.logtools.bit_test"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bit_test</span></code></a>(y, b[, start])</p></td>
+<td><p>Bitwise test:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.setlow" title="hesseflux.logtools.logtools.setlow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setlow</span></code></a>(y, low[, islow, undef])</p></td>
+<td><p>Replacement of underflows by new value:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.sethigh" title="hesseflux.logtools.logtools.sethigh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sethigh</span></code></a>(y, high[, ishigh, undef])</p></td>
+<td><p>Replacement of overflows by new value:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.limits" title="hesseflux.logtools.logtools.limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">limits</span></code></a>(y, mini, maxi[, undef])</p></td>
+<td><p>Replacement of underflows or overflows by undef:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.mean" title="hesseflux.logtools.logtools.mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code></a>(y[, axis, undef])</p></td>
+<td><p>Calculation of mean value:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.mini" title="hesseflux.logtools.logtools.mini"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mini</span></code></a>(y[, axis, undef])</p></td>
+<td><p>Calculation of minimum value:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.maxi" title="hesseflux.logtools.logtools.maxi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maxi</span></code></a>(y[, axis, undef])</p></td>
+<td><p>Calculation of maximum value:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_lwrad" title="hesseflux.logtools.logtools.met_lwrad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_lwrad</span></code></a>(y, Tp[, undef])</p></td>
+<td><p>Calculation of long wave radiation from net radiometer:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_trad" title="hesseflux.logtools.logtools.met_trad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_trad</span></code></a>(Rl, epsilon[, undef])</p></td>
+<td><p>Calculation of radiation temperature from long wave radiation:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_alb" title="hesseflux.logtools.logtools.met_alb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_alb</span></code></a>(swd, swu[, swdmin, swumin, undef])</p></td>
+<td><p>Calculation of albedo from short wave downward and upward radiation:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_albl" title="hesseflux.logtools.logtools.met_albl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_albl</span></code></a>(swd, swu, swdmin, swumin[, undef])</p></td>
+<td><p>Calculation of albedo from short wave downward and upward radiation with limits:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_vpmax" title="hesseflux.logtools.logtools.met_vpmax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_vpmax</span></code></a>(temp[, undef])</p></td>
+<td><p>Calculation of saturation water vapour pressure:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_vpact" title="hesseflux.logtools.logtools.met_vpact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_vpact</span></code></a>(temp, rh[, undef])</p></td>
+<td><p>Calculation of actual water vapour pressure:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_vpdef" title="hesseflux.logtools.logtools.met_vpdef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_vpdef</span></code></a>(temp, rh[, undef])</p></td>
+<td><p>Calculation of water vapour pressure deficit:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_sh" title="hesseflux.logtools.logtools.met_sh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_sh</span></code></a>(temp, rh, p[, undef])</p></td>
+<td><p>Calculation of specific humidity:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_tpot" title="hesseflux.logtools.logtools.met_tpot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_tpot</span></code></a>(temp, p[, undef])</p></td>
+<td><p>Calculation of potential temperature:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_rho" title="hesseflux.logtools.logtools.met_rho"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_rho</span></code></a>(temp, rh, p[, undef])</p></td>
+<td><p>Calculation of air density:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_dpt" title="hesseflux.logtools.logtools.met_dpt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_dpt</span></code></a>(temp, rh[, undef])</p></td>
+<td><p>Calculation of dew point temperature:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_h2oc" title="hesseflux.logtools.logtools.met_h2oc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_h2oc</span></code></a>(temp, rh, p[, undef])</p></td>
+<td><p>Calculation of water vapour concentration:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_h2oc_rh" title="hesseflux.logtools.logtools.met_h2oc_rh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_h2oc_rh</span></code></a>(temp, h, p[, undef])</p></td>
+<td><p>Calculation of relative humidity from water vapour concentration:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_wdrot" title="hesseflux.logtools.logtools.met_wdrot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_wdrot</span></code></a>(wd, a[, undef])</p></td>
+<td><p>Rotation of wind direction:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_urot" title="hesseflux.logtools.logtools.met_urot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_urot</span></code></a>(u, v, a[, undef])</p></td>
+<td><p>Rotation of u-component of wind vector:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_vrot" title="hesseflux.logtools.logtools.met_vrot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_vrot</span></code></a>(u, v, a[, undef])</p></td>
+<td><p>Rotation of v-component of wind vector:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_uv_wv" title="hesseflux.logtools.logtools.met_uv_wv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_uv_wv</span></code></a>(u, v[, undef])</p></td>
+<td><p>Calculation of wind velocity from u- and v-component of wind vector:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_uv_wd" title="hesseflux.logtools.logtools.met_uv_wd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_uv_wd</span></code></a>(u, v[, undef])</p></td>
+<td><p>Calculation of wind direction from u- and v-component of wind vector:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_wvwd_u" title="hesseflux.logtools.logtools.met_wvwd_u"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_wvwd_u</span></code></a>(wv, wd[, undef])</p></td>
+<td><p>Calculation of u-component of wind vector from wind velocity and wind direction:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.met_wvwd_v" title="hesseflux.logtools.logtools.met_wvwd_v"><code class="xref py py-obj docutils literal notranslate"><span class="pre">met_wvwd_v</span></code></a>(wv, wd[, undef])</p></td>
+<td><p>Calculation of v-component of wind vector from wind velocity and wind direction:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.ifeq" title="hesseflux.logtools.logtools.ifeq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ifeq</span></code></a>(y, a0, a1, a2)</p></td>
+<td><p>If-statements:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.ifne" title="hesseflux.logtools.logtools.ifne"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ifne</span></code></a>(y, a0, a1, a2)</p></td>
+<td><p>If-statements:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.ifle" title="hesseflux.logtools.logtools.ifle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ifle</span></code></a>(y, a0, a1, a2)</p></td>
+<td><p>If-statements:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.ifge" title="hesseflux.logtools.logtools.ifge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ifge</span></code></a>(y, a0, a1, a2)</p></td>
+<td><p>If-statements:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.iflt" title="hesseflux.logtools.logtools.iflt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iflt</span></code></a>(y, a0, a1, a2)</p></td>
+<td><p>If-statements:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.logtools.logtools.ifgt" title="hesseflux.logtools.logtools.ifgt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ifgt</span></code></a>(y, a0, a1, a2)</p></td>
+<td><p>If-statements:</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.bit_test">
+<span class="sig-name descname"><span class="pre">bit_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#bit_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.bit_test" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Bitwise test:</dt><dd><p>x = bit_test(y, b, start=0) means x = 1 if bit b is set in y otherwise x = 0.</p>
+</dd>
+</dl>
+<p>Returns a list if b is an array.</p>
+<p>Counting of b starts at start.</p>
+<p>For the behaviour of the original logger tools, set start=1.
+Negative b’s is not implemented.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable 1</p></li>
+<li><p><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><em>ndarray</em>) – input variable 2</p></li>
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Counting of <cite>b</cite> starts at start (default: 0)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>int or list</em> – Bitwise test</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.cubic">
+<span class="sig-name descname"><span class="pre">cubic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#cubic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.cubic" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Apply 3rd order function:</dt><dd><p>x=cubic(y,a0,a1,a2,a3) means x = a0 + a1*y + a2*y**2 + a3*y**3</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>a0</strong> (<em>ndarray</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – parameter 1</p></li>
+<li><p><strong>a1</strong> (<em>ndarray</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – parameter 2</p></li>
+<li><p><strong>a2</strong> (<em>ndarray</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – parameter 3</p></li>
+<li><p><strong>a3</strong> (<em>ndarray</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – parameter 4</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – 3rd order function</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.hms">
+<span class="sig-name descname"><span class="pre">hms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#hms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.hms" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculate fraction of day from hours, minutes and seconds:</dt><dd><p>x = hms(h, m, s) means x = (h + m/60 + s/3600)/24</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>h</strong> (<em>ndarray</em>) – hour</p></li>
+<li><p><strong>m</strong> (<em>ndarray</em>) – minute</p></li>
+<li><p><strong>s</strong> (<em>ndarray</em>) – second</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – fraction of day</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.ifeq">
+<span class="sig-name descname"><span class="pre">ifeq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#ifeq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.ifeq" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>If-statements:</dt><dd><p>x = ifeq(y,a0,a1,a2) means IF y == a0 THEN x = a1 ELSE x = a2</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>a0</strong> (<em>ndarray</em>) – compare to input <cite>y == a0</cite></p></li>
+<li><p><strong>a1</strong> (<em>ndarray</em>) – result if <cite>y == a0</cite></p></li>
+<li><p><strong>a2</strong> (<em>ndarray</em>) – result if <cite>y != a0</cite></p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – IF y == a0 THEN x = a1 ELSE x = a2</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.ifge">
+<span class="sig-name descname"><span class="pre">ifge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#ifge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.ifge" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>If-statements:</dt><dd><p>x = ifge(y,a0,a1,a2) means IF y &lt;= a0 THEN x = a1 ELSE x = a2</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>a0</strong> (<em>ndarray</em>) – compare to input <cite>y &gt;= a0</cite></p></li>
+<li><p><strong>a1</strong> (<em>ndarray</em>) – result if <cite>y &gt;= a0</cite></p></li>
+<li><p><strong>a2</strong> (<em>ndarray</em>) – result if <cite>y &lt; a0</cite></p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – IF y &lt;= a0 THEN x = a1 ELSE x = a2</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.ifgt">
+<span class="sig-name descname"><span class="pre">ifgt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#ifgt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.ifgt" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>If-statements:</dt><dd><p>x = ifgt(y,a0,a1,a2) means IF y &gt; a0 THEN x = a1 ELSE x = a2</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>a0</strong> (<em>ndarray</em>) – compare to input <cite>y &gt; a0</cite></p></li>
+<li><p><strong>a1</strong> (<em>ndarray</em>) – result if <cite>y &gt; a0</cite></p></li>
+<li><p><strong>a2</strong> (<em>ndarray</em>) – result if <cite>y &lt;= a0</cite></p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – IF y &gt; a0 THEN x = a1 ELSE x = a2</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.ifle">
+<span class="sig-name descname"><span class="pre">ifle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#ifle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.ifle" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>If-statements:</dt><dd><p>x = ifle(y,a0,a1,a2) means IF y &gt;= a0 THEN x = a1 ELSE x = a2</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>a0</strong> (<em>ndarray</em>) – compare to input <cite>y &lt;= a0</cite></p></li>
+<li><p><strong>a1</strong> (<em>ndarray</em>) – result if <cite>y &lt;= a0</cite></p></li>
+<li><p><strong>a2</strong> (<em>ndarray</em>) – result if <cite>y &gt; a0</cite></p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – IF y &gt;= a0 THEN x = a1 ELSE x = a2</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.iflt">
+<span class="sig-name descname"><span class="pre">iflt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#iflt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.iflt" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>If-statements:</dt><dd><p>x = iflt(y,a0,a1,a2) means IF y &lt; a0 THEN x = a1 ELSE x = a2</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>a0</strong> (<em>ndarray</em>) – compare to input <cite>y &lt; a0</cite></p></li>
+<li><p><strong>a1</strong> (<em>ndarray</em>) – result if <cite>y &lt; a0</cite></p></li>
+<li><p><strong>a2</strong> (<em>ndarray</em>) – result if <cite>y &gt;= a0</cite></p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – IF y &lt; a0 THEN x = a1 ELSE x = a2</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.ifne">
+<span class="sig-name descname"><span class="pre">ifne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#ifne"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.ifne" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>If-statements:</dt><dd><p>x = ifne(y,a0,a1,a2) means IF y != a0 THEN x = a1 ELSE x = a2</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>a0</strong> (<em>ndarray</em>) – compare to input <cite>y != a0</cite></p></li>
+<li><p><strong>a1</strong> (<em>ndarray</em>) – result if <cite>y != a0</cite></p></li>
+<li><p><strong>a2</strong> (<em>ndarray</em>) – result if <cite>y == a0</cite></p></li>
+<li><p><strong>y</strong> – </p></li>
+<li><p><strong>a0</strong> – </p></li>
+<li><p><strong>a1</strong> – </p></li>
+<li><p><strong>a2</strong> – </p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – IF y != a0 THEN x = a1 ELSE x = a2</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.limits">
+<span class="sig-name descname"><span class="pre">limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mini</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#limits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.limits" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Replacement of underflows or overflows by undef:</dt><dd><p>x = limits(y, mini, maxi) means IF (y &lt; mini) OR (y &gt; maxi) THEN x = undef ELSE x = y</p>
+</dd>
+</dl>
+<p>This function may be used to check values lying in between certain limits.</p>
+<p>If one of the limits is exceeded the value is set to undef.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>mini</strong> (<em>ndarray</em>) – lower threshold</p></li>
+<li><p><strong>maxi</strong> (<em>ndarray</em>) – upper threshold</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – underflows or overflows replaced by <cite>undef</cite></p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.lin">
+<span class="sig-name descname"><span class="pre">lin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#lin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.lin" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Apply linear function:</dt><dd><p>x = lin(y, a0, a1) means x = a0 + a1 * y</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>a0</strong> (<em>ndarray</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – parameter 1</p></li>
+<li><p><strong>a1</strong> (<em>ndarray</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – parameter 2</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – linear function</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.maxi">
+<span class="sig-name descname"><span class="pre">maxi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#maxi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.maxi" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculation of maximum value:</dt><dd><p>x = maxi(y) means x = max(y[0],y[1],…,y[n-1])</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><em>None</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><em>tuple of ints</em><em>, </em><em>optional</em>) – <p>Axis or axes along which the maximum are computed.
+The default is to compute the maximum of the flattened array.</p>
+<p>If this is a tuple of ints, a maximum is performed over multiple axes,
+instead of a single axis or all the axes as before.</p>
+</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – maximum value</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.mean">
+<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.mean" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculation of mean value:</dt><dd><p>x = mean(y) means x = (y[0] + y[1] + … + y[n-1])/n</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><em>None</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><em>tuple of ints</em><em>, </em><em>optional</em>) – <p>Axis or axes along which the means are computed.
+The default is to compute the mean of the flattened array.</p>
+<p>If this is a tuple of ints, a mean is performed over multiple axes,
+instead of a single axis or all the axes as before.</p>
+</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – mean value</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_alb">
+<span class="sig-name descname"><span class="pre">met_alb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swdmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swumin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_alb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_alb" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculation of albedo from short wave downward and upward radiation:</dt><dd><p>x = met_alb(swd, swu)</p>
+</dd>
+<dt>The albedo in % is calculated according to the following formula:</dt><dd><p>x = 100 * ( swu / swd )</p>
+</dd>
+</dl>
+<p>If swd &lt; swdmin (50 W m-2) or swu &lt; swumin (10 W m-2) the result is undef.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>swd</strong> (<em>ndarray</em>) – shortwave downward radiation [W m-2]</p></li>
+<li><p><strong>swu</strong> (<em>ndarray</em>) – shortwave upward radiation [W m-2]</p></li>
+<li><p><strong>swdmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – If <cite>swd</cite> &lt; <cite>swdmin</cite> the result is undef (default: 50).</p></li>
+<li><p><strong>swumin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – If <cite>swu</cite> &lt; <cite>swumin</cite> the result is undef (default: 10).</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – albedo in %</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_albl">
+<span class="sig-name descname"><span class="pre">met_albl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swdmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swumin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_albl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_albl" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculation of albedo from short wave downward and upward radiation with limits:</dt><dd><p>x=met_albl(swd,swu,swdmin,swumin)</p>
+</dd>
+<dt>The albedo in % is calculated according to the following formula:</dt><dd><p>x = 100 * ( swu / swd )</p>
+</dd>
+</dl>
+<p>If swd &lt; swdmin or swu &lt; swumin the result is <cite>undef</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>swd</strong> (<em>ndarray</em>) – shortwave downward radiation [W m-2]</p></li>
+<li><p><strong>swu</strong> (<em>ndarray</em>) – shortwave upward radiation [W m-2]</p></li>
+<li><p><strong>swdmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – If <cite>swd</cite> &lt; <cite>swdmin</cite> the result is undef.</p></li>
+<li><p><strong>swumin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – If <cite>swu</cite> &lt; <cite>swumin</cite> the result is undef.</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+<li><p><strong>undef</strong> – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – albedo in %</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_dpt">
+<span class="sig-name descname"><span class="pre">met_dpt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_dpt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_dpt" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>Calculation of dew point temperature:</dt><dd><p>x = met_dpt(T, rh)</p>
+</dd>
+<dt>The dew point temperature in degC is calculated according to the following formulas:</dt><dd><p>Es = 6.1078*exp(17.08085*T/(234.175 + T))</p>
+<p>E = Es * rh/100</p>
+<p>x = 234.175 * ln(E/6.1078)/(17.08085 - ln(E/6.1078))</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>temp</strong> (<em>ndarray</em>) – air temperature [degC]</p></li>
+<li><p><strong>rh</strong> (<em>ndarray</em>) – relative humidity [%]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – dew point temperature in degC</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_h2oc">
+<span class="sig-name descname"><span class="pre">met_h2oc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_h2oc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_h2oc" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>Calculation of water vapour concentration:</dt><dd><p>x = met_h2oc(T, rh, p)</p>
+</dd>
+<dt>The water vapour concentration in mmol mol-1 is calculated according to the following formulas:</dt><dd><p>Es = 6.1078*exp(17.08085*T/ (234.175 + T))</p>
+<p>E = Es * rh/100</p>
+<p>x = 0.1 * E /(0.001*p*100*0.001)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>temp</strong> (<em>ndarray</em>) – air temperature [degC]</p></li>
+<li><p><strong>rh</strong> (<em>ndarray</em>) – relative humidity [%]</p></li>
+<li><p><strong>p</strong> (<em>ndarray</em>) – air pressure [hPa = mbar]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – water vapour concentration in mmol mol-1</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_h2oc_rh">
+<span class="sig-name descname"><span class="pre">met_h2oc_rh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_h2oc_rh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_h2oc_rh" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>Calculation of relative humidity from water vapour concentration:</dt><dd><p>x = met_h2oc_rh(T, [H2O], p)</p>
+</dd>
+<dt>The relative humidity in % is calculated according to the following formulas:</dt><dd><p>Es = 6.1078*exp(17.08085*T/(234.175 + T))</p>
+<p>E = 10 * [H2O] * 0.001 * p * 100 * 0.001</p>
+<p>x = 100 * E / Es</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>temp</strong> (<em>ndarray</em>) – air temperature [degC]</p></li>
+<li><p><strong>h</strong> (<em>ndarray</em>) – water vapour concentration [mmol mol-1]</p></li>
+<li><p><strong>p</strong> (<em>ndarray</em>) – air pressure [hPa = mbar]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – relative humidity in %</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_lwrad">
+<span class="sig-name descname"><span class="pre">met_lwrad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_lwrad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_lwrad" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculation of long wave radiation from net radiometer:</dt><dd><p>x = met_lwrad(y, Tp)</p>
+</dd>
+<dt>The total radiation in W m-2 is calculated according to the following formula:</dt><dd><p>x = y*fl + sigma*(Tp+T0)**4</p>
+</dd>
+</dl>
+<p>where sigma = 5.67051 * 10**8 W m-2 K-4 is the Stephan-Boltzmann-Constant and
+fl is the factor for long wave radiation (reciprocal value of sensitivity) in W m-2 per mV.</p>
+<p>The function assumes that fl was already applied before.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – output voltage of the net radiometer [mV]</p></li>
+<li><p><strong>Tp</strong> (<em>ndarray</em>) – pyranometer temperature, i.e. the temperature of the net radiometer body [degC]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – total radiation in W m-2</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_rho">
+<span class="sig-name descname"><span class="pre">met_rho</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_rho"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_rho" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>Calculation of air density:</dt><dd><p>x = met_rho(T, rh, p)</p>
+</dd>
+<dt>The air density in kg m-3 is calculated according to the following formulas:</dt><dd><p>Es = 6.1078*exp(17.08085*T/ (234.175 + T))</p>
+<p>E = Es * rh/100</p>
+<p>sh = 622 * E/(p-0.378*E)</p>
+<p>Tv = ((T + T0) * (1 + 0.000608 * sh)) - T0</p>
+<p>x = p * 100 / (287.05 * (Tv + T0))</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>temp</strong> (<em>ndarray</em>) – air temperature [degC]</p></li>
+<li><p><strong>rh</strong> (<em>ndarray</em>) – relative humidity [%]</p></li>
+<li><p><strong>p</strong> (<em>ndarray</em>) – air pressure [hPa = mbar]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – air density in kg m-3</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_sh">
+<span class="sig-name descname"><span class="pre">met_sh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_sh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_sh" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>Calculation of specific humidity:</dt><dd><p>x = met_sh(T, rh, p)</p>
+</dd>
+<dt>The specific humidity in g kg-1 is calculated according to the following formulas:</dt><dd><p>Es = 6.1078*exp(17.08085*T/ (234.175 + T))</p>
+<p>E = Es * rh/100</p>
+<p>x = 622 * E/(p-0.378*E)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>temp</strong> (<em>ndarray</em>) – air temperature [degC]</p></li>
+<li><p><strong>rh</strong> (<em>ndarray</em>) – relative humidity [%]</p></li>
+<li><p><strong>p</strong> (<em>ndarray</em>) – air pressure [hPa = mbar]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – specific humidity in g kg-1</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_tpot">
+<span class="sig-name descname"><span class="pre">met_tpot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_tpot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_tpot" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculation of potential temperature:</dt><dd><p>x = met_tpot(T, p)</p>
+</dd>
+<dt>The potential temperature in K is calculated according to the following formula:</dt><dd><p>x = (T + T0) * (1000/p)**0.286</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>temp</strong> (<em>ndarray</em>) – air temperature [degC]</p></li>
+<li><p><strong>p</strong> (<em>ndarray</em>) – air pressure [hPa = mbar]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – potential temperature in K</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_trad">
+<span class="sig-name descname"><span class="pre">met_trad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Rl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_trad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_trad" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculation of radiation temperature from long wave radiation:</dt><dd><p>x = met_trad(Rl, epsilon)</p>
+</dd>
+<dt>The radiation temperature in degC is calculated according to the following formula:</dt><dd><p>x= sqrt4(Rl/(sigma*epsilon)) - T0</p>
+</dd>
+</dl>
+<p>where sigma = 5.67051 * 108 W m-2 K-4 is the Stephan-Boltzmann-Constant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Rl</strong> (<em>ndarray</em>) – longwave radiation [W m-2]</p></li>
+<li><p><strong>epsilon</strong> (<em>ndarray</em>) – long wave emissivity of the surface [0-1]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – radiation temperature in degC</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_urot">
+<span class="sig-name descname"><span class="pre">met_urot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_urot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_urot" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Rotation of u-component of wind vector:</dt><dd><p>x = met_urot(u, v, a)</p>
+</dd>
+<dt>The rotated u-component is calculated according to the following formula:</dt><dd><p>x = u * cos (a) + v * sin (a)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>ndarray</em>) – u-component of the wind vector</p></li>
+<li><p><strong>v</strong> (<em>ndarray</em>) – v-component of the wind vector</p></li>
+<li><p><strong>a</strong> (<em>ndarray</em>) – rotation angle (positive is clockwise) [degree]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – rotated u-component</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_uv_wd">
+<span class="sig-name descname"><span class="pre">met_uv_wd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_uv_wd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_uv_wd" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>Calculation of wind direction from u- and v-component of wind vector:</dt><dd><p>x = met_uv_wd(u, v)</p>
+</dd>
+<dt>The horizontal wind velocity is calculated according to the following formulas:</dt><dd><p>IF u = 0 AND v = 0 THEN x = 0</p>
+<p>IF u = 0 AND v &lt; 0 THEN x = 360</p>
+<p>IF u = 0 AND v &gt; 0 THEN x = 180</p>
+<p>IF u &gt; 0 THEN x = 270 - arctan(v/u)</p>
+<p>IF u &lt; 0 THEN x = 90 - arctan(v/u)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>ndarray</em>) – u-component of the wind vector</p></li>
+<li><p><strong>v</strong> (<em>ndarray</em>) – v-component of the wind vector</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – horizontal wind velocity</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_uv_wv">
+<span class="sig-name descname"><span class="pre">met_uv_wv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_uv_wv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_uv_wv" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculation of wind velocity from u- and v-component of wind vector:</dt><dd><p>x = met_uv_wv(u, v)</p>
+</dd>
+<dt>The horizontal wind velocity is calculated according to the following formula:</dt><dd><p>x = sqrt(u**2 + v**2)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>ndarray</em>) – u-component of the wind vector</p></li>
+<li><p><strong>v</strong> (<em>ndarray</em>) – v-component of the wind vector</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – horizontal wind velocity</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_vpact">
+<span class="sig-name descname"><span class="pre">met_vpact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_vpact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_vpact" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>Calculation of actual water vapour pressure:</dt><dd><p>x = met_vpact(T,rh)</p>
+</dd>
+<dt>The actual water vapour pressure in mbar (hPa) is calculated according to the following formulas:</dt><dd><p>Es = 6.1078*exp(17.08085*T/ (234.175 + T))</p>
+<p>x = Es * rh/100</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>temp</strong> (<em>ndarray</em>) – air temperature [degC]</p></li>
+<li><p><strong>rh</strong> (<em>ndarray</em>) – relative humidity [%]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – actual water vapour pressure in mbar (hPa)</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_vpdef">
+<span class="sig-name descname"><span class="pre">met_vpdef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_vpdef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_vpdef" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>Calculation of water vapour pressure deficit:</dt><dd><p>x = met_vpdef(T, rh)</p>
+</dd>
+<dt>The water vapour pressure deficit in mbar (hPa) is calculated according to the following formulas:</dt><dd><p>Es = 6.1078*exp(17.08085*T/ (234.175 + T))</p>
+<p>E = Es * rh/100</p>
+<p>x = Es - E</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>temp</strong> (<em>ndarray</em>) – air temperature [degC]</p></li>
+<li><p><strong>rh</strong> (<em>ndarray</em>) – relative humidity [%]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – water vapour pressure deficit in mbar (hPa)</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_vpmax">
+<span class="sig-name descname"><span class="pre">met_vpmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_vpmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_vpmax" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculation of saturation water vapour pressure:</dt><dd><p>x = met_vpmax(T) where</p>
+</dd>
+<dt>The saturation water vapour pressure in mbar (hPa) is calculated according to the following formula:</dt><dd><p>x = 6.1078 * exp(17.08085 * T / (234.175 + T))</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>temp</strong> (<em>ndarray</em>) – air temperature [degC]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – saturation water vapour pressure in mbar (hPa)</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_vrot">
+<span class="sig-name descname"><span class="pre">met_vrot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_vrot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_vrot" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Rotation of v-component of wind vector:</dt><dd><p>x = met_vrot(u, v, a)</p>
+</dd>
+<dt>The rotated v-component is calculated according to the following formula:</dt><dd><p>x = -u * sin (a) + v * cos (a)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>ndarray</em>) – u-component of the wind vector</p></li>
+<li><p><strong>v</strong> (<em>ndarray</em>) – v-component of the wind vector</p></li>
+<li><p><strong>a</strong> (<em>ndarray</em>) – rotation angle (positive is clockwise) [degree]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – rotated v-component</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_wdrot">
+<span class="sig-name descname"><span class="pre">met_wdrot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_wdrot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_wdrot" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>Rotation of wind direction:</dt><dd><p>x = met_wdrot(wd, a)</p>
+</dd>
+<dt>The rotated wind direction is calculated according to the following formulas:</dt><dd><p>x = wd + a</p>
+<p>IF x &lt; 0 THEN x = x + 360</p>
+<p>IF x &lt;= 360 THEN x = x - 360</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wd</strong> (<em>ndarray</em>) – wind direction [degree]</p></li>
+<li><p><strong>a</strong> (<em>ndarray</em>) – rotation angle (positive is clockwise) [degree]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – rotated wind direction</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_wvwd_u">
+<span class="sig-name descname"><span class="pre">met_wvwd_u</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_wvwd_u"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_wvwd_u" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculation of u-component of wind vector from wind velocity and wind direction:</dt><dd><p>x = met_wvwd_u(wv, wd)</p>
+</dd>
+<dt>The u-component of the wind vector is calculated according to the following formula:</dt><dd><p>x = -wv * sin (wd)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wv</strong> (<em>ndarray</em>) – horizontal wind velocity [m s-1]</p></li>
+<li><p><strong>wd</strong> (<em>ndarray</em>) – horizontal wind direction [degree]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – u-component of the wind vector</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.met_wvwd_v">
+<span class="sig-name descname"><span class="pre">met_wvwd_v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#met_wvwd_v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.met_wvwd_v" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculation of v-component of wind vector from wind velocity and wind direction:</dt><dd><p>x = met_wvwd_v(wv, wd)</p>
+</dd>
+<dt>The v-component of the wind vector is calculated according to the following formula:</dt><dd><p>x = -wv * cos (wd)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wv</strong> (<em>ndarray</em>) – horizontal wind velocity [m s-1]</p></li>
+<li><p><strong>wd</strong> (<em>ndarray</em>) – horizontal wind direction [degree]</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – v-component of the wind vector</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.mini">
+<span class="sig-name descname"><span class="pre">mini</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#mini"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.mini" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Calculation of minimum value:</dt><dd><p>x = mini(y) means x = min(y[0],y[1],…,y[n-1])</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><em>None</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><em>tuple of ints</em><em>, </em><em>optional</em>) – <p>Axis or axes along which the minimum are computed.
+The default is to compute the minimum of the flattened array.</p>
+<p>If this is a tuple of ints, a minimum is performed over multiple axes,
+instead of a single axis or all the axes as before.</p>
+</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – minimum value</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.quad">
+<span class="sig-name descname"><span class="pre">quad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#quad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.quad" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Apply 2nd order function:</dt><dd><p>x=quad(y,a0,a1,a2) means x = a0 + a1*y + a2*y**2</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>a0</strong> (<em>ndarray</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – parameter 1</p></li>
+<li><p><strong>a1</strong> (<em>ndarray</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – parameter 1</p></li>
+<li><p><strong>a2</strong> (<em>ndarray</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – parameter 1</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – 2nd order function</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.sethigh">
+<span class="sig-name descname"><span class="pre">sethigh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ishigh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#sethigh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.sethigh" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Replacement of overflows by new value:</dt><dd><p>x = sethigh(y,high,ishigh) means IF (y &gt; high) THEN x = ishigh ELSE x = y</p>
+</dd>
+</dl>
+<p>ishigh is optional. If not given high will be used.</p>
+<p>This function may be used to adjust relative humidity values of a little bit more than 100 % to 100 %.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>high</strong> (<em>ndarray</em>) – upper threshold</p></li>
+<li><p><strong>ishigh</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><em>None</em></a><em> or </em><em>ndarray</em><em>, </em><em>optional</em>) – if not None, use ishigh in case of y &gt; high</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – overflows replaced by new value</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.setlow">
+<span class="sig-name descname"><span class="pre">setlow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">islow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#setlow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.setlow" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Replacement of underflows by new value:</dt><dd><p>x = setlow(y,low,islow) means IF (y &lt; low) THEN x = islow ELSE x = y</p>
+</dd>
+</dl>
+<p>islow is optional. If not given low will be used.</p>
+<p>This function may be used to adjust small negative values of short wave radiation
+during nighttime to zero values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>low</strong> (<em>ndarray</em>) – lower threshold</p></li>
+<li><p><strong>islow</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><em>None</em></a><em> or </em><em>ndarray</em><em>, </em><em>optional</em>) – if not None, use islow in case of y &lt; low</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – underflows replaced by new value</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.varadd">
+<span class="sig-name descname"><span class="pre">varadd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varadd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varadd" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Addition:</dt><dd><p>x = varadd(a, b) means x = a + b, where a and b are ndarray or float.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>ndarray</em>) – input variable 1</p></li>
+<li><p><strong>b</strong> (<em>ndarray</em>) – input variable 2</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – Addition</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.varchs">
+<span class="sig-name descname"><span class="pre">varchs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varchs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varchs" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Change sign:</dt><dd><p>x = varchs(a) means x = -a, where a is ndarray or float.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – Changed sign</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Dec 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.vardiv">
+<span class="sig-name descname"><span class="pre">vardiv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#vardiv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.vardiv" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Division:</dt><dd><p>x = vardiv(a, b) means x = a/b, where a and b are ndarray or float.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>ndarray</em>) – dividend</p></li>
+<li><p><strong>b</strong> (<em>ndarray</em>) – divisor</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – Division</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.varexp">
+<span class="sig-name descname"><span class="pre">varexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varexp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Exponentiation of e:</dt><dd><p>x = varexp(a) means x = exp(a), where a is ndarray or float.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>ndarray</em>) – exponent</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – Exponentiation</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.varlog">
+<span class="sig-name descname"><span class="pre">varlog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varlog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varlog" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Natural logarithm:</dt><dd><p>x = varlog(a) means x = ln(a), where a is ndarray or float.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – Natural logarithm</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.varmul">
+<span class="sig-name descname"><span class="pre">varmul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varmul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varmul" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Multiplication:</dt><dd><p>x = varmul(a, b) means x = a * b, where a and b are ndarray or float.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>ndarray</em>) – input variable 1</p></li>
+<li><p><strong>b</strong> (<em>ndarray</em>) – input variable 2</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – Multiplication</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.varpot">
+<span class="sig-name descname"><span class="pre">varpot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varpot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varpot" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Exponentiation:</dt><dd><p>x = varpot(a, b) means x = a**b, where a and b are ndarray or float.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>ndarray</em>) – base</p></li>
+<li><p><strong>b</strong> (<em>ndarray</em>) – exponent</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – Exponentiation</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.varsqr">
+<span class="sig-name descname"><span class="pre">varsqr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varsqr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varsqr" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Square root:</dt><dd><p>x = varsqr(a) means x = sqrt(a), where a is ndarray or float.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – Square root</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.varsqrt">
+<span class="sig-name descname"><span class="pre">varsqrt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varsqrt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varsqrt" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Square root:</dt><dd><p>x = varsqrt(a) means x = sqrt(a), where a is ndarray or float.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>ndarray</em>) – input variable</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – Square root</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.logtools.logtools.varsub">
+<span class="sig-name descname"><span class="pre">varsub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/logtools/logtools.html#varsub"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.logtools.logtools.varsub" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Subtraction:</dt><dd><p>x = varsub(a, b) means x = a - b, where a and b are ndarray or float.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>ndarray</em>) – input variable 1</p></li>
+<li><p><strong>b</strong> (<em>ndarray</em>) – input variable 2</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – elements are excluded from the calculations if any of the inputs equals <cite>undef</cite> (default: -9999.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>ndarray</em> – Subtraction</p></li>
+<li><p><em>History</em></p></li>
+<li><p><em>——-</em></p></li>
+<li><p><em>Written,  Matthias Cuntz, Jun 2014</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="contents.html">hesseflux</a></h1>
+
+
+
+<p class="blurb">Functions used in the processing and post-processing of Eddy covariance flux data</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="package.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="package.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="argsort.html">hesseflux.argsort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ascii2ascii.html">hesseflux.ascii2ascii</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.const.html">hesseflux.const.const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.html">hesseflux.const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="date2dec.html">hesseflux.date2dec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dec2date.html">hesseflux.dec2date</a></li>
+<li class="toctree-l2"><a class="reference internal" href="division.html">hesseflux.division</a></li>
+<li class="toctree-l2"><a class="reference internal" href="esat.html">hesseflux.esat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fgui.html">hesseflux.fgui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fread.html">hesseflux.fread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fsread.html">hesseflux.fsread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.fit_functions.html">hesseflux.functions.fit_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.general_functions.html">hesseflux.functions.general_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.logistic_function.html">hesseflux.functions.logistic_function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.opti_test_functions.html">hesseflux.functions.opti_test_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html">hesseflux.functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.sa_test_functions.html">hesseflux.functions.sa_test_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gapfill.html">hesseflux.gapfill</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">hesseflux.logtools.logtools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logtools.html">hesseflux.logtools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mad.html">hesseflux.mad</a></li>
+<li class="toctree-l2"><a class="reference internal" href="madspikes.html">hesseflux.madspikes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nee2gpp.html">hesseflux.nee2gpp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sread.html">hesseflux.sread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ustarfilter.html">hesseflux.ustarfilter</a></li>
+</ul>
+</li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/mcuntz/hesseflux">hesseflux @ GitHub</a></li>
+    
+    <li class="toctree-l1"><a href="https://doi.org/10.5281/zenodo.3831488">hesseflux @ Zenodo</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/hesseflux/">hesseflux @ PyPI</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="contents.html">Documentation overview</a><ul>
+  <li><a href="package.html">API</a><ul>
+      <li>Previous: <a href="gapfill.html" title="previous chapter">hesseflux.gapfill</a></li>
+      <li>Next: <a href="logtools.html" title="next chapter">hesseflux.logtools</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2009-2022, Matthias Cuntz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/logtools.logtools.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

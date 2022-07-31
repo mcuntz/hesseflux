@@ -1,14 +1,8 @@
-include AUTHORS.md
-include CHANGELOG.md
-include CONTRIBUTING.md
-include LICENSE
-include MANIFEST.in
-include README.md
-include setup.py setup.cfg
-recursive-include hesseflux *.py
-recursive-include docs/source *
-include docs/Makefile docs/requirements.txt
-recursive-include tests *.py
-include tests/requirements_test.txt
-recursive-include example *
-recursive-include bin *
+prune **
+graft src
+graft tests
+graft bin
+graft example
+
+include LICENSE README.rst AUTHORS.rst CHANGELOG.rst pyproject.toml setup.cfg
+global-exclude __pycache__ *.py[cod] .*

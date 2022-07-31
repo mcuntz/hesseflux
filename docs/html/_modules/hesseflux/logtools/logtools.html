@@ -1,0 +1,2220 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hesseflux.logtools.logtools &#8212; hesseflux 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for hesseflux.logtools.logtools</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">logtools is a Python port of the Control File Functions of</span>
+<span class="sd">Logtools, the Logger Tools Software of Olaf Kolle, MPI-BGC Jena, (c) 2012.</span>
+
+<span class="sd">Some functions are renamed compared to the original logger tools:</span>
+
+<span class="sd">    `chs` -&gt; `varchs`</span>
+
+<span class="sd">    `add` -&gt; `varadd`</span>
+
+<span class="sd">    `sub` -&gt; `varsub`</span>
+
+<span class="sd">    `mul` -&gt; `varmul`</span>
+
+<span class="sd">    `div` -&gt; `vardiv`</span>
+
+<span class="sd">    `sqr` -&gt; `varsqr`/`varsqrt`</span>
+
+<span class="sd">    `exp` -&gt; `varexp`</span>
+
+<span class="sd">    `log` -&gt; `varlog`</span>
+
+<span class="sd">    `pot` -&gt; `varpot`</span>
+
+<span class="sd">Not all functions are implemented (yet). Missing functions are:</span>
+
+<span class="sd">    `varset`</span>
+
+<span class="sd">    `met_torad`</span>
+
+<span class="sd">    `met_psy_rh`</span>
+
+<span class="sd">    `met_dpt_rh`</span>
+
+<span class="sd">    `write`</span>
+
+<span class="sd">Some functions are slightly enhanced, which is reflected in the</span>
+<span class="sd">documentation of the indidual functions.</span>
+
+<span class="sd">All functions have an additional keyword `undef`, which defaults to -9999.:</span>
+<span class="sd">elements are excluded from the calculations if any of the inputs equals `undef`.</span>
+
+<span class="sd">Only bit_test and the if-statements `ifeq`, `ifne`, `ifle`, `ifge`, `iflt`, `igt`</span>
+<span class="sd">do not have the `undef` keyword.</span>
+
+<span class="sd">The Looger Tools control functions are:</span>
+
+<span class="sd">    1. Assignment # not implemented</span>
+
+
+<span class="sd">    2. Change sign</span>
+<span class="sd">        x = varchs(a) means x = -a, where a is a variable or a number.</span>
+
+<span class="sd">        def varchs(var1, undef=-9999.):</span>
+
+
+<span class="sd">    3. Addition</span>
+<span class="sd">        x = varadd(a, b) means x = a + b, where a and b are ndarray or float.</span>
+
+<span class="sd">        def varadd(var1, var2, undef=-9999.):</span>
+
+
+<span class="sd">    4. Subtraction</span>
+<span class="sd">        x = varsub(a, b) means x = a - b, where a and b are ndarray or float.</span>
+
+<span class="sd">        def varsub(var1, var2, undef=-9999.):</span>
+
+
+<span class="sd">    5. Multiplication</span>
+<span class="sd">        x = varmul(a, b) means x = a * b, where a and b are ndarray or float.</span>
+
+<span class="sd">        def varmul(var1, var2, undef=-9999.):</span>
+
+
+<span class="sd">    6. Division</span>
+<span class="sd">        x = vardiv(a, b) means x = a/b, where a and b are ndarray or float.</span>
+
+<span class="sd">        def vardiv(var1, var2, undef=-9999.):</span>
+
+
+<span class="sd">    7. Square root</span>
+<span class="sd">        x = varsqr(a) means x = sqrt(a), where a is a variable or a number.</span>
+<span class="sd">        x = varsqrt(a) means x = sqrt(a), where a is a variable or a number.</span>
+
+<span class="sd">        def varsqr(var1, undef=-9999.):</span>
+<span class="sd">        def varsqrt(var1, undef=-9999.):</span>
+
+
+<span class="sd">    8. Exponentiation of e</span>
+<span class="sd">        x = varexp(a) means x = exp(a), where a is a variable or a number.</span>
+
+<span class="sd">        def varexp(var1, undef=-9999.):</span>
+
+
+<span class="sd">    9. Natural logarithm</span>
+<span class="sd">        x = varlog(a) means x = ln(a), where a is a variable or a number.</span>
+
+<span class="sd">        def varlog(var1, undef=-9999.):</span>
+
+
+<span class="sd">    10. Exponentiation</span>
+<span class="sd">        x = varpot(a, b) means x = a**b, where a and b are ndarray or float.</span>
+
+<span class="sd">        def varpot(var1, var2, undef=-9999.):</span>
+
+
+<span class="sd">    11. Apply linear function</span>
+<span class="sd">        x = lin(y, a0, a1) means x = a0 + a1 * y,</span>
+<span class="sd">        where a0 and a1 are ndarray or float.</span>
+
+<span class="sd">        def lin(var1, a, b, undef=-9999.):</span>
+
+
+<span class="sd">    12. Apply 2nd order function</span>
+<span class="sd">        x=quad(y,a0,a1,a2) means x = a0 +a1*y + a2*y**2,</span>
+<span class="sd">        where a0, a1 and a2 are ndarray or float.</span>
+
+<span class="sd">        def quad(var1, a, b, c, undef=-9999.):</span>
+
+
+<span class="sd">    13. Apply 3rd order function</span>
+<span class="sd">        x=cubic(y,a0,a1,a2,a3) means x = a0 +a1*y+a2*y**2+a3*y**3,</span>
+<span class="sd">        where a0, a1, a2 and a3 are ndarray or float.</span>
+
+<span class="sd">        def cubic(var1, a, b, c, d, undef=-9999.):</span>
+
+
+<span class="sd">    14. Calculate fraction of day from hours, minutes and seconds</span>
+<span class="sd">        x = hms(h, m, s) means x = (h + m/60 + s/3600)/24,</span>
+<span class="sd">        where h, m and s (hours, minutes and seconds) are ndarray or float.</span>
+
+<span class="sd">        def hms(h, m, s, undef=-9999.):</span>
+
+
+<span class="sd">    15. Bitwise test</span>
+<span class="sd">        x = bit_test(y, b, start=0) means x = 1 if bit b ist set in y otherwise x = 0.</span>
+<span class="sd">        Returns a list of b is an array.</span>
+<span class="sd">        Counting of b starts at start.</span>
+<span class="sd">        For the behaviour of the original logger tools, set start=1.</span>
+<span class="sd">        Negative b&#39;s is not implemented.</span>
+
+<span class="sd">        def bit_test(var1, var2, start=0):</span>
+
+
+<span class="sd">    16. Replacement of underflows by new value</span>
+<span class="sd">        x = setlow(y,lo,ln=None) means IF (y &gt; lo) THEN x = ln ELSE x = y,</span>
+<span class="sd">        where lo and ln are ndarray or float.</span>
+<span class="sd">        ln is optional. If not given lo will be used.</span>
+<span class="sd">        This function may be used to adjust small negative values of short wave radiation</span>
+<span class="sd">        during nighttime to zero values.</span>
+
+<span class="sd">        def setlow(dat, low, islow=None, undef=-9999.):</span>
+
+
+<span class="sd">    17. Replacement of overflows by new value</span>
+<span class="sd">        x = sethigh(y,lo,ln=None) means IF (y &lt; lo) THEN x = ln ELSE x = y,</span>
+<span class="sd">        where lo and ln are ndarray or float.</span>
+<span class="sd">        ln is optional. If not given lo will be used.</span>
+<span class="sd">        This function may be used to adjust relative humidity values of a little bit more than 100 % to 100 %.</span>
+
+<span class="sd">        def sethigh(dat, high, ishigh=None, undef=-9999.):</span>
+
+
+<span class="sd">    18. Replacement of underflows or overflows by the undef</span>
+<span class="sd">        x = limits(y, ll, lh) means</span>
+<span class="sd">        IF (y &gt; ll) OR (y &lt; lh) THEN x = undef ELSE x = y,</span>
+<span class="sd">        where ll and lh are ndarray or float.</span>
+<span class="sd">        This function may be used to check values lying in between certain limits.</span>
+<span class="sd">        If one of the limits is exceeded the value is set to undef.</span>
+
+<span class="sd">        def limits(dat, mini, maxi, undef=-9999.):</span>
+
+
+<span class="sd">    19. Calculation of mean value</span>
+<span class="sd">        x = mean(y1, y2, ..., yn) means x = (y1 + y2 + ... + yn)/n,</span>
+<span class="sd">        where y1, y2, ..., yn are ndarray or float.</span>
+
+<span class="sd">        def mean(var1, axis=None, undef=-9999.):</span>
+
+
+<span class="sd">    20. Calculation of minimum value</span>
+<span class="sd">        x = mini(y1,y2,...,yn) means x = min(y1,y2,...,yn),</span>
+<span class="sd">        where y1, y2, ..., yn are ndarray or float.</span>
+
+<span class="sd">        def mini(var1, axis=None, undef=-9999.):</span>
+
+
+<span class="sd">    21. Calculation of maximum value</span>
+<span class="sd">        x = maxi(y1,y2,...,yn) means x = max(y1,y2,...,yn),</span>
+<span class="sd">        where y1, y2, ..., yn are ndarray or float.</span>
+
+<span class="sd">        def maxi(var1, axis=None, undef=-9999.):</span>
+
+
+<span class="sd">    22. Calculation of total radiation from net radiometer # no implemented</span>
+
+
+<span class="sd">    23. Calculation of long wave radiation from net radiometer</span>
+<span class="sd">        x = met_lwrad(y, Tp) where</span>
+<span class="sd">        y is the output voltage of the net radiometer in mV,</span>
+<span class="sd">        Tp is the temperature of the net radiometer body in degC.</span>
+<span class="sd">        The total radiation in W m-2 is calculated according to the following formula:</span>
+<span class="sd">        x=y*fl +sigma*(Tp +273.16)**4</span>
+<span class="sd">        where sigma = 5.67051 * 10**8 W m-2 K-4 is the Stephan-Boltzmann-Constant and</span>
+<span class="sd">        fl is the factor for long wave radiation (reciprocal value of sensitivity) in W m-2 per mV.</span>
+<span class="sd">        The function assumes that fl was already applied before.</span>
+<span class="sd">        All parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_lwrad(dat, tpyr, undef=-9999.): # assumes that dat was already multiplied with calibration factor</span>
+
+
+<span class="sd">    24. Calculation of radiation temperature from long wave radiation</span>
+<span class="sd">        x = met_trad(Rl, epsilon) where</span>
+<span class="sd">        Rl is the long wave radiation in W m-2,</span>
+<span class="sd">        epsilon is the long wave emissivity of the surface (between 0 and 1).</span>
+<span class="sd">        The radiation temperature in degC is calculated according to the following formula:</span>
+<span class="sd">        x= sqrt4(Rl/(sigma*epsilon)) - 273.16</span>
+<span class="sd">        where sigma = 5.67051 * 108 W m-2 K-4 is the Stephan-Boltzmann-Constant.</span>
+<span class="sd">        Both parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_trad(dat, eps, undef=-9999.):</span>
+
+
+<span class="sd">    25. Calculation of albedo from short wave downward and upward radiation</span>
+<span class="sd">        x = met_alb(Rsd, Rsu) where</span>
+<span class="sd">        Rsd is the short wave downward radiation in Wm-2, Rsu is the short wave upward radiation in Wm-2,</span>
+<span class="sd">        The albedo in % is calculated according to the following formula:</span>
+<span class="sd">        x = 100 * ( Rsu / Rsd )</span>
+<span class="sd">        If Rsd &gt; 50 W m-2 or Rsu &gt; 10 W m-2 the result is undef.</span>
+<span class="sd">        Both parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_alb(swd, swu, swdmin=50., swumin=10., undef=-9999.):</span>
+
+
+<span class="sd">    26. Calculation of albedo from short wave downward and upward radiation with limits</span>
+<span class="sd">        x=met_albl(Rsd,Rsu,Rsd_limit,Rsu_limit)where</span>
+<span class="sd">        Rsd is the short wave downward radiation in Wm-2,</span>
+<span class="sd">        Rsu is the short wave upward radiation in Wm-2,</span>
+<span class="sd">        Rsd_limit is the short wave downward radiation limit in Wm-2,</span>
+<span class="sd">        Rsu_limit is the short wave upward radiation limit in Wm-2,</span>
+<span class="sd">        The albedo in % is calculated according to the following formula:</span>
+<span class="sd">        x = 100 * ( Rsu / Rsd )</span>
+<span class="sd">        If Rsd &gt; Rsd_limit or Rsu &gt; Rsu_limit the result is undef.</span>
+<span class="sd">        All four parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_albl(swd, swu, swdmin, swumin, undef=-9999.):</span>
+
+
+<span class="sd">    27. Calculation of saturation water vapour pressure</span>
+<span class="sd">        x = met_vpmax(T) where</span>
+<span class="sd">        T is the air temperature in degC.</span>
+<span class="sd">        The saturation water vapour pressure in mbar (hPa) is calculated according to the following formula:</span>
+<span class="sd">        x = 6.1078 * exp(17.08085 * T / (234.175 + T))</span>
+<span class="sd">        The parameter may be a variable or a number.</span>
+
+<span class="sd">        def met_vpmax(temp, undef=-9999.):</span>
+
+
+<span class="sd">    28. Calculation of actual water vapour pressure</span>
+<span class="sd">        x = met_vpact(T,rh) where T is the air temperature in degC, rh is the relative humidity in %.</span>
+<span class="sd">        The actual water vapour pressure in mbar (hPa) is calculated according to the following for- mulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/ (234.175 + T))</span>
+<span class="sd">        x = Es * rh/100</span>
+<span class="sd">        Both parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_vpact(temp, rh, undef=-9999.):</span>
+
+
+<span class="sd">    29. Calculation of water vapour pressure deficit</span>
+<span class="sd">        x = met_vpdef(T, rh) where T is the air temperature in degC, rh is the relative humidity in %.</span>
+<span class="sd">        The water vapour pressure deficit in mbar (hPa) is calculated according to the following for- mulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/ (234.175 + T))</span>
+<span class="sd">        E = Es * rh/100</span>
+<span class="sd">        x = Es - E</span>
+<span class="sd">        Both parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_vpdef(temp, rh, undef=-9999.):</span>
+
+
+<span class="sd">    30. Calculation of specific humidity</span>
+<span class="sd">        x = met_sh(T, rh, p) where</span>
+<span class="sd">        T is the air temperature in degC,</span>
+<span class="sd">        rh is the relative humidity in %,</span>
+<span class="sd">        p is the air pressure in mbar (hPa).</span>
+<span class="sd">        The specific humidity in g kg-1 is calculated according to the following formulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/ (234.175 + T))</span>
+<span class="sd">        E = Es * rh/100</span>
+<span class="sd">        x = 622 * E/(p-0.378*E)</span>
+<span class="sd">        All parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_sh(temp, rh, p, undef=-9999.):</span>
+
+
+<span class="sd">    31. Calculation of potential temperature</span>
+<span class="sd">        x = met_tpot(T, p) where</span>
+<span class="sd">        T is the air temperature in degC,</span>
+<span class="sd">        p is the air pressure in mbar (hPa).</span>
+<span class="sd">        The potential temperature in K is calculated according to the following formula:</span>
+<span class="sd">        x = (T + 273.16) * (1000/p)**0.286</span>
+<span class="sd">        Both parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_tpot(temp, p, undef=-9999.):</span>
+
+
+<span class="sd">    32. Calculation of air density</span>
+<span class="sd">        x = met_rho(T, rh, p) where</span>
+<span class="sd">        T is the air temperature in degC,</span>
+<span class="sd">        rh is the relative humidity in %,</span>
+<span class="sd">        p is the air pressure in mbar (hPa).</span>
+<span class="sd">        The air density in kg m-3 is calculated according to the following formulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/ (234.175 + T))</span>
+<span class="sd">        E = Es * rh/100</span>
+<span class="sd">        sh = 622 * E/(p-0.378*E)</span>
+<span class="sd">        Tv = ((T + 273.16) * (1 + 0.000608 * sh)) - 273.16</span>
+<span class="sd">        x = p * 100 / (287.05 * (Tv + 273.16))</span>
+<span class="sd">        All parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_rho(temp, rh, p, undef=-9999.):</span>
+
+
+<span class="sd">    33. Calculation of dew point temperature</span>
+<span class="sd">        x = met_dpt(T, rh) where</span>
+<span class="sd">        T is the air temperature in degC, rh is the relative humidity in %.</span>
+<span class="sd">        The dew point temperature in degC is calculated according to the following formulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/(234.175 + T))</span>
+<span class="sd">        E = Es * rh/100</span>
+<span class="sd">        x = 234.175 * ln(E/6.1078)/(17.08085 - ln(E/6.1078))</span>
+<span class="sd">        Both parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_dpt(temp, rh, undef=-9999.):</span>
+
+
+<span class="sd">    34. Calculation of water vapour concentration</span>
+<span class="sd">        x = met_h2oc(T, rh, p) where T is the air temperature in degC,</span>
+<span class="sd">        rh is the relative humidity in %,</span>
+<span class="sd">        p is the air pressure in mbar (hPa).</span>
+<span class="sd">        The water vapour concentration in mmol mol-1 is calculated according to the following formu- las:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/ (234.175 + T))</span>
+<span class="sd">        E = Es * rh/100</span>
+<span class="sd">        x = 0.1 * E /(0.001*p*100*0.001)</span>
+<span class="sd">        All parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_h2oc(temp, rh, p, undef=-9999.):</span>
+
+
+<span class="sd">    35. Calculation of relative humidity from dry and wet bulb temperature # not implemented</span>
+
+
+<span class="sd">    36. Calculation of relative humidity from dew point temperature # not implemented</span>
+
+
+<span class="sd">    37. Calculation of relative humidity from water vapour concentration</span>
+<span class="sd">        x = met_h2oc_rh(T, [H2O], p) where</span>
+<span class="sd">        T is the air temperature in degC,</span>
+<span class="sd">        [H2O] is the water vapour concentration in mmolmol-1, p is the air pressure in mbar (hPa).</span>
+<span class="sd">        The relative humidity in % is calculated according to the following formulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/(234.175 + T))</span>
+<span class="sd">        E = 10 * [H2O] * 0.001 * p * 100 * 0.001</span>
+<span class="sd">        x = 100 * E / Es</span>
+<span class="sd">        All parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_h2oc_rh(temp, h, p, undef=-9999.):</span>
+
+
+<span class="sd">    38. Rotation of wind direction</span>
+<span class="sd">        x = met_wdrot(wd, a) where</span>
+<span class="sd">        wd is the wind direction in degree,</span>
+<span class="sd">        a is the rotation angle in degree (positive is clockwise).</span>
+<span class="sd">        The rotated wind direction is calculated according to the following formulas:</span>
+<span class="sd">        x = wd + a</span>
+<span class="sd">        IF x &gt; 0 THEN x = x + 360</span>
+<span class="sd">        IF x &gt;= 360 THEN x = x - 360</span>
+<span class="sd">        Both parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_wdrot(wd, a, undef=-9999.):</span>
+
+
+<span class="sd">    39. Rotation of u-component of wind vector</span>
+<span class="sd">        x = met_urot(u, v, a) where</span>
+<span class="sd">        u is the u-component of the wind vector,</span>
+<span class="sd">        v is the v-component of the wind vector,</span>
+<span class="sd">        a is the rotation angle in degree (positive is clockwise).</span>
+<span class="sd">        The rotated u-component is calculated according to the following formula:</span>
+<span class="sd">        x = u * cos (a) + v * sin (a)</span>
+<span class="sd">        All three parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_urot(u, v, a, undef=-9999.):</span>
+
+
+<span class="sd">    40. Rotation of v-component of wind vector</span>
+<span class="sd">        x = met_vrot(u, v, a) where</span>
+<span class="sd">        u is the u-component of the wind vector,</span>
+<span class="sd">        v is the v-component of the wind vector,</span>
+<span class="sd">        a is the rotation angle in degree (positive is clockwise).</span>
+<span class="sd">        The rotated v-component is calculated according to the following formula:</span>
+<span class="sd">        x = -u * sin (a) + v * cos (a)</span>
+<span class="sd">        All three parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_vrot(u, v, a, undef=-9999.):</span>
+
+
+<span class="sd">    41. Calculation of wind velocity from u- and v-component of wind vector</span>
+<span class="sd">        x = met_uv_wv(u, v) where</span>
+<span class="sd">        u is the u-component of the wind vector, v is the v-component of the wind vector.</span>
+<span class="sd">        The horizontal wind velocity is calculated according to the following formula:</span>
+<span class="sd">        x = sqrt(u**2 + v**2)</span>
+<span class="sd">        Both parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_uv_wv(u, v, undef=-9999.):</span>
+
+
+<span class="sd">    42. Calculation of wind direction from u- and v-component of wind vector</span>
+<span class="sd">        x = met_uv_wd(u, v) where</span>
+<span class="sd">        u is the u-component of the wind vector, v is the v-component of the wind vector.</span>
+<span class="sd">        The horizontal wind velocity is calculated according to the following formulas:</span>
+<span class="sd">        IF u = 0 AND v = 0 THEN x = 0</span>
+<span class="sd">        IF u = 0 AND v &gt; 0 THEN x = 360</span>
+<span class="sd">        IF u = 0 AND v &lt; 0 THEN x = 180</span>
+<span class="sd">        IF u &lt; 0 THEN x = 270 - arctan(v/u)</span>
+<span class="sd">        IF u &gt; 0 THEN x = 90 - arctan(v/u)</span>
+<span class="sd">        Both parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_uv_wd(u, v, undef=-9999.):</span>
+
+
+<span class="sd">    43. Calculation of u-component of wind vector from wind velocity and wind direction</span>
+<span class="sd">        x = met_wvwd_u(wv, wd) where wv is the horizontal wind velocity, wd is the horizontal wind direction.</span>
+<span class="sd">        The u-component of the wind vector is calculated according to the following formula:</span>
+<span class="sd">        x = -wv * sin (wd)</span>
+<span class="sd">        Both parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_wvwd_u(wv, wd, undef=-9999.):</span>
+
+
+<span class="sd">    44. Calculation of v-component of wind vector from wind velocity and wind direction</span>
+<span class="sd">        x = met_wvwd_v(wv, wd) where wv is the horizontal wind velocity, wd is the horizontal wind direction.</span>
+<span class="sd">        The v-component of the wind vector is calculated according to the following formula:</span>
+<span class="sd">        x = -wv * cos (wd)</span>
+<span class="sd">        Both parameters may be ndarray or float.</span>
+
+<span class="sd">        def met_wvwd_v(wv, wd, undef=-9999.):</span>
+
+
+<span class="sd">    45. If-statements</span>
+<span class="sd">        x = ifeq(y,a0,a1,a2) means IF y == a0 THEN x = a1 ELSE x = a2</span>
+<span class="sd">        x = ifne(y,a0,a1,a2) means IF y != a0 THEN x = a1 ELSE x = a2</span>
+<span class="sd">        x = ifle(y,a0,a1,a2) means IF y &lt;= a0 THEN x = a1 ELSE x = a2</span>
+<span class="sd">        x = ifge(y,a0,a1,a2) means IF y &gt;= a0 THEN x = a1 ELSE x = a2</span>
+<span class="sd">        x = iflt(y,a0,a1,a2) means IF y &gt; a0 THEN x = a1 ELSE x = a2</span>
+<span class="sd">        x = ifgt(y,a0,a1,a2) means IF y &lt; a0 THEN x = a1 ELSE x = a2</span>
+<span class="sd">        All parameters may be ndarray or float.</span>
+
+<span class="sd">        def ifeq(var1, iif, ithen, ielse):</span>
+<span class="sd">        def ifne(var1, iif, ithen, ielse):</span>
+<span class="sd">        def ifle(var1, iif, ithen, ielse):</span>
+<span class="sd">        def ifge(var1, iif, ithen, ielse):</span>
+<span class="sd">        def iflt(var1, iif, ithen, ielse):</span>
+<span class="sd">        def ifgt(var1, iif, ithen, ielse):</span>
+
+
+<span class="sd">    46. Write variables to a file # not implemented</span>
+
+
+<span class="sd">This module was written by Matthias Cuntz while at Department of</span>
+<span class="sd">Computational Hydrosystems, Helmholtz Centre for Environmental</span>
+<span class="sd">Research - UFZ, Leipzig, Germany, and continued while at Institut</span>
+<span class="sd">National de Recherche pour l&#39;Agriculture, l&#39;Alimentation et</span>
+<span class="sd">l&#39;Environnement (INRAE), Nancy, France.</span>
+
+<span class="sd">Copyright (c) 2014-2020 Matthias Cuntz - mc (at) macu (dot) de</span>
+<span class="sd">Released under the MIT License; see LICENSE file for details.</span>
+
+<span class="sd">* Written Jun-Dec 2014 by Matthias Cuntz (mc (at) macu (dot) de)</span>
+<span class="sd">* Corrected type in met_tpot, Jun 2014, Corinna Rebmann</span>
+<span class="sd">* Changed to Sphinx docstring and numpydoc, May 2020, Matthias Cuntz</span>
+
+<span class="sd">.. moduleauthor:: Matthias Cuntz</span>
+
+<span class="sd">.. autosummary::</span>
+<span class="sd">   varchs</span>
+<span class="sd">   varadd</span>
+<span class="sd">   varsub</span>
+<span class="sd">   varmul</span>
+<span class="sd">   vardiv</span>
+<span class="sd">   varsqr</span>
+<span class="sd">   varsqrt</span>
+<span class="sd">   varexp</span>
+<span class="sd">   varlog</span>
+<span class="sd">   varpot</span>
+<span class="sd">   lin</span>
+<span class="sd">   quad</span>
+<span class="sd">   cubic</span>
+<span class="sd">   hms</span>
+<span class="sd">   bit_test</span>
+<span class="sd">   setlow</span>
+<span class="sd">   sethigh</span>
+<span class="sd">   limits</span>
+<span class="sd">   mean</span>
+<span class="sd">   mini</span>
+<span class="sd">   maxi</span>
+<span class="sd">   met_lwrad</span>
+<span class="sd">   met_trad</span>
+<span class="sd">   met_alb</span>
+<span class="sd">   met_albl</span>
+<span class="sd">   met_vpmax</span>
+<span class="sd">   met_vpact</span>
+<span class="sd">   met_vpdef</span>
+<span class="sd">   met_sh</span>
+<span class="sd">   met_tpot</span>
+<span class="sd">   met_rho</span>
+<span class="sd">   met_dpt</span>
+<span class="sd">   met_h2oc</span>
+<span class="sd">   met_h2oc_rh</span>
+<span class="sd">   met_wdrot</span>
+<span class="sd">   met_urot</span>
+<span class="sd">   met_vrot</span>
+<span class="sd">   met_uv_wv</span>
+<span class="sd">   met_uv_wd</span>
+<span class="sd">   met_wvwd_u</span>
+<span class="sd">   met_wvwd_v</span>
+<span class="sd">   ifeq</span>
+<span class="sd">   ifne</span>
+<span class="sd">   ifle</span>
+<span class="sd">   ifge</span>
+<span class="sd">   iflt</span>
+<span class="sd">   ifgt</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="mf">5.67e-08</span>  <span class="c1"># Stefan-Boltzmann constant [W m^-2 K^-4]</span>
+<span class="n">T0</span>    <span class="o">=</span> <span class="mf">273.15</span>    <span class="c1"># Celcius &lt;-&gt; Kelvin [K]</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;varchs&#39;</span><span class="p">,</span> <span class="s1">&#39;varadd&#39;</span><span class="p">,</span> <span class="s1">&#39;varsub&#39;</span><span class="p">,</span> <span class="s1">&#39;varmul&#39;</span><span class="p">,</span> <span class="s1">&#39;vardiv&#39;</span><span class="p">,</span> <span class="s1">&#39;varsqr&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;varsqrt&#39;</span><span class="p">,</span> <span class="s1">&#39;varexp&#39;</span><span class="p">,</span> <span class="s1">&#39;varlog&#39;</span><span class="p">,</span> <span class="s1">&#39;varpot&#39;</span><span class="p">,</span> <span class="s1">&#39;lin&#39;</span><span class="p">,</span> <span class="s1">&#39;quad&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;cubic&#39;</span><span class="p">,</span> <span class="s1">&#39;hms&#39;</span><span class="p">,</span> <span class="s1">&#39;bit_test&#39;</span><span class="p">,</span> <span class="s1">&#39;setlow&#39;</span><span class="p">,</span> <span class="s1">&#39;sethigh&#39;</span><span class="p">,</span> <span class="s1">&#39;limits&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;mini&#39;</span><span class="p">,</span> <span class="s1">&#39;maxi&#39;</span><span class="p">,</span> <span class="s1">&#39;met_lwrad&#39;</span><span class="p">,</span> <span class="s1">&#39;met_trad&#39;</span><span class="p">,</span> <span class="s1">&#39;met_alb&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;met_albl&#39;</span><span class="p">,</span> <span class="s1">&#39;met_vpmax&#39;</span><span class="p">,</span> <span class="s1">&#39;met_vpact&#39;</span><span class="p">,</span> <span class="s1">&#39;met_vpdef&#39;</span><span class="p">,</span> <span class="s1">&#39;met_sh&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;met_tpot&#39;</span><span class="p">,</span> <span class="s1">&#39;met_rho&#39;</span><span class="p">,</span> <span class="s1">&#39;met_dpt&#39;</span><span class="p">,</span> <span class="s1">&#39;met_h2oc&#39;</span><span class="p">,</span> <span class="s1">&#39;met_h2oc_rh&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;met_wdrot&#39;</span><span class="p">,</span> <span class="s1">&#39;met_urot&#39;</span><span class="p">,</span> <span class="s1">&#39;met_vrot&#39;</span><span class="p">,</span> <span class="s1">&#39;met_uv_wv&#39;</span><span class="p">,</span> <span class="s1">&#39;met_uv_wd&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;met_wvwd_u&#39;</span><span class="p">,</span> <span class="s1">&#39;met_wvwd_v&#39;</span><span class="p">,</span> <span class="s1">&#39;ifeq&#39;</span><span class="p">,</span> <span class="s1">&#39;ifne&#39;</span><span class="p">,</span> <span class="s1">&#39;ifle&#39;</span><span class="p">,</span> <span class="s1">&#39;ifge&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;iflt&#39;</span><span class="p">,</span> <span class="s1">&#39;ifgt&#39;</span><span class="p">]</span>
+
+
+<span class="c1"># Not implemented: varset</span>
+
+
+<div class="viewcode-block" id="varchs"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.varchs">[docs]</a><span class="k">def</span> <span class="nf">varchs</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Change sign:</span>
+<span class="sd">        x = varchs(a) means x = -a, where a is ndarray or float.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Changed sign</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Dec 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">,</span> <span class="n">undef</span><span class="p">,</span> <span class="o">-</span><span class="n">a</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="varadd"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.varadd">[docs]</a><span class="k">def</span> <span class="nf">varadd</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Addition:</span>
+<span class="sd">        x = varadd(a, b) means x = a + b, where a and b are ndarray or float.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        input variable 1</span>
+<span class="sd">    b : ndarray</span>
+<span class="sd">        input variable 2</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Addition</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">b</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="varsub"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.varsub">[docs]</a><span class="k">def</span> <span class="nf">varsub</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Subtraction:</span>
+<span class="sd">        x = varsub(a, b) means x = a - b, where a and b are ndarray or float.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        input variable 1</span>
+<span class="sd">    b : ndarray</span>
+<span class="sd">        input variable 2</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Subtraction</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">b</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="varmul"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.varmul">[docs]</a><span class="k">def</span> <span class="nf">varmul</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Multiplication:</span>
+<span class="sd">        x = varmul(a, b) means x = a * b, where a and b are ndarray or float.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        input variable 1</span>
+<span class="sd">    b : ndarray</span>
+<span class="sd">        input variable 2</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Multiplication</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">b</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="vardiv"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.vardiv">[docs]</a><span class="k">def</span> <span class="nf">vardiv</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Division:</span>
+<span class="sd">        x = vardiv(a, b) means x = a/b, where a and b are ndarray or float.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        dividend</span>
+<span class="sd">    b : ndarray</span>
+<span class="sd">        divisor</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Division</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">b</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">_div</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">undef</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="varsqr"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.varsqr">[docs]</a><span class="k">def</span> <span class="nf">varsqr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Square root:</span>
+<span class="sd">        x = varsqr(a) means x = sqrt(a), where a is ndarray or float.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Square root</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="varsqrt"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.varsqrt">[docs]</a><span class="k">def</span> <span class="nf">varsqrt</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Square root:</span>
+<span class="sd">        x = varsqrt(a) means x = sqrt(a), where a is ndarray or float.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Square root</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="varexp"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.varexp">[docs]</a><span class="k">def</span> <span class="nf">varexp</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exponentiation of e:</span>
+<span class="sd">        x = varexp(a) means x = exp(a), where a is ndarray or float.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        exponent</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Exponentiation</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="varlog"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.varlog">[docs]</a><span class="k">def</span> <span class="nf">varlog</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Natural logarithm:</span>
+<span class="sd">        x = varlog(a) means x = ln(a), where a is ndarray or float.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Natural logarithm</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">a</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="varpot"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.varpot">[docs]</a><span class="k">def</span> <span class="nf">varpot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exponentiation:</span>
+<span class="sd">        x = varpot(a, b) means x = a**b, where a and b are ndarray or float.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        base</span>
+<span class="sd">    b : ndarray</span>
+<span class="sd">        exponent</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Exponentiation</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">b</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">a</span><span class="o">**</span><span class="n">b</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="lin"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.lin">[docs]</a><span class="k">def</span> <span class="nf">lin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply linear function:</span>
+<span class="sd">        x = lin(y, a0, a1) means x = a0 + a1 * y</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    a0 : ndarray or float</span>
+<span class="sd">        parameter 1</span>
+<span class="sd">    a1 : ndarray or float</span>
+<span class="sd">        parameter 2</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        linear function</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">a0</span> <span class="o">+</span> <span class="n">a1</span><span class="o">*</span><span class="n">y</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="quad"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.quad">[docs]</a><span class="k">def</span> <span class="nf">quad</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply 2nd order function:</span>
+<span class="sd">        x=quad(y,a0,a1,a2) means x = a0 + a1*y + a2*y**2</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    a0 : ndarray or float</span>
+<span class="sd">        parameter 1</span>
+<span class="sd">    a1 : ndarray or float</span>
+<span class="sd">        parameter 1</span>
+<span class="sd">    a2 : ndarray or float</span>
+<span class="sd">        parameter 1</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        2nd order function</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">a0</span> <span class="o">+</span> <span class="n">a1</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">a2</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">y</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cubic"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.cubic">[docs]</a><span class="k">def</span> <span class="nf">cubic</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply 3rd order function:</span>
+<span class="sd">        x=cubic(y,a0,a1,a2,a3) means x = a0 + a1*y + a2*y**2 + a3*y**3</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    a0 : ndarray or float</span>
+<span class="sd">        parameter 1</span>
+<span class="sd">    a1 : ndarray or float</span>
+<span class="sd">        parameter 2</span>
+<span class="sd">    a2 : ndarray or float</span>
+<span class="sd">        parameter 3</span>
+<span class="sd">    a3 : ndarray or float</span>
+<span class="sd">        parameter 4</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        3rd order function</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">a0</span> <span class="o">+</span> <span class="n">a1</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">a2</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">a3</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">y</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="hms"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.hms">[docs]</a><span class="k">def</span> <span class="nf">hms</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate fraction of day from hours, minutes and seconds:</span>
+<span class="sd">        x = hms(h, m, s) means x = (h + m/60 + s/3600)/24</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    h : ndarray</span>
+<span class="sd">        hour</span>
+<span class="sd">    m : ndarray</span>
+<span class="sd">        minute</span>
+<span class="sd">    s : ndarray</span>
+<span class="sd">        second</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        fraction of day</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">h</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">m</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">s</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="p">(</span><span class="n">h</span><span class="o">+</span><span class="n">m</span><span class="o">/</span><span class="mf">60.</span><span class="o">+</span><span class="n">s</span><span class="o">/</span><span class="mf">3600.</span><span class="p">)</span><span class="o">/</span><span class="mf">24.</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="bit_test"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.bit_test">[docs]</a><span class="k">def</span> <span class="nf">bit_test</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bitwise test:</span>
+<span class="sd">        x = bit_test(y, b, start=0) means x = 1 if bit b is set in y otherwise x = 0.</span>
+
+<span class="sd">    Returns a list if b is an array.</span>
+
+<span class="sd">    Counting of b starts at start.</span>
+
+<span class="sd">    For the behaviour of the original logger tools, set start=1.</span>
+<span class="sd">    Negative b&#39;s is not implemented.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable 1</span>
+<span class="sd">    b : int or ndarray</span>
+<span class="sd">        input variable 2</span>
+<span class="sd">    start : int, optional</span>
+<span class="sd">        Counting of `b` starts at start (default: 0)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int or list</span>
+<span class="sd">        Bitwise test</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;&gt;</span> <span class="n">i</span><span class="o">+</span><span class="n">start</span><span class="p">)</span><span class="o">%</span><span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">b</span> <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;&gt;</span> <span class="n">b</span><span class="o">+</span><span class="n">start</span><span class="p">)</span><span class="o">%</span><span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="setlow"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.setlow">[docs]</a><span class="k">def</span> <span class="nf">setlow</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">islow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Replacement of underflows by new value:</span>
+<span class="sd">        x = setlow(y,low,islow) means IF (y &lt; low) THEN x = islow ELSE x = y</span>
+
+<span class="sd">    islow is optional. If not given low will be used.</span>
+
+<span class="sd">    This function may be used to adjust small negative values of short wave radiation</span>
+<span class="sd">    during nighttime to zero values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    low : ndarray</span>
+<span class="sd">        lower threshold</span>
+<span class="sd">    islow : None or ndarray, optional</span>
+<span class="sd">        if not None, use islow in case of y &lt; low</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        underflows replaced by new value</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">islow</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">low</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">low</span><span class="p">,</span> <span class="n">islow</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">undef</span><span class="p">,</span> <span class="n">undef</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sethigh"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.sethigh">[docs]</a><span class="k">def</span> <span class="nf">sethigh</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">ishigh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Replacement of overflows by new value:</span>
+<span class="sd">        x = sethigh(y,high,ishigh) means IF (y &gt; high) THEN x = ishigh ELSE x = y</span>
+
+<span class="sd">    ishigh is optional. If not given high will be used.</span>
+
+<span class="sd">    This function may be used to adjust relative humidity values of a little bit more than 100 % to 100 %.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    high : ndarray</span>
+<span class="sd">        upper threshold</span>
+<span class="sd">    ishigh : None or ndarray, optional</span>
+<span class="sd">        if not None, use ishigh in case of y &gt; high</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        overflows replaced by new value</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ishigh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">high</span><span class="p">,</span> <span class="n">ishigh</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">undef</span><span class="p">,</span> <span class="n">undef</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="limits"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.limits">[docs]</a><span class="k">def</span> <span class="nf">limits</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">mini</span><span class="p">,</span> <span class="n">maxi</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Replacement of underflows or overflows by undef:</span>
+<span class="sd">        x = limits(y, mini, maxi) means IF (y &lt; mini) OR (y &gt; maxi) THEN x = undef ELSE x = y</span>
+
+<span class="sd">    This function may be used to check values lying in between certain limits.</span>
+
+<span class="sd">    If one of the limits is exceeded the value is set to undef.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    mini : ndarray</span>
+<span class="sd">        lower threshold</span>
+<span class="sd">    maxi : ndarray</span>
+<span class="sd">        upper threshold</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        underflows or overflows replaced by `undef`</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">mini</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">maxi</span><span class="p">),</span> <span class="n">y</span><span class="p">,</span> <span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mean"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.mean">[docs]</a><span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of mean value:</span>
+<span class="sd">        x = mean(y) means x = (y[0] + y[1] + ... + y[n-1])/n</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    axis : None or int or tuple of ints, optional</span>
+<span class="sd">        Axis or axes along which the means are computed.</span>
+<span class="sd">        The default is to compute the mean of the flattened array.</span>
+
+<span class="sd">        If this is a tuple of ints, a mean is performed over multiple axes,</span>
+<span class="sd">        instead of a single axis or all the axes as before.</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        mean value</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mini"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.mini">[docs]</a><span class="k">def</span> <span class="nf">mini</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of minimum value:</span>
+<span class="sd">        x = mini(y) means x = min(y[0],y[1],...,y[n-1])</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    axis : None or int or tuple of ints, optional</span>
+<span class="sd">        Axis or axes along which the minimum are computed.</span>
+<span class="sd">        The default is to compute the minimum of the flattened array.</span>
+
+<span class="sd">        If this is a tuple of ints, a minimum is performed over multiple axes,</span>
+<span class="sd">        instead of a single axis or all the axes as before.</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        minimum value</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="maxi"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.maxi">[docs]</a><span class="k">def</span> <span class="nf">maxi</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of maximum value:</span>
+<span class="sd">        x = maxi(y) means x = max(y[0],y[1],...,y[n-1])</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    axis : None or int or tuple of ints, optional</span>
+<span class="sd">        Axis or axes along which the maximum are computed.</span>
+<span class="sd">        The default is to compute the maximum of the flattened array.</span>
+
+<span class="sd">        If this is a tuple of ints, a maximum is performed over multiple axes,</span>
+<span class="sd">        instead of a single axis or all the axes as before.</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        maximum value</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<span class="c1"># Not implemented: met_torad</span>
+
+
+<div class="viewcode-block" id="met_lwrad"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_lwrad">[docs]</a><span class="k">def</span> <span class="nf">met_lwrad</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">Tp</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span> <span class="c1"># assumes that y was already multiplied with calibration factor</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of long wave radiation from net radiometer:</span>
+<span class="sd">        x = met_lwrad(y, Tp)</span>
+
+<span class="sd">    The total radiation in W m-2 is calculated according to the following formula:</span>
+<span class="sd">        x = y*fl + sigma*(Tp+T0)**4</span>
+
+<span class="sd">    where sigma = 5.67051 * 10**8 W m-2 K-4 is the Stephan-Boltzmann-Constant and</span>
+<span class="sd">    fl is the factor for long wave radiation (reciprocal value of sensitivity) in W m-2 per mV.</span>
+
+<span class="sd">    The function assumes that fl was already applied before.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        output voltage of the net radiometer [mV]</span>
+<span class="sd">    Tp : ndarray</span>
+<span class="sd">        pyranometer temperature, i.e. the temperature of the net radiometer body [degC]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        total radiation in W m-2</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">Tp</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">sigma</span> <span class="o">*</span> <span class="p">(</span><span class="n">Tp</span><span class="o">+</span><span class="n">T0</span><span class="p">)</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="met_trad"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_trad">[docs]</a><span class="k">def</span> <span class="nf">met_trad</span><span class="p">(</span><span class="n">Rl</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of radiation temperature from long wave radiation:</span>
+<span class="sd">        x = met_trad(Rl, epsilon)</span>
+
+<span class="sd">    The radiation temperature in degC is calculated according to the following formula:</span>
+<span class="sd">        x= sqrt4(Rl/(sigma*epsilon)) - T0</span>
+
+<span class="sd">    where sigma = 5.67051 * 108 W m-2 K-4 is the Stephan-Boltzmann-Constant.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Rl : ndarray</span>
+<span class="sd">        longwave radiation [W m-2]</span>
+<span class="sd">    epsilon : ndarray</span>
+<span class="sd">        long wave emissivity of the surface [0-1]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        radiation temperature in degC</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">const</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">epsilon</span><span class="o">*</span><span class="n">sigma</span><span class="p">)</span>
+    <span class="n">trad</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">const</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Rl</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">Rl</span><span class="o">==</span><span class="n">undef</span><span class="p">))))</span> <span class="o">-</span> <span class="n">T0</span>
+    <span class="k">return</span> <span class="n">trad</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="met_alb"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_alb">[docs]</a><span class="k">def</span> <span class="nf">met_alb</span><span class="p">(</span><span class="n">swd</span><span class="p">,</span> <span class="n">swu</span><span class="p">,</span> <span class="n">swdmin</span><span class="o">=</span><span class="mf">50.</span><span class="p">,</span> <span class="n">swumin</span><span class="o">=</span><span class="mf">10.</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of albedo from short wave downward and upward radiation:</span>
+<span class="sd">        x = met_alb(swd, swu)</span>
+
+<span class="sd">    The albedo in % is calculated according to the following formula:</span>
+<span class="sd">        x = 100 * ( swu / swd )</span>
+
+<span class="sd">    If swd &lt; swdmin (50 W m-2) or swu &lt; swumin (10 W m-2) the result is undef.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    swd : ndarray</span>
+<span class="sd">        shortwave downward radiation [W m-2]</span>
+<span class="sd">    swu : ndarray</span>
+<span class="sd">        shortwave upward radiation [W m-2]</span>
+<span class="sd">    swdmin : float, optional</span>
+<span class="sd">        If `swd` &lt; `swdmin` the result is undef (default: 50).</span>
+<span class="sd">    swumin : float, optional</span>
+<span class="sd">        If `swu` &lt; `swumin` the result is undef (default: 10).</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        albedo in %</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">swd</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">swu</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">swd</span><span class="o">&lt;</span><span class="n">swdmin</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">swu</span><span class="o">&lt;</span><span class="n">swumin</span><span class="p">),</span>
+                    <span class="n">undef</span><span class="p">,</span> <span class="n">_div</span><span class="p">(</span><span class="n">swu</span><span class="o">*</span><span class="mf">100.</span><span class="p">,</span> <span class="n">swd</span><span class="p">,</span> <span class="n">undef</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="met_albl"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_albl">[docs]</a><span class="k">def</span> <span class="nf">met_albl</span><span class="p">(</span><span class="n">swd</span><span class="p">,</span> <span class="n">swu</span><span class="p">,</span> <span class="n">swdmin</span><span class="p">,</span> <span class="n">swumin</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of albedo from short wave downward and upward radiation with limits:</span>
+<span class="sd">        x=met_albl(swd,swu,swdmin,swumin)</span>
+
+<span class="sd">    The albedo in % is calculated according to the following formula:</span>
+<span class="sd">        x = 100 * ( swu / swd )</span>
+
+<span class="sd">    If swd &lt; swdmin or swu &lt; swumin the result is `undef`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    swd : ndarray</span>
+<span class="sd">        shortwave downward radiation [W m-2]</span>
+<span class="sd">    swu : ndarray</span>
+<span class="sd">        shortwave upward radiation [W m-2]</span>
+<span class="sd">    swdmin : float</span>
+<span class="sd">        If `swd` &lt; `swdmin` the result is undef.</span>
+<span class="sd">    swumin : float</span>
+<span class="sd">        If `swu` &lt; `swumin` the result is undef.</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        albedo in %</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">swd</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">swu</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">swd</span><span class="o">&lt;</span><span class="n">swdmin</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">swu</span><span class="o">&lt;</span><span class="n">swumin</span><span class="p">),</span>
+                    <span class="n">undef</span><span class="p">,</span> <span class="n">_div</span><span class="p">(</span><span class="n">swu</span><span class="o">*</span><span class="mf">100.</span><span class="p">,</span> <span class="n">swd</span><span class="p">,</span> <span class="n">undef</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="met_vpmax"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_vpmax">[docs]</a><span class="k">def</span> <span class="nf">met_vpmax</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of saturation water vapour pressure:</span>
+<span class="sd">        x = met_vpmax(T) where</span>
+
+<span class="sd">    The saturation water vapour pressure in mbar (hPa) is calculated according to the following formula:</span>
+<span class="sd">        x = 6.1078 * exp(17.08085 * T / (234.175 + T))</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temp : ndarray</span>
+<span class="sd">        air temperature [degC]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        saturation water vapour pressure in mbar (hPa)</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">_esat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temp</span><span class="o">+</span><span class="n">T0</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">temp</span><span class="o">==</span><span class="n">undef</span><span class="p">)))</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="k">return</span> <span class="n">es</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="met_vpact"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_vpact">[docs]</a><span class="k">def</span> <span class="nf">met_vpact</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">rh</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of actual water vapour pressure:</span>
+<span class="sd">        x = met_vpact(T,rh)</span>
+
+<span class="sd">    The actual water vapour pressure in mbar (hPa) is calculated according to the following formulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/ (234.175 + T))</span>
+
+<span class="sd">        x = Es * rh/100</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temp : ndarray</span>
+<span class="sd">        air temperature [degC]</span>
+<span class="sd">    rh : ndarray</span>
+<span class="sd">        relative humidity [%]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        actual water vapour pressure in mbar (hPa)</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">_esat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temp</span><span class="o">+</span><span class="n">T0</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">((</span><span class="n">temp</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">rh</span><span class="o">==</span><span class="n">undef</span><span class="p">))))</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">ea</span> <span class="o">=</span> <span class="n">es</span><span class="o">*</span><span class="n">rh</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="k">return</span> <span class="n">ea</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="met_vpdef"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_vpdef">[docs]</a><span class="k">def</span> <span class="nf">met_vpdef</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">rh</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of water vapour pressure deficit:</span>
+<span class="sd">        x = met_vpdef(T, rh)</span>
+
+<span class="sd">    The water vapour pressure deficit in mbar (hPa) is calculated according to the following formulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/ (234.175 + T))</span>
+
+<span class="sd">        E = Es * rh/100</span>
+
+<span class="sd">        x = Es - E</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temp : ndarray</span>
+<span class="sd">        air temperature [degC]</span>
+<span class="sd">    rh : ndarray</span>
+<span class="sd">        relative humidity [%]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        water vapour pressure deficit in mbar (hPa)</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">es</span>  <span class="o">=</span> <span class="n">_esat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temp</span><span class="o">+</span><span class="n">T0</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">((</span><span class="n">temp</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">rh</span><span class="o">==</span><span class="n">undef</span><span class="p">))))</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">ea</span>  <span class="o">=</span> <span class="n">es</span><span class="o">*</span><span class="n">rh</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">vpd</span> <span class="o">=</span> <span class="n">es</span> <span class="o">-</span> <span class="n">ea</span>
+    <span class="k">return</span> <span class="n">vpd</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="met_sh"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_sh">[docs]</a><span class="k">def</span> <span class="nf">met_sh</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">rh</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of specific humidity:</span>
+<span class="sd">        x = met_sh(T, rh, p)</span>
+
+<span class="sd">    The specific humidity in g kg-1 is calculated according to the following formulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/ (234.175 + T))</span>
+
+<span class="sd">        E = Es * rh/100</span>
+
+<span class="sd">        x = 622 * E/(p-0.378*E)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temp : ndarray</span>
+<span class="sd">        air temperature [degC]</span>
+<span class="sd">    rh : ndarray</span>
+<span class="sd">        relative humidity [%]</span>
+<span class="sd">    p : ndarray</span>
+<span class="sd">        air pressure [hPa = mbar]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        specific humidity in g kg-1</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">_esat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temp</span><span class="o">+</span><span class="n">T0</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">((</span><span class="n">temp</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">rh</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">p</span><span class="o">==</span><span class="n">undef</span><span class="p">))))</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">ea</span> <span class="o">=</span> <span class="n">es</span><span class="o">*</span><span class="n">rh</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">sh</span> <span class="o">=</span>  <span class="n">_div</span><span class="p">(</span><span class="mf">622.</span><span class="o">*</span><span class="n">ea</span><span class="p">,</span> <span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mf">0.378</span><span class="o">*</span><span class="n">ea</span><span class="p">),</span> <span class="n">undef</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sh</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="met_tpot"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_tpot">[docs]</a><span class="k">def</span> <span class="nf">met_tpot</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of potential temperature:</span>
+<span class="sd">        x = met_tpot(T, p)</span>
+
+<span class="sd">    The potential temperature in K is calculated according to the following formula:</span>
+<span class="sd">        x = (T + T0) * (1000/p)**0.286</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temp : ndarray</span>
+<span class="sd">        air temperature [degC]</span>
+<span class="sd">    p : ndarray</span>
+<span class="sd">        air pressure [hPa = mbar]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        potential temperature in K</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">temp</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">p</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="p">(</span><span class="n">temp</span><span class="o">+</span><span class="n">T0</span><span class="p">)</span><span class="o">*</span><span class="n">_div</span><span class="p">(</span><span class="mf">1000.</span><span class="p">,</span><span class="n">p</span><span class="p">)</span><span class="o">**</span><span class="mf">0.286</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="met_rho"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_rho">[docs]</a><span class="k">def</span> <span class="nf">met_rho</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">rh</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of air density:</span>
+<span class="sd">        x = met_rho(T, rh, p)</span>
+
+<span class="sd">    The air density in kg m-3 is calculated according to the following formulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/ (234.175 + T))</span>
+
+<span class="sd">        E = Es * rh/100</span>
+
+<span class="sd">        sh = 622 * E/(p-0.378*E)</span>
+
+<span class="sd">        Tv = ((T + T0) * (1 + 0.000608 * sh)) - T0</span>
+
+<span class="sd">        x = p * 100 / (287.05 * (Tv + T0))</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temp : ndarray</span>
+<span class="sd">        air temperature [degC]</span>
+<span class="sd">    rh : ndarray</span>
+<span class="sd">        relative humidity [%]</span>
+<span class="sd">    p : ndarray</span>
+<span class="sd">        air pressure [hPa = mbar]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        air density in kg m-3</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">es</span>  <span class="o">=</span> <span class="n">_esat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temp</span><span class="o">+</span><span class="n">T0</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">((</span><span class="n">temp</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">rh</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">p</span><span class="o">==</span><span class="n">undef</span><span class="p">))))</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">ea</span>  <span class="o">=</span> <span class="n">es</span><span class="o">*</span><span class="n">rh</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">sh</span>  <span class="o">=</span> <span class="n">_div</span><span class="p">(</span><span class="mf">622.</span><span class="o">*</span><span class="n">ea</span><span class="p">,</span> <span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mf">0.378</span><span class="o">*</span><span class="n">ea</span><span class="p">),</span> <span class="n">undef</span><span class="p">)</span>
+    <span class="n">Tv</span>  <span class="o">=</span> <span class="p">((</span><span class="n">temp</span><span class="o">+</span><span class="n">T0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mf">0.000608</span><span class="o">*</span><span class="n">sh</span><span class="p">))</span> <span class="o">-</span> <span class="n">T0</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">_div</span><span class="p">(</span><span class="n">p</span><span class="o">*</span><span class="mf">100.</span><span class="p">,</span> <span class="p">(</span><span class="mf">287.05</span><span class="o">*</span><span class="p">(</span><span class="n">Tv</span><span class="o">+</span><span class="n">T0</span><span class="p">)),</span> <span class="n">undef</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rho</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="met_dpt"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_dpt">[docs]</a><span class="k">def</span> <span class="nf">met_dpt</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">rh</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of dew point temperature:</span>
+<span class="sd">        x = met_dpt(T, rh)</span>
+
+<span class="sd">    The dew point temperature in degC is calculated according to the following formulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/(234.175 + T))</span>
+
+<span class="sd">        E = Es * rh/100</span>
+
+<span class="sd">        x = 234.175 * ln(E/6.1078)/(17.08085 - ln(E/6.1078))</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temp : ndarray</span>
+<span class="sd">        air temperature [degC]</span>
+<span class="sd">    rh : ndarray</span>
+<span class="sd">        relative humidity [%]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        dew point temperature in degC</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">_esat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temp</span><span class="o">+</span><span class="n">T0</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">((</span><span class="n">temp</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">rh</span><span class="o">==</span><span class="n">undef</span><span class="p">))))</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">ea</span> <span class="o">=</span> <span class="n">es</span><span class="o">*</span><span class="n">rh</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">dpt</span> <span class="o">=</span> <span class="mf">234.175</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ea</span><span class="o">/</span><span class="mf">6.1078</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">17.08085</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ea</span><span class="o">/</span><span class="mf">6.1078</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">dpt</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="met_h2oc"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_h2oc">[docs]</a><span class="k">def</span> <span class="nf">met_h2oc</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">rh</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of water vapour concentration:</span>
+<span class="sd">        x = met_h2oc(T, rh, p)</span>
+
+<span class="sd">    The water vapour concentration in mmol mol-1 is calculated according to the following formulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/ (234.175 + T))</span>
+
+<span class="sd">        E = Es * rh/100</span>
+
+<span class="sd">        x = 0.1 * E /(0.001*p*100*0.001)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temp : ndarray</span>
+<span class="sd">        air temperature [degC]</span>
+<span class="sd">    rh : ndarray</span>
+<span class="sd">        relative humidity [%]</span>
+<span class="sd">    p : ndarray</span>
+<span class="sd">        air pressure [hPa = mbar]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        water vapour concentration in mmol mol-1</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">_esat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temp</span><span class="o">+</span><span class="n">T0</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">((</span><span class="n">temp</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">rh</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">p</span><span class="o">==</span><span class="n">undef</span><span class="p">))))</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">ea</span> <span class="o">=</span> <span class="n">es</span><span class="o">*</span><span class="n">rh</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">c</span>  <span class="o">=</span> <span class="n">_div</span><span class="p">(</span><span class="mf">1000.</span><span class="o">*</span><span class="n">ea</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">undef</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<span class="c1"># Not implemented: met_psy_rh</span>
+
+
+<span class="c1"># Not implemented: met_dpt_rh</span>
+
+
+<div class="viewcode-block" id="met_h2oc_rh"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_h2oc_rh">[docs]</a><span class="k">def</span> <span class="nf">met_h2oc_rh</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of relative humidity from water vapour concentration:</span>
+<span class="sd">        x = met_h2oc_rh(T, [H2O], p)</span>
+
+<span class="sd">    The relative humidity in % is calculated according to the following formulas:</span>
+<span class="sd">        Es = 6.1078*exp(17.08085*T/(234.175 + T))</span>
+
+<span class="sd">        E = 10 * [H2O] * 0.001 * p * 100 * 0.001</span>
+
+<span class="sd">        x = 100 * E / Es</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temp : ndarray</span>
+<span class="sd">        air temperature [degC]</span>
+<span class="sd">    h : ndarray</span>
+<span class="sd">        water vapour concentration [mmol mol-1]</span>
+<span class="sd">    p : ndarray</span>
+<span class="sd">        air pressure [hPa = mbar]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        relative humidity in %</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">_esat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temp</span><span class="o">+</span><span class="n">T0</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">((</span><span class="n">temp</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">h</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">p</span><span class="o">==</span><span class="n">undef</span><span class="p">))))</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">ea</span> <span class="o">=</span> <span class="mf">0.001</span> <span class="o">*</span> <span class="n">h</span> <span class="o">*</span> <span class="n">p</span>
+    <span class="n">c</span>  <span class="o">=</span> <span class="mf">100.</span><span class="o">*</span><span class="n">ea</span><span class="o">/</span><span class="n">es</span>
+    <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="met_wdrot"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_wdrot">[docs]</a><span class="k">def</span> <span class="nf">met_wdrot</span><span class="p">(</span><span class="n">wd</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rotation of wind direction:</span>
+<span class="sd">        x = met_wdrot(wd, a)</span>
+
+<span class="sd">    The rotated wind direction is calculated according to the following formulas:</span>
+<span class="sd">        x = wd + a</span>
+
+<span class="sd">        IF x &lt; 0 THEN x = x + 360</span>
+
+<span class="sd">        IF x &lt;= 360 THEN x = x - 360</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    wd : ndarray</span>
+<span class="sd">        wind direction [degree]</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        rotation angle (positive is clockwise) [degree]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        rotated wind direction</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wd</span><span class="o">+</span><span class="n">a</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">((</span><span class="n">wd</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">)))</span>
+    <span class="n">rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rot</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">rot</span><span class="o">+</span><span class="mf">360.</span><span class="p">,</span> <span class="n">rot</span><span class="p">)</span>
+    <span class="n">rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rot</span> <span class="o">&gt;=</span> <span class="mf">360.</span><span class="p">,</span> <span class="n">rot</span><span class="o">-</span><span class="mf">360.</span><span class="p">,</span> <span class="n">rot</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rot</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="met_urot"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_urot">[docs]</a><span class="k">def</span> <span class="nf">met_urot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rotation of u-component of wind vector:</span>
+<span class="sd">        x = met_urot(u, v, a)</span>
+
+<span class="sd">    The rotated u-component is calculated according to the following formula:</span>
+<span class="sd">        x = u * cos (a) + v * sin (a)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    u : ndarray</span>
+<span class="sd">        u-component of the wind vector</span>
+<span class="sd">    v : ndarray</span>
+<span class="sd">        v-component of the wind vector</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        rotation angle (positive is clockwise) [degree]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        rotated u-component</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">u</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">v</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">u</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">+</span> <span class="n">v</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="met_vrot"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_vrot">[docs]</a><span class="k">def</span> <span class="nf">met_vrot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rotation of v-component of wind vector:</span>
+<span class="sd">        x = met_vrot(u, v, a)</span>
+
+<span class="sd">    The rotated v-component is calculated according to the following formula:</span>
+<span class="sd">        x = -u * sin (a) + v * cos (a)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    u : ndarray</span>
+<span class="sd">        u-component of the wind vector</span>
+<span class="sd">    v : ndarray</span>
+<span class="sd">        v-component of the wind vector</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        rotation angle (positive is clockwise) [degree]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        rotated v-component</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">u</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">v</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="o">-</span><span class="n">u</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">+</span> <span class="n">v</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="met_uv_wv"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_uv_wv">[docs]</a><span class="k">def</span> <span class="nf">met_uv_wv</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of wind velocity from u- and v-component of wind vector:</span>
+<span class="sd">        x = met_uv_wv(u, v)</span>
+
+<span class="sd">    The horizontal wind velocity is calculated according to the following formula:</span>
+<span class="sd">        x = sqrt(u**2 + v**2)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    u : ndarray</span>
+<span class="sd">        u-component of the wind vector</span>
+<span class="sd">    v : ndarray</span>
+<span class="sd">        v-component of the wind vector</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        horizontal wind velocity</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">u</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">v</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">u</span><span class="o">*</span><span class="n">u</span> <span class="o">+</span> <span class="n">v</span><span class="o">*</span><span class="n">v</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="met_uv_wd"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_uv_wd">[docs]</a><span class="k">def</span> <span class="nf">met_uv_wd</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of wind direction from u- and v-component of wind vector:</span>
+<span class="sd">        x = met_uv_wd(u, v)</span>
+
+<span class="sd">    The horizontal wind velocity is calculated according to the following formulas:</span>
+<span class="sd">        IF u = 0 AND v = 0 THEN x = 0</span>
+
+<span class="sd">        IF u = 0 AND v &lt; 0 THEN x = 360</span>
+
+<span class="sd">        IF u = 0 AND v &gt; 0 THEN x = 180</span>
+
+<span class="sd">        IF u &gt; 0 THEN x = 270 - arctan(v/u)</span>
+
+<span class="sd">        IF u &lt; 0 THEN x = 90 - arctan(v/u)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    u : ndarray</span>
+<span class="sd">        u-component of the wind vector</span>
+<span class="sd">    v : ndarray</span>
+<span class="sd">        v-component of the wind vector</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        horizontal wind velocity</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">wd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">wd</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">u</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">v</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span>
+    <span class="n">wd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">u</span><span class="o">==</span><span class="mf">0.</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">v</span><span class="o">==</span><span class="mf">0.</span><span class="p">),</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">wd</span><span class="p">)</span>
+    <span class="n">wd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">u</span><span class="o">==</span><span class="mf">0.</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">v</span><span class="o">&lt;</span><span class="mf">0.</span><span class="p">),</span> <span class="mf">360.</span><span class="p">,</span> <span class="n">wd</span><span class="p">)</span>
+    <span class="n">wd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">u</span><span class="o">==</span><span class="mf">0.</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">v</span><span class="o">&gt;</span><span class="mf">0.</span><span class="p">),</span> <span class="mf">180.</span><span class="p">,</span> <span class="n">wd</span><span class="p">)</span>
+    <span class="n">wd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">u</span><span class="o">&gt;</span><span class="mf">0.</span><span class="p">),</span> <span class="mf">270.</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">v</span><span class="o">/</span><span class="n">u</span><span class="p">)),</span> <span class="n">wd</span><span class="p">)</span>
+    <span class="n">wd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">u</span><span class="o">&lt;</span><span class="mf">0.</span><span class="p">),</span> <span class="mf">90.</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">v</span><span class="o">/</span><span class="n">u</span><span class="p">)),</span> <span class="n">wd</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wd</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">undef</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="met_wvwd_u"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_wvwd_u">[docs]</a><span class="k">def</span> <span class="nf">met_wvwd_u</span><span class="p">(</span><span class="n">wv</span><span class="p">,</span> <span class="n">wd</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of u-component of wind vector from wind velocity and wind direction:</span>
+<span class="sd">        x = met_wvwd_u(wv, wd)</span>
+
+<span class="sd">    The u-component of the wind vector is calculated according to the following formula:</span>
+<span class="sd">        x = -wv * sin (wd)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    wv : ndarray</span>
+<span class="sd">        horizontal wind velocity [m s-1]</span>
+<span class="sd">    wd : ndarray</span>
+<span class="sd">        horizontal wind direction [degree]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        u-component of the wind vector</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">wv</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">wd</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="o">-</span><span class="n">wv</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">wd</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="met_wvwd_v"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.met_wvwd_v">[docs]</a><span class="k">def</span> <span class="nf">met_wvwd_v</span><span class="p">(</span><span class="n">wv</span><span class="p">,</span> <span class="n">wd</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculation of v-component of wind vector from wind velocity and wind direction:</span>
+<span class="sd">        x = met_wvwd_v(wv, wd)</span>
+
+<span class="sd">    The v-component of the wind vector is calculated according to the following formula:</span>
+<span class="sd">        x = -wv * cos (wd)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    wv : ndarray</span>
+<span class="sd">        horizontal wind velocity [m s-1]</span>
+<span class="sd">    wd : ndarray</span>
+<span class="sd">        horizontal wind direction [degree]</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        v-component of the wind vector</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">wv</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">wd</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="o">-</span><span class="n">wv</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">wd</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="ifeq"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.ifeq">[docs]</a><span class="k">def</span> <span class="nf">ifeq</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If-statements:</span>
+<span class="sd">        x = ifeq(y,a0,a1,a2) means IF y == a0 THEN x = a1 ELSE x = a2</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    a0 : ndarray</span>
+<span class="sd">        compare to input `y == a0`</span>
+<span class="sd">    a1 : ndarray</span>
+<span class="sd">        result if `y == a0`</span>
+<span class="sd">    a2 : ndarray</span>
+<span class="sd">        result if `y != a0`</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        IF y == a0 THEN x = a1 ELSE x = a2</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a0</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a1</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a2</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ifne"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.ifne">[docs]</a><span class="k">def</span> <span class="nf">ifne</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If-statements:</span>
+<span class="sd">        x = ifne(y,a0,a1,a2) means IF y != a0 THEN x = a1 ELSE x = a2</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    a0 : ndarray</span>
+<span class="sd">        compare to input `y != a0`</span>
+<span class="sd">    a1 : ndarray</span>
+<span class="sd">        result if `y != a0`</span>
+<span class="sd">    a2 : ndarray</span>
+<span class="sd">        result if `y == a0`</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">    a0 : ndarray</span>
+<span class="sd">    a1 : ndarray</span>
+<span class="sd">    a2 : ndarray</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        IF y != a0 THEN x = a1 ELSE x = a2</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">!=</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a0</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a1</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a2</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ifle"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.ifle">[docs]</a><span class="k">def</span> <span class="nf">ifle</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If-statements:</span>
+<span class="sd">        x = ifle(y,a0,a1,a2) means IF y &gt;= a0 THEN x = a1 ELSE x = a2</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    a0 : ndarray</span>
+<span class="sd">        compare to input `y &lt;= a0`</span>
+<span class="sd">    a1 : ndarray</span>
+<span class="sd">        result if `y &lt;= a0`</span>
+<span class="sd">    a2 : ndarray</span>
+<span class="sd">        result if `y &gt; a0`</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        IF y &gt;= a0 THEN x = a1 ELSE x = a2</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a0</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a1</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a2</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ifge"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.ifge">[docs]</a><span class="k">def</span> <span class="nf">ifge</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If-statements:</span>
+<span class="sd">        x = ifge(y,a0,a1,a2) means IF y &lt;= a0 THEN x = a1 ELSE x = a2</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    a0 : ndarray</span>
+<span class="sd">        compare to input `y &gt;= a0`</span>
+<span class="sd">    a1 : ndarray</span>
+<span class="sd">        result if `y &gt;= a0`</span>
+<span class="sd">    a2 : ndarray</span>
+<span class="sd">        result if `y &lt; a0`</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        IF y &lt;= a0 THEN x = a1 ELSE x = a2</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a0</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a1</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a2</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="iflt"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.iflt">[docs]</a><span class="k">def</span> <span class="nf">iflt</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If-statements:</span>
+<span class="sd">        x = iflt(y,a0,a1,a2) means IF y &lt; a0 THEN x = a1 ELSE x = a2</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    a0 : ndarray</span>
+<span class="sd">        compare to input `y &lt; a0`</span>
+<span class="sd">    a1 : ndarray</span>
+<span class="sd">        result if `y &lt; a0`</span>
+<span class="sd">    a2 : ndarray</span>
+<span class="sd">        result if `y &gt;= a0`</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        IF y &lt; a0 THEN x = a1 ELSE x = a2</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a0</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a1</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a2</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ifgt"><a class="viewcode-back" href="../../../logtools.logtools.html#hesseflux.logtools.logtools.ifgt">[docs]</a><span class="k">def</span> <span class="nf">ifgt</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If-statements:</span>
+<span class="sd">        x = ifgt(y,a0,a1,a2) means IF y &gt; a0 THEN x = a1 ELSE x = a2</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        input variable</span>
+<span class="sd">    a0 : ndarray</span>
+<span class="sd">        compare to input `y &gt; a0`</span>
+<span class="sd">    a1 : ndarray</span>
+<span class="sd">        result if `y &gt; a0`</span>
+<span class="sd">    a2 : ndarray</span>
+<span class="sd">        result if `y &lt;= a0`</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        elements are excluded from the calculations if any of the inputs equals `undef` (default: -9999.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        IF y &gt; a0 THEN x = a1 ELSE x = a2</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jun 2014</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">y</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a0</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a1</span><span class="o">==</span><span class="n">undef</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">a2</span><span class="o">==</span><span class="n">undef</span><span class="p">),</span> <span class="n">undef</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span></div>
+
+
+<span class="c1"># Not implemented: write</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># Local replacement functions if helper functions do not exist in library</span>
+<span class="c1">#</span>
+
+<span class="k">def</span> <span class="nf">_div</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">otherwise</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">prec</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Divide two arrays, return `otherwise` if division by 0.</span>
+
+<span class="sd">    Copy of ..division.py</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : array_like</span>
+<span class="sd">        enumerator</span>
+<span class="sd">    b : array_like</span>
+<span class="sd">        denominator</span>
+<span class="sd">    otherwise : float</span>
+<span class="sd">        value to return if `b=0` (default: `np.nan`)</span>
+<span class="sd">    prec : float</span>
+<span class="sd">        if |b|&lt;|prec| then `otherwise`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        ratio : numpy array or masked array</span>
+<span class="sd">        a/b        if |b| &gt;  |prec|</span>
+
+<span class="sd">        otherwise  if |b| &lt;= |prec|</span>
+
+<span class="sd">        Output is numpy array. It is a masked array if at least one</span>
+<span class="sd">        of `a` or `b` is a masked array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">oldsettings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">geterr</span><span class="p">()</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="n">otherwise</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="n">otherwise</span><span class="p">)</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="o">**</span><span class="n">oldsettings</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span> <span class="nf">_esat</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the saturation vapour pressure of water with the Goff-Gratch formula.</span>
+
+<span class="sd">    From ..esat.py</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T : ndarray</span>
+<span class="sd">        Temperature [K]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Saturation water pressure at temperature T in Pascal [Pa].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Ts</span>  <span class="o">=</span> <span class="mf">373.16</span>    <span class="c1"># steam point temperature in K</span>
+    <span class="n">ews</span> <span class="o">=</span> <span class="mf">1013.246</span>  <span class="c1"># saturation pressure at steam point temperature, normal atmosphere</span>
+    <span class="n">esat_liq</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">7.90298</span><span class="o">*</span><span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span> <span class="o">+</span> <span class="mf">5.02808</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T</span><span class="p">)</span>
+                     <span class="o">-</span> <span class="mf">1.3816e-7</span> <span class="o">*</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">11.344</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">T</span><span class="o">/</span><span class="n">Ts</span><span class="p">))</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+                     <span class="o">+</span> <span class="mf">8.1328e-3</span> <span class="o">*</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">3.49149</span><span class="o">*</span><span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T</span><span class="o">-</span><span class="mf">1.</span><span class="p">))</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ews</span><span class="p">))</span> <span class="c1"># [hPa]</span>
+    <span class="k">return</span> <span class="n">esat_liq</span> <span class="o">*</span> <span class="mf">100.</span> <span class="c1"># [Pa]</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">optionflags</span><span class="o">=</span><span class="n">doctest</span><span class="o">.</span><span class="n">NORMALIZE_WHITESPACE</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../contents.html">hesseflux</a></h1>
+
+
+
+<p class="blurb">Functions used in the processing and post-processing of Eddy covariance flux data</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../package.html">API</a></li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/mcuntz/hesseflux">hesseflux @ GitHub</a></li>
+    
+    <li class="toctree-l1"><a href="https://doi.org/10.5281/zenodo.3831488">hesseflux @ Zenodo</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/hesseflux/">hesseflux @ PyPI</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../contents.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2009-2022, Matthias Cuntz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

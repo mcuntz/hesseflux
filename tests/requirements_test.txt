@@ -1,8 +1,0 @@
-setuptools
-coverage
-coveralls
-pytest-cov
-numpy
-scipy
-matplotlib
-pandas

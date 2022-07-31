@@ -1,0 +1,111 @@
+/** css/custom.css **/
+
+/* This line is theme specific - it includes the base theme CSS */
+@import '../alabaster.css';  /* for Alabaster */
+/*@import 'theme.css';       /* for the Read the Docs theme */
+
+/* https://gist.github.com/tehilinski/Sphinx_alabaster_custom.css */
+
+body {
+    font-family: Liberation Sans, DejaVu Sans, sans serif, sans;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+div.body {
+    font-size: 100%;
+}
+
+div.document {
+    height: 100%;
+}
+
+div.documentwrapper {
+    height: 100%;
+}
+
+/* body headers */
+
+div.body h1, div.body h2, div.body h3 {
+    font-family: Liberation Sans, DejaVu Sans, sans serif, sans;
+    font-weight: bold;
+}
+
+div.body h1 {
+    text-indent: -1em;
+    font-size: 150%;
+}
+
+div.body h2 {
+    text-indent: -1em;
+    font-size: 130%;
+    margin-top: 2em;
+}
+
+div.body h3 {
+    font-size: 120%;
+    margin-top: 2em;
+}
+
+div.body h4 {
+    font-size: 110%;
+    font-family: Liberation Serif, DejaVu Serif, serif, sans;
+    font-weight: bold;
+    margin-top: 2em;
+}
+
+/* sidebar */
+
+div.sphinxsidebar {
+    height: 100%;
+    font-size: 90%;
+}
+
+div.sphinxsidebar p.caption {
+    font-weight: bold;
+    font-size: 130%;
+}
+
+div.sphinxsidebar h1
+{
+    text-indent: 0;
+    font-size: 150%;
+}
+
+div.sphinxsidebar h2
+{
+    text-indent: 0;
+    font-size: 100%;
+}
+
+div.sphinxsidebar h3
+{
+    text-indent: 0;
+    font-size: 100%;
+}
+
+/* pre background will be lighter; no italics */
+pre, tt, code {
+    background-color: #F5F5F5;
+    font-size: 90%;
+    font-family: Liberation Mono, DejaVu San Mono, Monospace, fixed;
+}
+
+.highlight .c1 {
+    font-style: normal;
+}
+
+/* tables */
+
+table.docutils td, table.docutils th {
+    border-color: #E5E5E5;	/* lighten */
+}
+
+/* https://stackoverflow.com/questions/60199526/how-to-create-a-horizontal-line-and-white-space-between-function-signatures-in-s */
+
+.function {
+    border-bottom: 2px solid #d0d0d0;
+    padding-bottom: 30px;
+    padding-top: 30px;
+}

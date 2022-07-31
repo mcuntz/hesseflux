@@ -1,0 +1,398 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hesseflux.date2dec &#8212; hesseflux 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="hesseflux.dec2date" href="dec2date.html" />
+    <link rel="prev" title="hesseflux.const" href="const.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-hesseflux.date2dec">
+<span id="hesseflux-date2dec"></span><h1>hesseflux.date2dec<a class="headerlink" href="#module-hesseflux.date2dec" title="Permalink to this headline">¶</a></h1>
+<p>date2dec : Converts calendar dates into decimal dates.</p>
+<p>This module was written by Arndt Piayda and then enhanced and
+maintained by Matthias Cuntz while at Department of Computational
+Hydrosystems, Helmholtz Centre for Environmental Research - UFZ,
+Leipzig, Germany, and continued by Matthias Cuntz while at Institut
+National de Recherche pour l’Agriculture, l’Alimentation et
+l’Environnement (INRAE), Nancy, France.</p>
+<p>Copyright (c) 2010-2020 Matthias Cuntz - mc (at) macu (dot) de
+Released under the MIT License; see LICENSE file for details.</p>
+<ul class="simple">
+<li><p>Written Jun 2010 by Arndt Piayda</p></li>
+<li><p>Input can be scalar, list, array, or mix of it, Feb 2012, Matthias Cuntz</p></li>
+<li><p>Changed checks, added calendars decimal and decimal360, Feb 2012, Matthias Cuntz</p></li>
+<li><p>Changed units of proleptic_gregorian calendar from days since 0001-01-01 00:00:00 to days since 0001-01-00 00:00:00, Dec 2010, Matthias Cuntz</p></li>
+<li><p>Deal with Excel leap year error, Feb 2013, Matthias Cuntz</p></li>
+<li><p>Ported to Python 3, Feb 2013, Matthias Cuntz</p></li>
+<li><p>ascii/eng without time defaults to 00:00:00, Jul 2013, Matthias Cuntz</p></li>
+<li><p>Excel starts at 1 not at 0 on 01 January 1900 or 1904, Oct 2013, Matthias Cuntz</p></li>
+<li><p>Bug: 01.01.0001 was substracted if Julian calendar even with units given, Oct 2013, Matthias Cuntz</p></li>
+<li><p>Removed remnant of time treatment before time check in eng keyword, Nov 2013, Matthias Cuntz</p></li>
+<li><p>Adapted to new netCDF4/netcdftime (&gt;= v1.0) and datetime (&gt;= Python v2.7.9), Jun 2015, Matthias Cuntz</p></li>
+<li><p>Call date2num with list instead of single netCDF4.datetime objects, Oct 2015, Matthias Cuntz</p></li>
+<li><p>mo for months always integer, Oct 2016, Matthias Cuntz</p></li>
+<li><p>00, 01, etc. for integers not accepted by Python 3, removed from examples and code, Nov 2016, Matthias Cuntz</p></li>
+<li><p>Using numpy docstring format, May 2020, Matthias Cuntz</p></li>
+<li><p>Succeed eng by en keyword as in ascii2ascii and dec2date, Jul 2020, Matthias Cuntz</p></li>
+<li><p>proleptic_gregorian instead of gregorian calendar for Excel dates, Jul 2020, Matthias Cuntz</p></li>
+</ul>
+<p>The following functions are provided</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.date2dec.date2dec" title="hesseflux.date2dec.date2dec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">date2dec</span></code></a>([calendar, units, excelerr, yr, ...])</p></td>
+<td><p>Convert scalar and array_like with calendar dates into decimal dates.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.date2dec.date2dec">
+<span class="sig-name descname"><span class="pre">date2dec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calendar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'standard'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">excelerr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ascii</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">en</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/date2dec.html#date2dec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.date2dec.date2dec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert scalar and array_like with calendar dates into decimal
+dates. Supported calendar formats are standard, gregorian, julian,
+proleptic_gregorian, excel1900, excel1904, 365_day, noleap, 366_day,
+all_leap, 360_day, decimal, or decimal360.</p>
+<p>Input is year, month day, hour, minute, second or a combination of them.
+Input as date string is possible.</p>
+<p>Output is decimal date with day as unit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>yr</strong> (<em>array_like</em><em>, </em><em>optional</em>) – years (default: 1)</p></li>
+<li><p><strong>mo</strong> (<em>array_like</em><em>, </em><em>optional</em>) – month (default: 1)</p></li>
+<li><p><strong>dy</strong> (<em>array_like</em><em>, </em><em>optional</em>) – days (default: 1)</p></li>
+<li><p><strong>hr</strong> (<em>array_like</em><em>, </em><em>optional</em>) – hours (default: 0)</p></li>
+<li><p><strong>mi</strong> (<em>array_like</em><em>, </em><em>optional</em>) – minutes (default: 0)</p></li>
+<li><p><strong>sc</strong> (<em>array_like</em><em>, </em><em>optional</em>) – seconds (default: 0)</p></li>
+<li><p><strong>ascii</strong> (<em>array_like</em><em>, </em><em>optional</em>) – <p>strings of the format ‘dd.mm.yyyy hh:mm:ss’.
+Missing hour, minutes and/or seconds are set
+to their default values (0).</p>
+<p><cite>ascii</cite> overwrites all other keywords.</p>
+<p><cite>ascii</cite> and <cite>eng</cite> are mutually exclusive.</p>
+</p></li>
+<li><p><strong>en</strong> (<em>array_like</em><em>, </em><em>optional</em>) – <p>strings of the format ‘yyyy-mm-dd hh:mm:ss’.
+Missing hour, minutes and/or seconds are set
+to their default values (0).</p>
+<p><cite>en</cite> overwrites all other keywords.</p>
+<p><cite>en</cite> and <cite>ascii</cite> are mutually exclusive.</p>
+</p></li>
+<li><p><strong>eng</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Same as en: obsolete.</p></li>
+<li><p><strong>calendar</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Calendar of output dates (default: ‘standard’).</p>
+<p>Possible values are:</p>
+<p>’standard’, ‘gregorian’ = julian calendar from
+01.01.-4712 12:00:00 (BC) until 05.03.1583 00:00:00 and
+gregorian calendar from 15.03.1583 00:00:00 until now.
+Missing 10 days do not exsist.</p>
+<dl class="simple">
+<dt>’julian’ = julian calendar from 01.01.-4712 12:00:00 (BC)</dt><dd><p>until now.</p>
+</dd>
+</dl>
+<p>’proleptic_gregorian’ = gregorian calendar from
+01.01.0001 00:00:00 until now.</p>
+<p>’excel1900’ = Excel dates with origin at
+01.01.1900 00:00:00.</p>
+<p>’excel1904’ = Excel 1904 (Lotus) format.
+Same as excel1904 but with origin at
+01.01.1904 00:00:00.</p>
+<p>’365_day’, ‘noleap’ = 365 days format,
+i.e. common years only (no leap years)
+with origin at 01.01.0001 00:00:00.</p>
+<p>’366_day’, ‘all_leap’ = 366 days format,
+i.e. leap years only (no common years)
+with origin at 01.01.0001 00:00:00.</p>
+<p>’360_day’ = 360 days format,
+i.e. years with only 360 days (30 days per month)
+with origin at 01.01.0001 00:00:00.</p>
+<p>’decimal’ = decimal year instead of decimal days.</p>
+<p>’decimal360’ = decimal year with a year of 360 days, i.e. 12 month with 30 days each.</p>
+</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – User set units of output dates. Must be a
+string in the format ‘days since yyyy-mm-dd hh:mm:ss’.
+Default values are set automatically depending on <cite>calendar</cite>.</p></li>
+<li><p><strong>excelerr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – <p>In Excel, the year 1900 is normally considered a leap year,
+which it was not. By default, this error is taken into account
+if <cite>calendar==’excel1900’</cite> (default: True).</p>
+<p>1900 is not considered a leap year if <cite>excelerr==False</cite>.</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array_like with decimal dates. The type of output will be the same as the input type.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>Most versions of <cite>datetime</cite> do not support negative years,
+i.e. Julian days &lt; 1721423.5 = 01.01.0001 00:00:00.</p>
+<p>There is an issue in <cite>netcdftime</cite> version &lt; 0.9.5 in proleptic_gregorian for dates before year 301:
+dec2date(date2dec(ascii=’01.01.0300 00:00:00’, calendar=’proleptic_gregorian’), calendar=’proleptic_gregorian’)
+[300, 1, 2, 0, 0, 0]
+dec2date(date2dec(ascii=’01.01.0301 00:00:00’, calendar=’proleptic_gregorian’), calendar=’proleptic_gregorian’)
+[301, 1, 1, 0, 0, 0]</p>
+<p>List input is only supported up to 2 dimensions.</p>
+<p>Requires <cite>netcdftime.py</cite> from module <cite>netcdftime</cite> available at:
+<a class="reference external" href="http://netcdf4-python.googlecode.com">http://netcdf4-python.googlecode.com</a></p>
+</div>
+<p class="rubric">Examples</p>
+<p># Some implementations of datetime do not support negative years
+&gt;&gt;&gt; import datetime
+&gt;&gt;&gt; if datetime.MINYEAR &gt; 0:
+…     print(‘The minimum year in your datetime implementation is ‘, datetime.MINYEAR)
+…     print(‘i.e. it does not support negative years (BC).’)
+The minimum year in your datetime implementation is  1
+i.e. it does not support negative years (BC).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">datetime</span><span class="o">.</span><span class="n">MINYEAR</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">year</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">1810</span><span class="p">,</span> <span class="mi">1630</span><span class="p">,</span> <span class="mi">1510</span><span class="p">,</span> <span class="mi">1271</span><span class="p">,</span> <span class="mi">619</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">... </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">year</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">1810</span><span class="p">,</span> <span class="mi">1630</span><span class="p">,</span> <span class="mi">1510</span><span class="p">,</span> <span class="mi">1271</span><span class="p">,</span> <span class="mi">619</span><span class="p">,</span> <span class="o">-</span><span class="mi">1579</span><span class="p">,</span> <span class="o">-</span><span class="mi">4712</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">month</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">day</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hour</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">12</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">12</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">minute</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">30</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">41</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">second</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">37</span><span class="p">,</span> <span class="mi">41</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decimal</span> <span class="o">=</span> <span class="n">date2dec</span><span class="p">(</span><span class="n">calendar</span> <span class="o">=</span> <span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">yr</span><span class="o">=</span><span class="n">year</span><span class="p">,</span> <span class="n">mo</span><span class="o">=</span><span class="n">month</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="n">day</span><span class="p">,</span> <span class="n">hr</span><span class="o">=</span><span class="n">hour</span><span class="p">,</span> <span class="n">mi</span><span class="o">=</span><span class="n">minute</span><span class="p">,</span> <span class="n">sc</span><span class="o">=</span><span class="n">second</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nn</span> <span class="o">=</span> <span class="n">year</span><span class="o">.</span><span class="n">size</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.14e}</span><span class="s1"> </span><span class="si">{:.14e}</span><span class="s1"> </span><span class="si">{:.14e}</span><span class="s1"> </span><span class="si">{:.14e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">decimal</span><span class="p">[:</span><span class="n">nn</span><span class="o">//</span><span class="mi">2</span><span class="p">]))</span>
+<span class="go">2.45154902100695e+06 2.38226217719907e+06 2.31660093101852e+06 2.27284810821759e+06</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.14e}</span><span class="s1"> </span><span class="si">{:.14e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">decimal</span><span class="p">[</span><span class="n">nn</span><span class="o">//</span><span class="mi">2</span><span class="p">:</span><span class="n">nn</span><span class="o">-</span><span class="mi">2</span><span class="p">]))</span>
+<span class="go">2.18536732053241e+06 1.94738596431713e+06</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decimal</span> <span class="o">=</span> <span class="n">date2dec</span><span class="p">(</span><span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">yr</span><span class="o">=</span><span class="n">year</span><span class="p">,</span> <span class="n">mo</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">hr</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">mi</span><span class="o">=</span><span class="n">minute</span><span class="p">,</span> <span class="n">sc</span><span class="o">=</span><span class="n">second</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.14e}</span><span class="s1"> </span><span class="si">{:.14e}</span><span class="s1"> </span><span class="si">{:.14e}</span><span class="s1"> </span><span class="si">{:.14e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">decimal</span><span class="p">[:</span><span class="n">nn</span><span class="o">//</span><span class="mi">2</span><span class="p">]))</span>
+<span class="go">2.45171102100695e+06 2.38231401053241e+06 2.31657101435185e+06 2.27275102488426e+06</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.14e}</span><span class="s1"> </span><span class="si">{:.14e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">decimal</span><span class="p">[</span><span class="n">nn</span><span class="o">//</span><span class="mi">2</span><span class="p">:</span><span class="n">nn</span><span class="o">-</span><span class="mi">2</span><span class="p">]))</span>
+<span class="go">2.18545602886574e+06 1.94731300598380e+06</span>
+</pre></div>
+</div>
+<p># ascii input
+&gt;&gt;&gt; if datetime.MINYEAR &gt; 0:
+…     a = np.array([‘05.01.2000 12:30:15’, ‘24.04.1810 16:15:10’, ‘15.07.1630 10:20:40’, ‘20.09.1510 14:35:50’,
+…                   ‘18.03.1271 19:41:34’, ‘27.08. 619 11:08:37’, ‘23.08.0002 20:03:41’, ‘01.01.0001 12:00:00’])
+… else:
+…     a = np.array([‘05.01.2000 12:30:15’, ‘24.04.1810 16:15:10’, ‘15.07.1630 10:20:40’,  ‘20.09.1510 14:35:50’,
+…                   ‘18.03.1271 19:41:34’, ‘27.08. 619 11:08:37’, ‘23.08.-1579 20:03:41’, ‘01.01.-4712 12:00:00’])
+&gt;&gt;&gt; decimal = date2dec(calendar=’standard’, ascii=a)
+&gt;&gt;&gt; nn = a.size
+&gt;&gt;&gt; print(‘{:.14e} {:.14e} {:.14e} {:.14e}’.format(<a href="#id1"><span class="problematic" id="id2">*</span></a>decimal[:nn//2]))
+2.45154902100695e+06 2.38226217719907e+06 2.31660093101852e+06 2.27284810821759e+06
+&gt;&gt;&gt; print(‘{:.14e} {:.14e}’.format(<a href="#id3"><span class="problematic" id="id4">*</span></a>decimal[nn//2:nn-2]))
+2.18536732053241e+06 1.94738596431713e+06</p>
+<p># calendar = ‘julian’
+&gt;&gt;&gt; decimal = date2dec(calendar=’julian’, ascii=a)
+&gt;&gt;&gt; print(‘{:.14e} {:.14e} {:.14e} {:.14e}’.format(<a href="#id5"><span class="problematic" id="id6">*</span></a>decimal[:nn//2]))
+2.45156202100695e+06 2.38227417719907e+06 2.31661093101852e+06 2.27284810821759e+06
+&gt;&gt;&gt; print(‘{:.14e} {:.14e}’.format(<a href="#id7"><span class="problematic" id="id8">*</span></a>decimal[nn//2:nn-2]))
+2.18536732053241e+06 1.94738596431713e+06</p>
+<p># calendar = ‘proleptic_gregorian’
+&gt;&gt;&gt; decimal = date2dec(calendar=’proleptic_gregorian’, ascii=a)
+&gt;&gt;&gt; print(‘{:.7f} {:.7f} {:.7f} {:.7f}’.format(<a href="#id9"><span class="problematic" id="id10">*</span></a>decimal[:nn//2]))
+730123.5210069 660836.6771991 595175.4310185 551412.6082176
+&gt;&gt;&gt; print(‘{:.7f} {:.7f}’.format(<a href="#id11"><span class="problematic" id="id12">*</span></a>decimal[nn//2:nn-2]))
+463934.8205324 225957.4643171</p>
+<p># calendar = ‘excel1900’ WITH excelerr=True -&gt; 1900 considered as leap year
+&gt;&gt;&gt; d = np.array([‘05.01.2000 12:30:15’, ‘27.05.1950 16:25:10’, ‘13.08.1910 10:40:55’,
+…               ‘01.03.1900 00:00:00’, ‘29.02.1900 00:00:00’, ‘28.02.1900 00:00:00’,
+…               ‘01.01.1900 00:00:00’])
+&gt;&gt;&gt; decimal = date2dec(calendar=’excel1900’, ascii=d)
+&gt;&gt;&gt; nn = d.size
+&gt;&gt;&gt; print(‘{:.7f} {:.7f} {:.7f}’.format(<a href="#id13"><span class="problematic" id="id14">*</span></a>decimal[:nn//2]))
+36530.5210069 18410.6841435 3878.4450810
+&gt;&gt;&gt; print(‘{:.1f} {:.1f} {:.1f} {:.1f}’.format(<a href="#id15"><span class="problematic" id="id16">*</span></a>decimal[nn//2:]))
+61.0 60.0 59.0 1.0</p>
+<p># calendar = ‘excel1900’ WITH excelerr = False -&gt; 1900 is NO leap year
+&gt;&gt;&gt; decimal = date2dec(calendar=’excel1900’, ascii=d, excelerr=False)
+&gt;&gt;&gt; print(‘{:.7f} {:.7f} {:.7f}’.format(<a href="#id17"><span class="problematic" id="id18">*</span></a>decimal[:nn//2]))
+36529.5210069 18409.6841435 3877.4450810
+&gt;&gt;&gt; print(‘{:.1f} {:.1f} {:.1f} {:.1f}’.format(<a href="#id19"><span class="problematic" id="id20">*</span></a>decimal[nn//2:]))
+60.0 60.0 59.0 1.0</p>
+<p># calendar = ‘excel1904’
+&gt;&gt;&gt; decimal = date2dec(calendar=’excel1904’, ascii=d[:nn//2])
+&gt;&gt;&gt; print(‘{:.7f} {:.7f} {:.7f}’.format(<a href="#id21"><span class="problematic" id="id22">*</span></a>decimal[:nn//2]))
+35069.5210069 16949.6841435 2417.4450810</p>
+<p># calendar = ‘365_day’
+&gt;&gt;&gt; g = np.array([‘18.08.1972 12:30:15’, ‘25.10.0986 12:30:15’, ‘28.11.0493 22:20:40’, ‘01.01.0001 00:00:00’])
+&gt;&gt;&gt; decimal = date2dec(calendar=’365_day’, ascii=g)
+&gt;&gt;&gt; nn = g.size
+&gt;&gt;&gt; print(‘{:.7f} {:.7f} {:.7f} {:.7f}’.format(<a href="#id23"><span class="problematic" id="id24">*</span></a>decimal[:nn]))
+719644.5210069 359822.5210069 179911.9310185 0.0000000</p>
+<p># calendar = ‘366_day’
+&gt;&gt;&gt; decimal = date2dec(calendar=’366_day’, ascii=g)
+&gt;&gt;&gt; print(‘{:.7f} {:.7f} {:.7f} {:.7f}’.format(<a href="#id25"><span class="problematic" id="id26">*</span></a>decimal[:nn]))
+721616.5210069 360808.5210069 180404.9310185 0.0000000</p>
+<p># 360_day does not work with netcdftime.py version equal or below 0.9.2
+# calendar = ‘360_day’
+&gt;&gt;&gt; decimal = date2dec(calendar=’360_day’, ascii=g)
+&gt;&gt;&gt; print(‘{:.7f} {:.7f} {:.7f} {:.7f}’.format(<a href="#id27"><span class="problematic" id="id28">*</span></a>decimal[:nn]))
+709787.5210069 354894.5210069 177447.9310185 0.0000000</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.7f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">date2dec</span><span class="p">(</span><span class="n">yr</span><span class="o">=</span><span class="mi">1992</span><span class="p">,</span> <span class="n">mo</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mi">26</span><span class="p">,</span> <span class="n">hr</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mi</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal&#39;</span><span class="p">)))</span>
+<span class="go">1992.0685337</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.7f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">date2dec</span><span class="p">(</span><span class="n">ascii</span><span class="o">=</span><span class="s1">&#39;26.01.1992 02:00&#39;</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal360&#39;</span><span class="p">)))</span>
+<span class="go">1992.0696759</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.7f}</span><span class="s1"> </span><span class="si">{:.7f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">date2dec</span><span class="p">(</span><span class="n">ascii</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;26.01.1992 02:00&#39;</span><span class="p">,</span><span class="s1">&#39;26.01.1992 02:00&#39;</span><span class="p">],</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal360&#39;</span><span class="p">)))</span>
+<span class="go">1992.0696759 1992.0696759</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.7f}</span><span class="s1"> </span><span class="si">{:.7f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">date2dec</span><span class="p">(</span><span class="n">yr</span><span class="o">=</span><span class="p">[</span><span class="mi">1992</span><span class="p">,</span><span class="mi">1992</span><span class="p">],</span> <span class="n">mo</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mi">26</span><span class="p">,</span> <span class="n">hr</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mi</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal360&#39;</span><span class="p">)))</span>
+<span class="go">1992.0696759 1992.0696759</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.7f}</span><span class="s1"> </span><span class="si">{:.7f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">date2dec</span><span class="p">(</span><span class="n">yr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1992</span><span class="p">,</span><span class="mi">1992</span><span class="p">]),</span> <span class="n">mo</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mi">26</span><span class="p">,</span> <span class="n">hr</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mi</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal360&#39;</span><span class="p">)))</span>
+<span class="go">1992.0696759 1992.0696759</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decimal</span> <span class="o">=</span> <span class="n">date2dec</span><span class="p">(</span><span class="n">ascii</span><span class="o">=</span><span class="p">[[</span><span class="s1">&#39;26.01.1992 02:00&#39;</span><span class="p">,</span><span class="s1">&#39;26.01.1992 02:00&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                          <span class="p">[</span><span class="s1">&#39;26.01.1992 02:00&#39;</span><span class="p">,</span><span class="s1">&#39;26.01.1992 02:00&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                          <span class="p">[</span><span class="s1">&#39;26.01.1992 02:00&#39;</span><span class="p">,</span><span class="s1">&#39;26.01.1992 02:00&#39;</span><span class="p">]],</span>
+<span class="gp">... </span>                   <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;decimal360&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.7f}</span><span class="s1"> </span><span class="si">{:.7f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">decimal</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="go">1992.0696759 1992.0696759</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.7f}</span><span class="s1"> </span><span class="si">{:.7f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">decimal</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+<span class="go">1992.0696759 1992.0696759</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">((</span><span class="n">date2dec</span><span class="p">(</span><span class="n">ascii</span><span class="o">=</span><span class="s1">&#39;01.03.2003 00:00:00&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">date2dec</span><span class="p">(</span><span class="n">ascii</span><span class="o">=</span><span class="s1">&#39;01.03.2003&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p># en
+&gt;&gt;&gt; decimal = date2dec(en=’1992-01-26 02:00’, calendar=’decimal360’)
+&gt;&gt;&gt; print(‘{:.7f}’.format(decimal))
+1992.0696759
+&gt;&gt;&gt; decimal = date2dec(eng=’1992-01-26 02:00’, calendar=’decimal360’)
+&gt;&gt;&gt; print(‘{:.7f}’.format(decimal))
+1992.0696759</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="contents.html">hesseflux</a></h1>
+
+
+
+<p class="blurb">Functions used in the processing and post-processing of Eddy covariance flux data</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="package.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="package.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="argsort.html">hesseflux.argsort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ascii2ascii.html">hesseflux.ascii2ascii</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.const.html">hesseflux.const.const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.html">hesseflux.const</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">hesseflux.date2dec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dec2date.html">hesseflux.dec2date</a></li>
+<li class="toctree-l2"><a class="reference internal" href="division.html">hesseflux.division</a></li>
+<li class="toctree-l2"><a class="reference internal" href="esat.html">hesseflux.esat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fgui.html">hesseflux.fgui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fread.html">hesseflux.fread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fsread.html">hesseflux.fsread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.fit_functions.html">hesseflux.functions.fit_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.general_functions.html">hesseflux.functions.general_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.logistic_function.html">hesseflux.functions.logistic_function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.opti_test_functions.html">hesseflux.functions.opti_test_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html">hesseflux.functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.sa_test_functions.html">hesseflux.functions.sa_test_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gapfill.html">hesseflux.gapfill</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logtools.logtools.html">hesseflux.logtools.logtools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logtools.html">hesseflux.logtools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mad.html">hesseflux.mad</a></li>
+<li class="toctree-l2"><a class="reference internal" href="madspikes.html">hesseflux.madspikes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nee2gpp.html">hesseflux.nee2gpp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sread.html">hesseflux.sread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ustarfilter.html">hesseflux.ustarfilter</a></li>
+</ul>
+</li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/mcuntz/hesseflux">hesseflux @ GitHub</a></li>
+    
+    <li class="toctree-l1"><a href="https://doi.org/10.5281/zenodo.3831488">hesseflux @ Zenodo</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/hesseflux/">hesseflux @ PyPI</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="contents.html">Documentation overview</a><ul>
+  <li><a href="package.html">API</a><ul>
+      <li>Previous: <a href="const.html" title="previous chapter">hesseflux.const</a></li>
+      <li>Next: <a href="dec2date.html" title="next chapter">hesseflux.dec2date</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2009-2022, Matthias Cuntz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/date2dec.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

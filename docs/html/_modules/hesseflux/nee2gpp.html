@@ -1,0 +1,1138 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hesseflux.nee2gpp &#8212; hesseflux 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for hesseflux.nee2gpp</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">nee2gpp : Estimates photosynthesis (GPP) and ecosystem respiration (RECO)</span>
+<span class="sd">          from Eddy covariance CO2 flux data.</span>
+
+<span class="sd">This module was written by Matthias Cuntz while at Department of</span>
+<span class="sd">Computational Hydrosystems, Helmholtz Centre for Environmental</span>
+<span class="sd">Research - UFZ, Leipzig, Germany, and continued while at Institut</span>
+<span class="sd">National de Recherche pour l&#39;Agriculture, l&#39;Alimentation et</span>
+<span class="sd">l&#39;Environnement (INRAE), Nancy, France.</span>
+
+<span class="sd">Copyright (c) 2012-2020 Matthias Cuntz - mc (at) macu (dot) de</span>
+<span class="sd">Released under the MIT License; see LICENSE file for details.</span>
+
+<span class="sd">* Written 2012 by Matthias Cuntz - mc (at) macu (dot) de</span>
+<span class="sd">* Set default undef to NaN, Mar 2012, Arndt Piayda</span>
+<span class="sd">* Add wrapper nee2gpp for individual routines, Nov 2012, Matthias Cuntz</span>
+<span class="sd">* Ported to Python 3, Feb 2013, Matthias Cuntz</span>
+<span class="sd">* Use generel cost function cost_abs from functions module, May 2013, Matthias Cuntz</span>
+<span class="sd">* Use fmin_tnc to allow params &lt; 0, Aug 2014, Arndt Piayda</span>
+<span class="sd">* Keyword nogppnight, Aug 2014, Arndt Piayda</span>
+<span class="sd">* Add wrapper nee2gpp for individual routines, Nov 2012, Matthias Cuntz</span>
+<span class="sd">* Add wrapper nee2gpp for individual routines, Nov 2012, Matthias Cuntz</span>
+<span class="sd">* Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz</span>
+<span class="sd">* Using numpy docstring format, May 2020, Matthias Cuntz</span>
+
+<span class="sd">.. moduleauthor:: Matthias Cuntz, Arndt Piayda</span>
+
+<span class="sd">The following functions are provided</span>
+
+<span class="sd">.. autosummary::</span>
+<span class="sd">   nee2gpp</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scipy.optimize</span> <span class="k">as</span> <span class="nn">opt</span> <span class="c1"># curve_fit, fmin, fmin_tnc</span>
+<span class="k">try</span><span class="p">:</span>    <span class="c1"># import package</span>
+    <span class="kn">from</span> <span class="nn">.mad</span> <span class="kn">import</span> <span class="n">mad</span>
+    <span class="kn">from</span> <span class="nn">.functions</span> <span class="kn">import</span> <span class="n">cost_abs</span><span class="p">,</span> <span class="n">lloyd_only_rref_p</span>
+    <span class="kn">from</span> <span class="nn">.functions</span> <span class="kn">import</span> <span class="n">cost_lloyd_fix</span><span class="p">,</span> <span class="n">lloyd_fix</span><span class="p">,</span> <span class="n">lloyd_fix_p</span>
+    <span class="kn">from</span> <span class="nn">.functions</span> <span class="kn">import</span> <span class="n">cost_lasslop</span><span class="p">,</span> <span class="n">lasslop</span>
+<span class="k">except</span><span class="p">:</span> <span class="c1"># python nee2gpp.py</span>
+    <span class="kn">from</span> <span class="nn">mad</span> <span class="kn">import</span> <span class="n">mad</span>
+    <span class="kn">from</span> <span class="nn">functions</span> <span class="kn">import</span> <span class="n">cost_abs</span><span class="p">,</span> <span class="n">lloyd_only_rref_p</span>
+    <span class="kn">from</span> <span class="nn">functions</span> <span class="kn">import</span> <span class="n">cost_lloyd_fix</span><span class="p">,</span> <span class="n">lloyd_fix</span><span class="p">,</span> <span class="n">lloyd_fix_p</span>
+    <span class="kn">from</span> <span class="nn">functions</span> <span class="kn">import</span> <span class="n">cost_lasslop</span><span class="p">,</span> <span class="n">lasslop</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;nee2gpp&#39;</span><span class="p">]</span>
+
+
+<span class="c1"># ----------------------------------------------------------------------</span>
+<div class="viewcode-block" id="nee2gpp"><a class="viewcode-back" href="../../nee2gpp.html#hesseflux.nee2gpp.nee2gpp">[docs]</a><span class="k">def</span> <span class="nf">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isday</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeformat</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">undef</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;reichstein&#39;</span><span class="p">,</span> <span class="n">nogppnight</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">swthr</span><span class="o">=</span><span class="mf">10.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate photosynthesis (GPP) and ecosystem respiration (RECO)</span>
+<span class="sd">    from Eddy covariance CO2 flux data.</span>
+
+<span class="sd">    It uses either</span>
+
+<span class="sd">      1. a fit of Reco vs. temperature to all nighttime data (`method=&#39;falge&#39;`), or</span>
+
+<span class="sd">      2. several fits over the season of Reco vs. temperature as in Reichstein</span>
+<span class="sd">         et al. (2005) (`method=&#39;reichstein&#39;`), or</span>
+
+<span class="sd">      3. the daytime method of Lasslop et al. (2010) (`method=&#39;lasslop&#39;`),</span>
+
+<span class="sd">    in order to calculate Reco and then GPP = Reco - NEE.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dfin : pandas.Dataframe or numpy.array</span>
+<span class="sd">        time series of CO2 fluxes and air temperature, and possibly</span>
+<span class="sd">        incoming shortwave radiation and air vapour pressure deficit.</span>
+
+<span class="sd">        `dfin` can be a pandas.Dataframe with the columns</span>
+<span class="sd">        &#39;FC&#39; or &#39;NEE&#39; (or starting with &#39;FC\_&#39; or &#39;NEE\_&#39;) for observed CO2 flux [umol(CO2) m-2 s-1]</span>
+<span class="sd">        &#39;TA&#39;    (or starting with &#39;TA\_&#39;) for air temperature [K]</span>
+
+<span class="sd">        `method=&#39;lasslop&#39;` or `method=&#39;day&#39;` needs also</span>
+<span class="sd">        &#39;SW_IN&#39; (or starting with &#39;SW_IN&#39;) for incoming short-wave radiation [W m-2]</span>
+<span class="sd">        &#39;VPD&#39;   (or starting with &#39;VPD&#39;) for air vapour deficit [Pa]</span>
+<span class="sd">        The index is taken as date variable.</span>
+
+<span class="sd">        `dfin` can also me a numpy array with the same columns. In this case</span>
+<span class="sd">        `colhead`, `date`, and possibly `dateformat` must be given.</span>
+<span class="sd">    flag : pandas.Dataframe or numpy.array, optional</span>
+<span class="sd">        flag Dataframe or array has the same shape as `dfin`. Non-zero values in</span>
+<span class="sd">        `flag` will be treated as missing values in `dfin`.</span>
+
+<span class="sd">        `flag` must follow the same rules as `dfin` if pandas.Dataframe.</span>
+
+<span class="sd">        If `flag` is numpy array, `df.columns.values` will be used as column heads</span>
+<span class="sd">        and the index of `dfin` will be copied to `flag`.</span>
+<span class="sd">    isday : array_like of bool, optional</span>
+<span class="sd">        True when it is day, False when night. Must have the same length as `dfin.shape[0]`.</span>
+
+<span class="sd">        If `isday` is not given, `dfin` must have a column with head &#39;SW_IN&#39; or</span>
+<span class="sd">        starting with &#39;SW_IN&#39;. `isday` will then be `dfin[&#39;SW_IN&#39;] &gt; swthr`.</span>
+<span class="sd">    date : array_like of string, optional</span>
+<span class="sd">        1D-array_like of calendar dates in format given in `timeformat`.</span>
+
+<span class="sd">        `date` must be given if `dfin` is numpy array.</span>
+<span class="sd">    timeformat : str, optional</span>
+<span class="sd">        Format of dates in `date`, if given (default: &#39;%Y-%m-%d %H:%M:%S&#39;).</span>
+<span class="sd">        See strftime documentation of Python&#39;s datetime module:</span>
+<span class="sd">        https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior</span>
+<span class="sd">    colhed : array_like of str, optional</span>
+<span class="sd">        column names if `dfin` is numpy array. See `dfin` for mandatory column names.</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        values having `undef` value are treated as missing values in `dfin` (default: -9999)</span>
+<span class="sd">    method : str, optional</span>
+<span class="sd">        method to use for partitioning. Possible values are:</span>
+
+<span class="sd">        &#39;global&#39; or &#39;falge&#39;:     fit of Reco vs. temperature to all nighttime data</span>
+
+<span class="sd">        &#39;local&#39; of &#39;reichstein&#39;: several fits over the season of Reco vs. temperature</span>
+<span class="sd">                                 as in Reichstein et al. (2005) (default)</span>
+
+<span class="sd">        &#39;day&#39; or &#39;lasslop&#39;:      method of Lasslop et al. (2010) fitting a light-response curve</span>
+<span class="sd">    nogppnight : float, optional</span>
+<span class="sd">        GPP will be set to zero at night. RECO will then equal NEE at night (default: False)</span>
+<span class="sd">    swthr : float, optional</span>
+<span class="sd">        Threshold to determine daytime from incoming shortwave radiation if `isday` not given (default: 10).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.Dataframe or numpy arrays</span>
+<span class="sd">        pandas.Dataframe with two columns &#39;GPP&#39; and &#39;RECO&#39; with estimated</span>
+<span class="sd">        photosynthesis and ecosystem respiration, or two numpy arrays</span>
+<span class="sd">        [GPP, RECO].</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Negative respiration possible at night if GPP is forced to 0 with `nogppnight=True`.</span>
+
+<span class="sd">    Literature</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Falge et al. (2001)</span>
+<span class="sd">        Gap filling strategies for defensible annual sums of net ecosystem exchange,</span>
+<span class="sd">        Acricultural and Forest Meteorology 107, 43-69</span>
+
+<span class="sd">    Lasslop et al. (2010)</span>
+<span class="sd">        Separation of net ecosystem exchange into assimilation and respiration using</span>
+<span class="sd">        a light response curve approach: critical issues and global evaluation,</span>
+<span class="sd">        Global Change Biology 16, 187-208</span>
+
+<span class="sd">    Reichstein et al. (2005)</span>
+<span class="sd">        On the separation of net ecosystem exchange into assimilation and ecosystem</span>
+<span class="sd">        respiration: review and improved algorithm,</span>
+<span class="sd">        Global Change Biology 11, 1424-1439</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fread import fread</span>
+<span class="sd">    &gt;&gt;&gt; from date2dec import date2dec</span>
+<span class="sd">    &gt;&gt;&gt; from dec2date import dec2date</span>
+<span class="sd">    &gt;&gt;&gt; ifile = &#39;test_nee2gpp.csv&#39;</span>
+<span class="sd">    &gt;&gt;&gt; undef = -9999.</span>
+<span class="sd">    &gt;&gt;&gt; dat   = fread(ifile, skip=2, transpose=True)</span>
+<span class="sd">    &gt;&gt;&gt; ndat  = dat.shape[1]</span>
+<span class="sd">    &gt;&gt;&gt; head  = fread(ifile, skip=2, header=True)</span>
+<span class="sd">    &gt;&gt;&gt; head1 = head[0]</span>
+<span class="sd">    &gt;&gt;&gt; # date</span>
+<span class="sd">    &gt;&gt;&gt; jdate = date2dec(dy=dat[0,:], mo=dat[1,:], yr=dat[2,:], hr=dat[3,:], mi=dat[4,:])</span>
+<span class="sd">    &gt;&gt;&gt; adate = dec2date(jdate, eng=True)</span>
+<span class="sd">    &gt;&gt;&gt; # colhead</span>
+<span class="sd">    &gt;&gt;&gt; idx   = []</span>
+<span class="sd">    &gt;&gt;&gt; for i in head1:</span>
+<span class="sd">    ...     if i in [&#39;NEE&#39;, &#39;rg&#39;, &#39;Tair&#39;, &#39;VPD&#39;]: idx.append(head1.index(i))</span>
+<span class="sd">    &gt;&gt;&gt; colhead = [&#39;FC&#39;, &#39;SW_IN&#39;, &#39;TA&#39;, &#39;VPD&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; # data</span>
+<span class="sd">    &gt;&gt;&gt; dfin = dat[idx,:]</span>
+<span class="sd">    &gt;&gt;&gt; dfin[2,:] = np.where(dfin[2,:] == undef, undef, dfin[2,:]+273.15)</span>
+<span class="sd">    &gt;&gt;&gt; dfin[3,:] = np.where(dfin[3,:] == undef, undef, dfin[3,:]*100.)</span>
+<span class="sd">    &gt;&gt;&gt; # flag</span>
+<span class="sd">    &gt;&gt;&gt; flag = np.where(dfin == undef, 2, 0)</span>
+<span class="sd">    &gt;&gt;&gt; # partition</span>
+<span class="sd">    &gt;&gt;&gt; GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;local&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(GPP[1120:1128])</span>
+<span class="sd">    [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+<span class="sd">      8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+<span class="sd">    &gt;&gt;&gt; print(Reco[1120:1128])</span>
+<span class="sd">    [1.68311981 1.81012431 1.9874173  2.17108871 2.38759152 2.64372415</span>
+<span class="sd">     2.90076664 3.18592735]</span>
+
+<span class="sd">    &gt;&gt;&gt; GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;local&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(GPP[1120:1128])</span>
+<span class="sd">    [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+<span class="sd">      8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+
+<span class="sd">    &gt;&gt;&gt; GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;global&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(GPP[1120:1128])</span>
+<span class="sd">    [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.33166157e+00</span>
+<span class="sd">      8.18228013e+00  1.04092252e+01  8.19395317e+00  1.08427448e+01]</span>
+
+<span class="sd">    &gt;&gt;&gt; GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;Reichstein&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(GPP[1120:1128])</span>
+<span class="sd">    [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+<span class="sd">      8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+
+<span class="sd">    &gt;&gt;&gt; GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;reichstein&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(GPP[1120:1128])</span>
+<span class="sd">    [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+<span class="sd">      8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+
+<span class="sd">    &gt;&gt;&gt; GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;day&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(GPP[1120:1128])</span>
+<span class="sd">    [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  2.78457540e+00</span>
+<span class="sd">      6.63212545e+00  8.88902165e+00  6.74243873e+00  9.51364527e+00]</span>
+<span class="sd">    &gt;&gt;&gt; print(Reco[1120:1128])</span>
+<span class="sd">    [0.28786696 0.34594516 0.43893276 0.5495954  0.70029545 0.90849165</span>
+<span class="sd">     1.15074873 1.46137527]</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written  Matthias Cuntz, Mar 2012</span>
+<span class="sd">    Modified Arndt Piayda,   Mar 2012 - undef=np.nan</span>
+<span class="sd">             Matthias Cuntz, Nov 2012 - wrapper for individual routines nee2gpp_reichstein etc.</span>
+<span class="sd">             Matthias Cuntz, Feb 2013 - ported to Python 3</span>
+<span class="sd">             Matthias Cuntz, May 2013 - replaced cost functions by generel cost function cost_abs if possible</span>
+<span class="sd">             Arndt Piayda,   Aug 2014 - replaced fmin with fmin_tnc to permit params&lt;0,</span>
+<span class="sd">                                        permit gpp&lt;0 at any time if nogppnight=True </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check input</span>
+    <span class="c1"># numpy or panda</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">)):</span>
+        <span class="n">isnumpy</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">istrans</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">assert</span> <span class="n">colhead</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;colhead must be given if input is numpy.ndarray.&#39;</span>
+        <span class="k">if</span> <span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">colhead</span><span class="p">):</span>
+            <span class="n">istrans</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">colhead</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">colhead</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">colhead</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Length of colhead must be number of columns in input array. len(colhead)=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">colhead</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39; shape(input)=(&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;,&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;).&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;Date must be given if input is numpy arrary.&#39;</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">timeformat</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Datetime&#39;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">isnumpy</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">istrans</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">),</span> <span class="s1">&#39;Input must be either numpy.ndarray or pandas.DataFrame.&#39;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">dfin</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Incoming flags</span>
+    <span class="k">if</span> <span class="n">flag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">)):</span>
+            <span class="n">fisnumpy</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">fistrans</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+                <span class="n">ff</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+                <span class="n">fistrans</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">ff</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">flag</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;flag must have same shape as data array. data: (</span><span class="si">{:d}</span><span class="s1">,</span><span class="si">{:d}</span><span class="s1">); flag: (</span><span class="si">{:d}</span><span class="s1">,</span><span class="si">{:d}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">ff</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fisnumpy</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">fistrans</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">),</span> <span class="s1">&#39;Flag must be either numpy.ndarray or pandas.DataFrame.&#39;</span>
+            <span class="n">ff</span> <span class="o">=</span> <span class="n">flag</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fisnumpy</span> <span class="o">=</span> <span class="n">isnumpy</span>
+        <span class="n">fistrans</span> <span class="o">=</span> <span class="n">istrans</span>
+        <span class="c1"># flags: 0: good; 1: input flagged; 2: output flagged</span>
+        <span class="n">ff</span>              <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">ff</span><span class="p">[:]</span>           <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ff</span><span class="p">[</span><span class="n">df</span> <span class="o">==</span> <span class="n">undef</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">ff</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span>   <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># day or night</span>
+    <span class="k">if</span> <span class="n">isday</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sw_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;SW_IN&#39;</span><span class="p">):</span>
+                <span class="n">sw_id</span> <span class="o">=</span> <span class="n">cc</span>
+                <span class="k">break</span>
+        <span class="k">assert</span> <span class="n">sw_id</span><span class="p">,</span> <span class="s1">&#39;Global radiation with name SW or starting with SW_ must be in input if isday not given.&#39;</span>
+        <span class="n">isday</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">sw_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">swthr</span> <span class="c1"># Papale et al. (Biogeosciences, 2006): 20; REddyProc: 10</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">isday</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span><span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)):</span>
+        <span class="n">isday</span> <span class="o">=</span> <span class="n">isday</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">isday</span><span class="p">[</span><span class="n">isday</span> <span class="o">==</span> <span class="n">undef</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">ff</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">isday</span><span class="p">)]</span>   <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># Global relationship in Reichstein et al. (2005)</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;global&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;falge&#39;</span><span class="p">)):</span>
+        <span class="n">dfout</span> <span class="o">=</span> <span class="n">_nee2gpp_falge</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ff</span><span class="p">,</span> <span class="n">isday</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">)</span>
+    <span class="c1"># Local relationship = Reichstein et al. (2005)</span>
+    <span class="k">elif</span> <span class="p">((</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;local&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;reichstein&#39;</span><span class="p">)):</span>
+        <span class="n">dfout</span> <span class="o">=</span> <span class="n">_nee2gpp_reichstein</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ff</span><span class="p">,</span> <span class="n">isday</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">nogppnight</span><span class="o">=</span><span class="n">nogppnight</span><span class="p">)</span>
+    <span class="c1"># Lasslop et al. (2010) daytime method</span>
+    <span class="k">elif</span> <span class="p">((</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;day&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;lasslop&#39;</span><span class="p">)):</span>
+        <span class="n">dfout</span> <span class="o">=</span> <span class="n">_nee2gpp_lasslop</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ff</span><span class="p">,</span> <span class="n">isday</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">nogppnight</span><span class="o">=</span><span class="n">nogppnight</span><span class="p">)</span>
+    <span class="c1"># Include new methods here</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Error nee2gpp: method not implemented yet.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">isnumpy</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">dfout</span><span class="p">[</span><span class="s1">&#39;GPP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">dfout</span><span class="p">[</span><span class="s1">&#39;RECO&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">dfout</span></div>
+
+
+<span class="c1"># ----------------------------------------------------------------------</span>
+<span class="k">def</span> <span class="nf">_nee2gpp_falge</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ff</span><span class="p">,</span> <span class="n">isday</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mi">9999</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from original</span>
+<span class="sd">    Eddy flux data, using a fit of Reco vs. temperature to all nighttime data,</span>
+<span class="sd">    in order to calculate Reco and then GPP = Reco - NEE.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pandas.Dataframe</span>
+<span class="sd">        time series of CO2 fluxes and air temperature.</span>
+
+<span class="sd">        pandas.Dataframe with the columns</span>
+<span class="sd">        &#39;FC&#39; or &#39;NEE&#39; (or starting with &#39;FC\_&#39; or &#39;NEE\_&#39;) for observed CO2 flux [umol(CO2) m-2 s-1]</span>
+<span class="sd">        &#39;TA&#39;    (or starting with &#39;TA\_&#39;) for air temperature [K]</span>
+<span class="sd">        The index is taken as date variable.</span>
+<span class="sd">    ff : pandas.Dataframe</span>
+<span class="sd">        flag Dataframe or array has the same shape as `df`. Non-zero values in</span>
+<span class="sd">        `ff` will be treated as missing values in `df`.</span>
+
+<span class="sd">        `ff` must follow the same rules as `df`.</span>
+<span class="sd">    isday : array_like of bool</span>
+<span class="sd">        True when it is day, False when night. Must have the same length as `df.shape[0].`</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        values having `undef` value are treated as missing values in `df` (default: -9999)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.Dataframe or numpy arrays</span>
+<span class="sd">        pandas.Dataframe with two columns &#39;GPP&#39; and &#39;RECO&#39; with estimated</span>
+<span class="sd">        photosynthesis and ecosystem respiration.</span>
+
+<span class="sd">    Literature</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Falge et al. (2001)</span>
+<span class="sd">        Gap filling strategies for defensible annual sums of net ecosystem exchange,</span>
+<span class="sd">        Acricultural and Forest Meteorology 107, 43-69</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fread import fread</span>
+<span class="sd">    &gt;&gt;&gt; from date2dec import date2dec</span>
+<span class="sd">    &gt;&gt;&gt; from dec2date import dec2date</span>
+<span class="sd">    &gt;&gt;&gt; ifile = &#39;test_nee2gpp.csv&#39;</span>
+<span class="sd">    &gt;&gt;&gt; undef = -9999.</span>
+<span class="sd">    &gt;&gt;&gt; dat   = fread(ifile, skip=2, transpose=True)</span>
+<span class="sd">    &gt;&gt;&gt; ndat  = dat.shape[1]</span>
+<span class="sd">    &gt;&gt;&gt; head  = fread(ifile, skip=2, header=True)</span>
+<span class="sd">    &gt;&gt;&gt; head1 = head[0]</span>
+<span class="sd">    &gt;&gt;&gt; # date</span>
+<span class="sd">    &gt;&gt;&gt; jdate = date2dec(dy=dat[0,:], mo=dat[1,:], yr=dat[2,:], hr=dat[3,:], mi=dat[4,:])</span>
+<span class="sd">    &gt;&gt;&gt; adate = dec2date(jdate, eng=True)</span>
+<span class="sd">    &gt;&gt;&gt; # colhead</span>
+<span class="sd">    &gt;&gt;&gt; idx   = []</span>
+<span class="sd">    &gt;&gt;&gt; for i in head1:</span>
+<span class="sd">    ...     if i in [&#39;NEE&#39;, &#39;rg&#39;, &#39;Tair&#39;, &#39;VPD&#39;]: idx.append(head1.index(i))</span>
+<span class="sd">    &gt;&gt;&gt; colhead = [&#39;FC&#39;, &#39;SW_IN&#39;, &#39;TA&#39;, &#39;VPD&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; # data</span>
+<span class="sd">    &gt;&gt;&gt; dfin = dat[idx,:]</span>
+<span class="sd">    &gt;&gt;&gt; dfin[2,:] = np.where(dfin[2,:] == undef, undef, dfin[2,:]+273.15)</span>
+<span class="sd">    &gt;&gt;&gt; dfin[3,:] = np.where(dfin[3,:] == undef, undef, dfin[3,:]*100.)</span>
+<span class="sd">    &gt;&gt;&gt; # flag</span>
+<span class="sd">    &gt;&gt;&gt; flag = np.where(dfin == undef, 2, 0)</span>
+<span class="sd">    &gt;&gt;&gt; # partition</span>
+<span class="sd">    &gt;&gt;&gt; GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;global&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(GPP[1120:1128])</span>
+<span class="sd">    [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.33166157e+00</span>
+<span class="sd">      8.18228013e+00  1.04092252e+01  8.19395317e+00  1.08427448e+01]</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written  Matthias Cuntz, Mar 2012</span>
+<span class="sd">    Modified Arndt Piayda,   Mar 2012 - undef=np.nan</span>
+<span class="sd">             Matthias Cuntz, Nov 2012 - individual routine</span>
+<span class="sd">             Matthias Cuntz, Feb 2013 - ported to Python 3</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Variables</span>
+    <span class="n">fc_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;FC_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;FC&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;NEE_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;NEE&#39;</span><span class="p">):</span>
+            <span class="n">fc_id</span> <span class="o">=</span> <span class="n">cc</span>
+            <span class="k">break</span>
+    <span class="n">ta_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;TA_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;TA&#39;</span><span class="p">):</span>
+            <span class="n">ta_id</span> <span class="o">=</span> <span class="n">cc</span>
+            <span class="k">break</span>
+    <span class="k">assert</span> <span class="n">fc_id</span><span class="p">,</span> <span class="s1">&#39;Carbon net flux with name FC or NEE or starting with FC_ or NEE_ must be in input.&#39;</span>
+    <span class="k">assert</span> <span class="n">ta_id</span><span class="p">,</span> <span class="s1">&#39;Air temperature with name TA or starting with TA_ must be in input.&#39;</span>
+
+    <span class="n">nee</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">fc_id</span><span class="p">],</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">ff</span><span class="p">[</span><span class="n">fc_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">t</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">ta_id</span><span class="p">],</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">ff</span><span class="p">[</span><span class="n">ta_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">misday</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">isday</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">((</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">isday</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">isday</span> <span class="o">==</span> <span class="n">undef</span><span class="p">)))</span>
+
+    <span class="c1"># Partition - Global relationship as in Falge et al. (2001)</span>
+
+    <span class="c1"># Select valid nighttime</span>
+    <span class="n">ndata</span> <span class="o">=</span> <span class="n">nee</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">misday</span> <span class="o">|</span> <span class="n">nee</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">misday</span><span class="o">.</span><span class="n">mask</span>
+    <span class="n">ii</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">tt</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">compressed</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+    <span class="n">net</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">compressed</span><span class="p">(</span><span class="n">nee</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+    <span class="n">p</span>        <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">fmin</span><span class="p">(</span><span class="n">cost_abs</span><span class="p">,</span> <span class="p">[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">200.</span><span class="p">],</span>
+                        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">lloyd_fix_p</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">net</span><span class="p">),</span> <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">Reco</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ndata</span><span class="p">)</span><span class="o">*</span><span class="n">undef</span>
+    <span class="n">ii</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">t</span><span class="o">.</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">Reco</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">lloyd_fix</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># GPP</span>
+    <span class="n">GPP</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ndata</span><span class="p">)</span><span class="o">*</span><span class="n">undef</span>
+    <span class="n">ii</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">nee</span><span class="o">.</span><span class="n">mask</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">GPP</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">Reco</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">-</span> <span class="n">nee</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+
+    <span class="n">dfout</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;GPP&#39;</span><span class="p">:</span><span class="n">GPP</span><span class="p">,</span> <span class="s1">&#39;RECO&#39;</span><span class="p">:</span><span class="n">Reco</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dfout</span>
+
+
+<span class="c1"># ----------------------------------------------------------------------</span>
+<span class="k">def</span> <span class="nf">_nee2gpp_reichstein</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ff</span><span class="p">,</span> <span class="n">isday</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span> <span class="n">nogppnight</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from original</span>
+<span class="sd">    Eddy flux data, using several fits of Reco vs. temperature of nighttime data</span>
+<span class="sd">    over the season, as in Reichstein et al. (2005), in order to calculate Reco</span>
+<span class="sd">    and then GPP = Reco - NEE.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pandas.Dataframe</span>
+<span class="sd">        time series of CO2 fluxes and air temperature.</span>
+
+<span class="sd">        pandas.Dataframe with the columns</span>
+<span class="sd">        &#39;FC&#39; or &#39;NEE&#39; (or starting with &#39;FC\_&#39; or &#39;NEE\_&#39;) for observed CO2 flux [umol(CO2) m-2 s-1]</span>
+<span class="sd">        &#39;TA&#39;    (or starting with &#39;TA\_&#39;) for air temperature [K]</span>
+<span class="sd">        The index is taken as date variable.</span>
+<span class="sd">    ff : pandas.Dataframe</span>
+<span class="sd">        flag Dataframe or array has the same shape as `df`. Non-zero values in</span>
+<span class="sd">        `ff` will be treated as missing values in `df`.</span>
+
+<span class="sd">        `ff` must follow the same rules as `df`.</span>
+<span class="sd">    isday : array_like of bool</span>
+<span class="sd">        True when it is day, False when night. Must have the same length as `df.shape[0].`</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        values having `undef` value are treated as missing values in `df` (default: -9999)</span>
+<span class="sd">    nogppnight : float, optional</span>
+<span class="sd">        GPP will be set to zero at night. RECO will then equal NEE at night (default: False)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.Dataframe</span>
+<span class="sd">        pandas.Dataframe with two columns &#39;GPP&#39; and &#39;RECO&#39; with estimated</span>
+<span class="sd">        photosynthesis and ecosystem respiration.</span>
+
+<span class="sd">    Literature</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Reichstein et al. (2005)</span>
+<span class="sd">        On the separation of net ecosystem exchange into assimilation and ecosystem</span>
+<span class="sd">        respiration: review and improved algorithm,</span>
+<span class="sd">        Global Change Biology 11, 1424-1439</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fread import fread</span>
+<span class="sd">    &gt;&gt;&gt; from date2dec import date2dec</span>
+<span class="sd">    &gt;&gt;&gt; from dec2date import dec2date</span>
+<span class="sd">    &gt;&gt;&gt; ifile = &#39;test_nee2gpp.csv&#39;</span>
+<span class="sd">    &gt;&gt;&gt; undef = -9999.</span>
+<span class="sd">    &gt;&gt;&gt; dat   = fread(ifile, skip=2, transpose=True)</span>
+<span class="sd">    &gt;&gt;&gt; ndat  = dat.shape[1]</span>
+<span class="sd">    &gt;&gt;&gt; head  = fread(ifile, skip=2, header=True)</span>
+<span class="sd">    &gt;&gt;&gt; head1 = head[0]</span>
+<span class="sd">    &gt;&gt;&gt; # date</span>
+<span class="sd">    &gt;&gt;&gt; jdate = date2dec(dy=dat[0,:], mo=dat[1,:], yr=dat[2,:], hr=dat[3,:], mi=dat[4,:])</span>
+<span class="sd">    &gt;&gt;&gt; adate = dec2date(jdate, eng=True)</span>
+<span class="sd">    &gt;&gt;&gt; # colhead</span>
+<span class="sd">    &gt;&gt;&gt; idx   = []</span>
+<span class="sd">    &gt;&gt;&gt; for i in head1:</span>
+<span class="sd">    ...     if i in [&#39;NEE&#39;, &#39;rg&#39;, &#39;Tair&#39;, &#39;VPD&#39;]: idx.append(head1.index(i))</span>
+<span class="sd">    &gt;&gt;&gt; colhead = [&#39;FC&#39;, &#39;SW_IN&#39;, &#39;TA&#39;, &#39;VPD&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; # data</span>
+<span class="sd">    &gt;&gt;&gt; dfin = dat[idx,:]</span>
+<span class="sd">    &gt;&gt;&gt; dfin[2,:] = np.where(dfin[2,:] == undef, undef, dfin[2,:]+273.15)</span>
+<span class="sd">    &gt;&gt;&gt; dfin[3,:] = np.where(dfin[3,:] == undef, undef, dfin[3,:]*100.)</span>
+<span class="sd">    &gt;&gt;&gt; # flag</span>
+<span class="sd">    &gt;&gt;&gt; flag = np.where(dfin == undef, 2, 0)</span>
+<span class="sd">    &gt;&gt;&gt; # partition</span>
+<span class="sd">    &gt;&gt;&gt; GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;local&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(GPP[1120:1128])</span>
+<span class="sd">    [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+<span class="sd">      8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+<span class="sd">    &gt;&gt;&gt; print(Reco[1120:1128])</span>
+<span class="sd">    [1.68311981 1.81012431 1.9874173  2.17108871 2.38759152 2.64372415</span>
+<span class="sd">     2.90076664 3.18592735]</span>
+
+<span class="sd">    &gt;&gt;&gt; GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;local&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(GPP[1120:1128])</span>
+<span class="sd">    [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+<span class="sd">      8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+
+<span class="sd">    &gt;&gt;&gt; GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;Reichstein&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(GPP[1120:1128])</span>
+<span class="sd">    [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+<span class="sd">      8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+
+<span class="sd">    &gt;&gt;&gt; GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;reichstein&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(GPP[1120:1128])</span>
+<span class="sd">    [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+<span class="sd">      8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written  Matthias Cuntz, Mar 2012</span>
+<span class="sd">    Modified Arndt Piayda,   Mar 2012 - undef=np.nan</span>
+<span class="sd">             Matthias Cuntz, Nov 2012 - individual routine</span>
+<span class="sd">             Matthias Cuntz, Feb 2013 - ported to Python 3</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Variables</span>
+    <span class="n">fc_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;FC_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;FC&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;NEE_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;NEE&#39;</span><span class="p">):</span>
+            <span class="n">fc_id</span> <span class="o">=</span> <span class="n">cc</span>
+            <span class="k">break</span>
+    <span class="n">ta_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;TA_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;TA&#39;</span><span class="p">):</span>
+            <span class="n">ta_id</span> <span class="o">=</span> <span class="n">cc</span>
+            <span class="k">break</span>
+    <span class="k">assert</span> <span class="n">fc_id</span><span class="p">,</span> <span class="s1">&#39;Carbon net flux with name FC or NEE or starting with FC_ or NEE_ must be in input.&#39;</span>
+    <span class="k">assert</span> <span class="n">ta_id</span><span class="p">,</span> <span class="s1">&#39;Air temperature with name TA or starting with TA_ must be in input.&#39;</span>
+
+    <span class="n">nee</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">fc_id</span><span class="p">],</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">ff</span><span class="p">[</span><span class="n">fc_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">t</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">ta_id</span><span class="p">],</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">ff</span><span class="p">[</span><span class="n">ta_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">misday</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">isday</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">((</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">isday</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">isday</span> <span class="o">==</span> <span class="n">undef</span><span class="p">)))</span>
+    <span class="n">dates</span>  <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_julian_date</span><span class="p">()</span>
+
+    <span class="c1"># Partition - Local relationship = Reichstein et al. (2005)</span>
+
+    <span class="n">ndata</span> <span class="o">=</span> <span class="n">nee</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">GPP</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ndata</span><span class="p">)</span><span class="o">*</span><span class="n">undef</span>
+    <span class="n">Reco</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ndata</span><span class="p">)</span><span class="o">*</span><span class="n">undef</span>
+    <span class="n">dfout</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;GPP&#39;</span><span class="p">:</span><span class="n">GPP</span><span class="p">,</span> <span class="s1">&#39;RECO&#39;</span><span class="p">:</span><span class="n">Reco</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="c1"># Select valid nighttime</span>
+    <span class="n">mask</span>  <span class="o">=</span> <span class="n">misday</span> <span class="o">|</span> <span class="n">nee</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">misday</span><span class="o">.</span><span class="n">mask</span>
+    <span class="n">ii</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ii</span><span class="o">.</span><span class="n">size</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+        <span class="c1"># raise ValueError(&#39;Error _nee2gpp_reichstein: no valid nighttime data.&#39;)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning _nee2gpp_reichstein: no valid nighttime data.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dfout</span>
+    <span class="n">jul</span>  <span class="o">=</span> <span class="n">dates</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+    <span class="n">tt</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">compressed</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+    <span class="n">net</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">compressed</span><span class="p">(</span><span class="n">nee</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+    <span class="c1"># 1. each 5 days, in 15 day period, fit if range of T &gt; 5</span>
+    <span class="n">locp</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># local param</span>
+    <span class="n">locs</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># local err</span>
+    <span class="n">dmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">jul</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span> <span class="c1"># be aware that julian days starts at noon, i.e. 1.0 is 12h</span>
+    <span class="n">dmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">jul</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>  <span class="c1"># so the search will be from noon to noon and thus includes all nights</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dmin</span><span class="p">,</span><span class="n">dmax</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">iii</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">jul</span><span class="o">&gt;=</span><span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">jul</span><span class="o">&lt;</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">14</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">niii</span> <span class="o">=</span> <span class="n">iii</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">if</span> <span class="n">niii</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="n">tt1</span>  <span class="o">=</span> <span class="n">tt</span><span class="p">[</span><span class="n">iii</span><span class="p">]</span>
+            <span class="n">net1</span> <span class="o">=</span> <span class="n">net</span><span class="p">[</span><span class="n">iii</span><span class="p">]</span>
+            <span class="n">mm</span>   <span class="o">=</span> <span class="o">~</span><span class="n">mad</span><span class="p">(</span><span class="n">net1</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">4.5</span><span class="p">)</span> <span class="c1"># make fit more robust by removing outliers</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="n">iii</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mf">5.</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mm</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">):</span>
+                <span class="n">p</span><span class="p">,</span> <span class="n">temp1</span><span class="p">,</span> <span class="n">temp2</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">fmin_tnc</span><span class="p">(</span><span class="n">cost_lloyd_fix</span><span class="p">,</span> <span class="p">[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">200.</span><span class="p">],</span>
+                                               <span class="n">bounds</span><span class="o">=</span><span class="p">[[</span><span class="mf">0.</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="kc">None</span><span class="p">]],</span>
+                                               <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">tt1</span><span class="p">[</span><span class="n">mm</span><span class="p">],</span> <span class="n">net1</span><span class="p">[</span><span class="n">mm</span><span class="p">]),</span>
+                                               <span class="n">approx_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">p1</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">curve_fit</span><span class="p">(</span><span class="n">lloyd_fix</span><span class="p">,</span> <span class="n">tt1</span><span class="p">[</span><span class="n">mm</span><span class="p">],</span> <span class="n">net1</span><span class="p">[</span><span class="n">mm</span><span class="p">],</span> <span class="n">p0</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">maxfev</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span> <span class="c1"># params, covariance</span>
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">c</span><span class="p">)):</span> <span class="c1"># possible return of curvefit: c=inf</span>
+                        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">s</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">locp</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="p">]</span>
+                <span class="n">locs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">s</span><span class="p">]</span>
+                <span class="c1"># if ((s[1]/p[1])&lt;0.5) &amp; (p[1] &gt; 0.): pdb.set_trace()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">locp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># raise ValueError(&#39;Error _nee2gpp_reichstein: No local relationship found.&#39;)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning _nee2gpp_reichstein: No local relationship found.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dfout</span>
+    <span class="n">locp</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">locp</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">))</span>
+    <span class="n">locs</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">locs</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">))</span>
+    <span class="c1"># 2. E0 = avg of best 3</span>
+    <span class="c1"># Reichstein et al. (2005), p. 1430, 1st paragraph.</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+        <span class="n">iii</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">locp</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">locp</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">450.</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">locs</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">locp</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">niii</span> <span class="o">=</span> <span class="n">iii</span><span class="o">.</span><span class="n">size</span>
+    <span class="k">if</span> <span class="n">niii</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># raise ValueError(&#39;Error _nee2gpp_reichstein: No good local relationship found.&#39;)</span>
+        <span class="c1"># loosen the criteria: take the best three estimates anyway</span>
+        <span class="n">iii</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">locp</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">niii</span> <span class="o">=</span> <span class="n">iii</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">if</span> <span class="n">niii</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># raise ValueError(&#39;Error _nee2gpp_reichstein: No E0&gt;0 found.&#39;)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning _nee2gpp_reichstein: No E0&gt;0 found.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dfout</span>
+        <span class="n">lp</span>    <span class="o">=</span> <span class="n">locp</span><span class="p">[</span><span class="n">iii</span><span class="p">,:]</span>
+        <span class="n">ls</span>    <span class="o">=</span> <span class="n">locs</span><span class="p">[</span><span class="n">iii</span><span class="p">,:]</span>
+        <span class="n">iis</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">ls</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">bestp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">lp</span><span class="p">[</span><span class="n">iis</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">niii</span><span class="p">)],:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">bests</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ls</span><span class="p">[</span><span class="n">iis</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">niii</span><span class="p">)],:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">niii</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">bestp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">locp</span><span class="p">[</span><span class="n">iii</span><span class="p">,:])</span>
+        <span class="n">bests</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">locs</span><span class="p">[</span><span class="n">iii</span><span class="p">,:])</span>
+    <span class="k">elif</span> <span class="n">niii</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+        <span class="n">bestp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">locp</span><span class="p">[</span><span class="n">iii</span><span class="p">,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">bests</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">locs</span><span class="p">[</span><span class="n">iii</span><span class="p">,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># ls    = locs[iii,:]</span>
+        <span class="c1"># iis   = np.argsort(ls[:,1])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lp</span>    <span class="o">=</span> <span class="n">locp</span><span class="p">[</span><span class="n">iii</span><span class="p">,:]</span>
+        <span class="n">ls</span>    <span class="o">=</span> <span class="n">locs</span><span class="p">[</span><span class="n">iii</span><span class="p">,:]</span>
+        <span class="n">iis</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">ls</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">bestp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">lp</span><span class="p">[</span><span class="n">iis</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">bests</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ls</span><span class="p">[</span><span class="n">iis</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># 3. Refit Rref with fixed E0, each 4 days</span>
+    <span class="n">refp</span>  <span class="o">=</span> <span class="p">[]</span> <span class="c1"># Rref param</span>
+    <span class="n">refii</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># mean index of data points</span>
+    <span class="n">E0</span>    <span class="o">=</span> <span class="n">bestp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">et</span>    <span class="o">=</span> <span class="n">lloyd_fix</span><span class="p">(</span><span class="n">tt</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">E0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dmin</span><span class="p">,</span><span class="n">dmax</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">iii</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">jul</span><span class="o">&gt;=</span><span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">jul</span><span class="o">&lt;</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">4</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">niii</span> <span class="o">=</span> <span class="n">iii</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">if</span> <span class="n">niii</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># Calc directly minisation of (nee-p*et)**2</span>
+            <span class="n">p</span><span class="p">,</span> <span class="n">temp1</span><span class="p">,</span> <span class="n">temp2</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">fmin_tnc</span><span class="p">(</span><span class="n">cost_abs</span><span class="p">,</span> <span class="p">[</span><span class="mf">2.</span><span class="p">],</span>
+                                           <span class="n">bounds</span><span class="o">=</span><span class="p">[[</span><span class="mf">0.</span><span class="p">,</span><span class="kc">None</span><span class="p">]],</span>
+                                           <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">lloyd_only_rref_p</span><span class="p">,</span> <span class="n">et</span><span class="p">[</span><span class="n">iii</span><span class="p">],</span> <span class="n">net</span><span class="p">[</span><span class="n">iii</span><span class="p">]),</span>
+                                           <span class="n">approx_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">refp</span>  <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">refii</span> <span class="o">+=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">((</span><span class="n">iii</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">iii</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">//</span><span class="mi">2</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">refp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># raise ValueError(&#39;Error _nee2gpp_reichstein: No ref relationship found.&#39;)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning _nee2gpp_reichstein: No ref relationship found.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dfout</span>
+    <span class="n">refp</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">refp</span><span class="p">))</span>
+    <span class="n">refii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">refii</span><span class="p">))</span>
+
+    <span class="c1"># 4. Interpol Rref</span>
+    <span class="n">Rref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">jul</span><span class="p">[</span><span class="n">refii</span><span class="p">],</span> <span class="n">refp</span><span class="p">)</span>
+
+    <span class="c1"># 5. Calc Reco</span>
+    <span class="n">Reco</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ndata</span><span class="p">)</span><span class="o">*</span><span class="n">undef</span>
+    <span class="n">ii</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">t</span><span class="o">.</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">Reco</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">lloyd_fix</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">Rref</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">E0</span><span class="p">)</span>
+
+    <span class="c1"># 6. Calc GPP</span>
+    <span class="n">GPP</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ndata</span><span class="p">)</span><span class="o">*</span><span class="n">undef</span>
+    <span class="n">ii</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">nee</span><span class="o">.</span><span class="n">mask</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">GPP</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">Reco</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">-</span> <span class="n">nee</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+
+    <span class="c1"># 7. Set GPP=0 at night, if wanted</span>
+    <span class="k">if</span> <span class="n">nogppnight</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">misday</span> <span class="o">|</span> <span class="n">nee</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">misday</span><span class="o">.</span><span class="n">mask</span> <span class="c1"># night</span>
+        <span class="n">ii</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Reco</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">nee</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="n">GPP</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>  <span class="o">=</span> <span class="mf">0.</span>
+        <span class="c1"># and prohibit negative gpp at any time</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">nee</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="p">(</span><span class="n">GPP</span><span class="o">&gt;</span><span class="mf">0.</span><span class="p">)</span>
+        <span class="n">ii</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Reco</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">-=</span> <span class="n">GPP</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="n">GPP</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>  <span class="o">=</span> <span class="mf">0.</span>
+
+    <span class="n">dfout</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;GPP&#39;</span><span class="p">:</span><span class="n">GPP</span><span class="p">,</span> <span class="s1">&#39;RECO&#39;</span><span class="p">:</span><span class="n">Reco</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dfout</span>
+
+
+<span class="c1"># ----------------------------------------------------------------------</span>
+<span class="k">def</span> <span class="nf">_nee2gpp_lasslop</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ff</span><span class="p">,</span> <span class="n">isday</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span> <span class="n">nogppnight</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from original</span>
+<span class="sd">    Eddy flux data, using the daytime method of Lasslop et al. (2010),</span>
+<span class="sd">    in order to calculate Reco and then GPP = Reco - NEE.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pandas.Dataframe or numpy.array</span>
+<span class="sd">        time series of CO2 fluxes, air temperature,</span>
+<span class="sd">        incoming shortwave radiation, and air vapour pressure deficit.</span>
+
+<span class="sd">        `df` can be a pandas.Dataframe with the columns</span>
+<span class="sd">        &#39;FC&#39; or &#39;NEE&#39; (or starting with &#39;FC\_&#39; or &#39;NEE\_&#39;) for observed CO2 flux [umol(CO2) m-2 s-1]</span>
+<span class="sd">        &#39;TA&#39;    (or starting with &#39;TA\_&#39;) for air temperature [K]</span>
+<span class="sd">        &#39;SW_IN&#39; (or starting with &#39;SW_IN&#39;) for incoming short-wave radiation [W m-2]</span>
+<span class="sd">        &#39;VPD&#39;   (or starting with &#39;VPD&#39;) for air vapour deficit [Pa]</span>
+<span class="sd">        The index is taken as date variable.</span>
+<span class="sd">    ff : pandas.Dataframe or numpy.array, optional</span>
+<span class="sd">        flag Dataframe or array has the same shape as `df`. Non-zero values in</span>
+<span class="sd">        `ff` will be treated as missing values in `df`.</span>
+
+<span class="sd">        `ff` must follow the same rules as `df` if pandas.Dataframe.</span>
+<span class="sd">    isday : array_like of bool, optional</span>
+<span class="sd">        True when it is day, False when night. Must have the same length as `df.shape[0]`.</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        values having `undef` value are treated as missing values in `df` (default: -9999)</span>
+<span class="sd">    nogppnight : float, optional</span>
+<span class="sd">        GPP will be set to zero at night. RECO will then equal NEE at night (default: False)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.Dataframe</span>
+<span class="sd">        pandas.Dataframe with two columns &#39;GPP&#39; and &#39;RECO&#39; with estimated</span>
+<span class="sd">        photosynthesis and ecosystem respiration.</span>
+
+<span class="sd">    Literature</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Lasslop et al. (2010)</span>
+<span class="sd">        Separation of net ecosystem exchange into assimilation and respiration using</span>
+<span class="sd">        a light response curve approach: critical issues and global evaluation,</span>
+<span class="sd">        Global Change Biology 16, 187-208</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fread import fread</span>
+<span class="sd">    &gt;&gt;&gt; from date2dec import date2dec</span>
+<span class="sd">    &gt;&gt;&gt; from dec2date import dec2date</span>
+<span class="sd">    &gt;&gt;&gt; ifile = &#39;test_nee2gpp.csv&#39;</span>
+<span class="sd">    &gt;&gt;&gt; undef = -9999.</span>
+<span class="sd">    &gt;&gt;&gt; dat   = fread(ifile, skip=2, transpose=True)</span>
+<span class="sd">    &gt;&gt;&gt; ndat  = dat.shape[1]</span>
+<span class="sd">    &gt;&gt;&gt; head  = fread(ifile, skip=2, header=True)</span>
+<span class="sd">    &gt;&gt;&gt; head1 = head[0]</span>
+<span class="sd">    &gt;&gt;&gt; # date</span>
+<span class="sd">    &gt;&gt;&gt; jdate = date2dec(dy=dat[0,:], mo=dat[1,:], yr=dat[2,:], hr=dat[3,:], mi=dat[4,:])</span>
+<span class="sd">    &gt;&gt;&gt; adate = dec2date(jdate, eng=True)</span>
+<span class="sd">    &gt;&gt;&gt; # colhead</span>
+<span class="sd">    &gt;&gt;&gt; idx   = []</span>
+<span class="sd">    &gt;&gt;&gt; for i in head1:</span>
+<span class="sd">    ...     if i in [&#39;NEE&#39;, &#39;rg&#39;, &#39;Tair&#39;, &#39;VPD&#39;]: idx.append(head1.index(i))</span>
+<span class="sd">    &gt;&gt;&gt; colhead = [&#39;FC&#39;, &#39;SW_IN&#39;, &#39;TA&#39;, &#39;VPD&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; # data</span>
+<span class="sd">    &gt;&gt;&gt; dfin = dat[idx,:]</span>
+<span class="sd">    &gt;&gt;&gt; dfin[2,:] = np.where(dfin[2,:] == undef, undef, dfin[2,:]+273.15)</span>
+<span class="sd">    &gt;&gt;&gt; dfin[3,:] = np.where(dfin[3,:] == undef, undef, dfin[3,:]*100.)</span>
+<span class="sd">    &gt;&gt;&gt; # flag</span>
+<span class="sd">    &gt;&gt;&gt; flag = np.where(dfin == undef, 2, 0)</span>
+<span class="sd">    &gt;&gt;&gt; # partition</span>
+<span class="sd">    &gt;&gt;&gt; GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;day&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(GPP[1120:1128])</span>
+<span class="sd">    [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  2.78457540e+00</span>
+<span class="sd">      6.63212545e+00  8.88902165e+00  6.74243873e+00  9.51364527e+00]</span>
+<span class="sd">    &gt;&gt;&gt; print(Reco[1120:1128])</span>
+<span class="sd">    [0.28786696 0.34594516 0.43893276 0.5495954  0.70029545 0.90849165</span>
+<span class="sd">     1.15074873 1.46137527]</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written  Matthias Cuntz, Mar 2012</span>
+<span class="sd">    Modified Arndt Piayda,   Mar 2012 - undef=np.nan</span>
+<span class="sd">             Matthias Cuntz, Nov 2012 - individual routine</span>
+<span class="sd">             Matthias Cuntz, Feb 2013 - ported to Python 3</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Variables</span>
+    <span class="n">fc_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;FC_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;FC&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;NEE_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;NEE&#39;</span><span class="p">):</span>
+            <span class="n">fc_id</span> <span class="o">=</span> <span class="n">cc</span>
+            <span class="k">break</span>
+    <span class="n">ta_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;TA_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;TA&#39;</span><span class="p">):</span>
+            <span class="n">ta_id</span> <span class="o">=</span> <span class="n">cc</span>
+            <span class="k">break</span>
+    <span class="n">sw_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;SW_IN_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;SW_IN&#39;</span><span class="p">):</span>
+            <span class="n">sw_id</span> <span class="o">=</span> <span class="n">cc</span>
+            <span class="k">break</span>
+    <span class="n">vpd_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;VPD_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;VPD&#39;</span><span class="p">):</span>
+            <span class="n">vpd_id</span> <span class="o">=</span> <span class="n">cc</span>
+            <span class="k">break</span>
+    <span class="k">assert</span> <span class="n">fc_id</span><span class="p">,</span>  <span class="s1">&#39;Carbon net flux with name FC or NEE or starting with FC_ or NEE_ must be in input.&#39;</span>
+    <span class="k">assert</span> <span class="n">ta_id</span><span class="p">,</span>  <span class="s1">&#39;Air temperature with name TA or starting with TA_ must be in input.&#39;</span>
+    <span class="k">assert</span> <span class="n">sw_id</span><span class="p">,</span>  <span class="s1">&#39;Global radiation with name SW or starting with SW_ must be in input.&#39;</span>
+    <span class="k">assert</span> <span class="n">vpd_id</span><span class="p">,</span> <span class="s1">&#39;Vapour pressure deficit with name VPD or starting with VPD_ must be in input.&#39;</span>
+
+    <span class="n">nee</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">fc_id</span><span class="p">],</span>  <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">ff</span><span class="p">[</span><span class="n">fc_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">t</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">ta_id</span><span class="p">],</span>  <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">ff</span><span class="p">[</span><span class="n">ta_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">sw</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">sw_id</span><span class="p">],</span>  <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">ff</span><span class="p">[</span><span class="n">sw_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">vpd</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">vpd_id</span><span class="p">],</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">ff</span><span class="p">[</span><span class="n">vpd_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">misday</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">isday</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">((</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">isday</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">isday</span> <span class="o">==</span> <span class="n">undef</span><span class="p">)))</span>
+    <span class="n">dates</span>  <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_julian_date</span><span class="p">()</span>
+
+    <span class="c1"># Partition - Lasslop et al. (2010) method</span>
+
+    <span class="n">ndata</span> <span class="o">=</span> <span class="n">nee</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">GPP</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ndata</span><span class="p">)</span><span class="o">*</span><span class="n">undef</span>
+    <span class="n">Reco</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ndata</span><span class="p">)</span><span class="o">*</span><span class="n">undef</span>
+    <span class="n">dfout</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;GPP&#39;</span><span class="p">:</span><span class="n">GPP</span><span class="p">,</span> <span class="s1">&#39;RECO&#39;</span><span class="p">:</span><span class="n">Reco</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="n">do_lgpp</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">mask</span>  <span class="o">=</span> <span class="n">nee</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">misday</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">sw</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">vpd</span><span class="o">.</span><span class="n">mask</span>
+    <span class="c1"># night</span>
+    <span class="n">nmask</span> <span class="o">=</span> <span class="n">misday</span> <span class="o">|</span> <span class="n">mask</span>
+    <span class="n">nii</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">nmask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">njul</span>  <span class="o">=</span> <span class="n">dates</span><span class="p">[</span><span class="n">nii</span><span class="p">]</span>
+    <span class="n">ntt</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">compressed</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">nii</span><span class="p">])</span>
+    <span class="n">nnet</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">compressed</span><span class="p">(</span><span class="n">nee</span><span class="p">[</span><span class="n">nii</span><span class="p">])</span>
+    <span class="n">aRref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">nnet</span><span class="p">)</span>
+    <span class="c1"># day</span>
+    <span class="n">dmask</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">misday</span><span class="p">)</span> <span class="o">|</span> <span class="n">mask</span>
+    <span class="n">dii</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">dmask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">djul</span>  <span class="o">=</span> <span class="n">dates</span><span class="p">[</span><span class="n">dii</span><span class="p">]</span>
+    <span class="n">dtt</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">compressed</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">dii</span><span class="p">])</span>
+    <span class="n">dnet</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">compressed</span><span class="p">(</span><span class="n">nee</span><span class="p">[</span><span class="n">dii</span><span class="p">])</span>
+    <span class="n">dsw</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">compressed</span><span class="p">(</span><span class="n">sw</span><span class="p">[</span><span class="n">dii</span><span class="p">])</span>
+    <span class="n">dvpd</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">compressed</span><span class="p">(</span><span class="n">vpd</span><span class="p">[</span><span class="n">dii</span><span class="p">])</span>
+    <span class="c1"># starting values for optim</span>
+    <span class="n">aalpha</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="n">qnet</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">dnet</span><span class="p">)</span>
+    <span class="n">nqnet</span>  <span class="o">=</span> <span class="n">qnet</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">abeta0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">qnet</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="mf">0.97</span><span class="o">*</span><span class="n">nqnet</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)]</span><span class="o">-</span><span class="n">qnet</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="mf">0.03</span><span class="o">*</span><span class="n">nqnet</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)])</span>
+    <span class="n">ak</span>     <span class="o">=</span> <span class="mf">0.</span>
+    <span class="c1"># out</span>
+    <span class="n">lE0</span>    <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lalpha</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">do_lgpp</span><span class="p">:</span>
+        <span class="n">lbeta0</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lk</span>     <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lRref</span>  <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lii</span>    <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">dmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">dates</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="n">dmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">dates</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="n">zaehl</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dmin</span><span class="p">,</span><span class="n">dmax</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">good</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># 1. Estimate E0 from nighttime data</span>
+        <span class="n">iii</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">njul</span><span class="o">&gt;=</span><span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">njul</span><span class="o">&lt;</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">12</span><span class="p">))))</span>
+        <span class="n">niii</span> <span class="o">=</span> <span class="n">iii</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">if</span> <span class="n">niii</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">p</span><span class="p">,</span> <span class="n">temp1</span><span class="p">,</span> <span class="n">temp2</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">fmin_tnc</span><span class="p">(</span><span class="n">cost_abs</span><span class="p">,</span> <span class="p">[</span><span class="n">aRref</span><span class="p">,</span> <span class="mf">100.</span><span class="p">],</span>
+                                           <span class="n">bounds</span><span class="o">=</span><span class="p">[[</span><span class="mf">0.</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="kc">None</span><span class="p">]],</span>
+                                           <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">lloyd_fix_p</span><span class="p">,</span> <span class="n">ntt</span><span class="p">[</span><span class="n">iii</span><span class="p">],</span> <span class="n">nnet</span><span class="p">[</span><span class="n">iii</span><span class="p">]),</span>
+                                           <span class="n">approx_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">E0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">50.</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">zaehl</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">E0</span> <span class="o">=</span> <span class="n">lE0</span><span class="p">[</span><span class="n">zaehl</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># large gap at beginning of data set, i.e. skip the period</span>
+                <span class="n">good</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">continue</span>
+        <span class="c1"># 2. Estimate alpha, k, beta0, Rref from daytime data</span>
+        <span class="n">iii</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">djul</span><span class="o">&gt;=</span><span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">djul</span><span class="o">&lt;</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">4</span><span class="p">))))</span>
+        <span class="n">niii</span> <span class="o">=</span> <span class="n">iii</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">if</span> <span class="n">niii</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">et</span>     <span class="o">=</span> <span class="n">lloyd_fix</span><span class="p">(</span><span class="n">dtt</span><span class="p">[</span><span class="n">iii</span><span class="p">],</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">E0</span><span class="p">)</span>
+            <span class="n">again</span>  <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">ialpha</span> <span class="o">=</span> <span class="n">aalpha</span>
+            <span class="n">ibeta0</span> <span class="o">=</span> <span class="n">abeta0</span>
+            <span class="n">ik</span>     <span class="o">=</span> <span class="n">ak</span>
+            <span class="n">iRref</span>  <span class="o">=</span> <span class="n">aRref</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="p">[[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">]]</span>
+            <span class="k">while</span> <span class="n">again</span><span class="p">:</span>
+                <span class="n">again</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">p</span><span class="p">,</span> <span class="n">nfeval</span><span class="p">,</span> <span class="n">rc</span>  <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">fmin_tnc</span><span class="p">(</span><span class="n">cost_lasslop</span><span class="p">,</span> <span class="p">[</span><span class="n">ialpha</span><span class="p">,</span> <span class="n">ibeta0</span><span class="p">,</span> <span class="n">ik</span><span class="p">,</span> <span class="n">iRref</span><span class="p">],</span>
+                                              <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
+                                              <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">dsw</span><span class="p">[</span><span class="n">iii</span><span class="p">],</span> <span class="n">et</span><span class="p">,</span> <span class="n">dvpd</span><span class="p">[</span><span class="n">iii</span><span class="p">],</span> <span class="n">dnet</span><span class="p">[</span><span class="n">iii</span><span class="p">]),</span>
+                                              <span class="n">approx_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="c1"># if parameters beyond some bounds, set params and redo the optim or skip</span>
+                <span class="k">if</span> <span class="p">((</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.22</span><span class="p">)):</span> <span class="c1"># alpha</span>
+                    <span class="n">again</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">zaehl</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">lalpha</span><span class="p">[</span><span class="n">zaehl</span><span class="p">],</span><span class="n">lalpha</span><span class="p">[</span><span class="n">zaehl</span><span class="p">]]</span>
+                        <span class="n">ialpha</span>    <span class="o">=</span> <span class="n">lalpha</span><span class="p">[</span><span class="n">zaehl</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]</span>
+                        <span class="n">ialpha</span>    <span class="o">=</span> <span class="mf">0.</span>
+                <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">:</span>                     <span class="c1"># beta0</span>
+                    <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]</span>
+                    <span class="n">ibeta0</span>    <span class="o">=</span> <span class="mf">0.</span>
+                    <span class="n">again</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">250.</span><span class="p">:</span>
+                    <span class="n">good</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">:</span>                     <span class="c1"># k</span>
+                    <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]</span>
+                    <span class="n">ik</span>        <span class="o">=</span> <span class="mf">0.</span>
+                    <span class="n">again</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>                      <span class="c1"># Rref</span>
+                    <span class="n">good</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">good</span><span class="p">:</span>
+                <span class="n">lalpha</span> <span class="o">=</span> <span class="n">lalpha</span> <span class="o">+</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="n">do_lgpp</span><span class="p">:</span>
+                    <span class="n">lbeta0</span> <span class="o">=</span> <span class="n">lbeta0</span> <span class="o">+</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                    <span class="n">lk</span>     <span class="o">=</span> <span class="n">lk</span>     <span class="o">+</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                <span class="n">lRref</span>  <span class="o">=</span> <span class="n">lRref</span>  <span class="o">+</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+                <span class="n">lii</span>    <span class="o">=</span> <span class="n">lii</span>    <span class="o">+</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">((</span><span class="n">iii</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">iii</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">lE0</span>    <span class="o">=</span> <span class="n">lE0</span> <span class="o">+</span> <span class="p">[</span><span class="n">E0</span><span class="p">]</span>
+        <span class="n">zaehl</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lE0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># raise ValueError(&#39;Error _nee2gpp_lasslop: No day relationship found.&#39;)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning _nee2gpp_lasslop: No day relationship found.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dfout</span>
+    <span class="n">lE0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lE0</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">do_lgpp</span><span class="p">:</span>
+        <span class="n">lalpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lalpha</span><span class="p">))</span>
+        <span class="n">lbeta0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lbeta0</span><span class="p">))</span>
+        <span class="n">lk</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lk</span><span class="p">))</span>
+    <span class="n">lRref</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lRref</span><span class="p">))</span>
+    <span class="n">lii</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lii</span><span class="p">))</span>
+
+    <span class="c1"># 3. Interpol E0 and Rref</span>
+    <span class="n">E0</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">djul</span><span class="p">[</span><span class="n">lii</span><span class="p">],</span> <span class="n">lE0</span><span class="p">)</span>
+    <span class="n">Rref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">djul</span><span class="p">[</span><span class="n">lii</span><span class="p">],</span> <span class="n">lRref</span><span class="p">)</span>
+
+    <span class="c1"># 4. Calc Reco</span>
+    <span class="n">Reco</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ndata</span><span class="p">)</span><span class="o">*</span><span class="n">undef</span>
+    <span class="n">ii</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">t</span><span class="o">.</span><span class="n">mask</span><span class="p">))</span>
+    <span class="n">Reco</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">lloyd_fix</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">Rref</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">E0</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+
+    <span class="c1"># 5. Calc GPP from light response for check</span>
+    <span class="k">if</span> <span class="n">do_lgpp</span><span class="p">:</span>
+        <span class="n">alpha</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">djul</span><span class="p">[</span><span class="n">lii</span><span class="p">],</span> <span class="n">lE0</span><span class="p">)</span>
+        <span class="n">beta0</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">djul</span><span class="p">[</span><span class="n">lii</span><span class="p">],</span> <span class="n">lbeta0</span><span class="p">)</span>
+        <span class="n">k</span>        <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">djul</span><span class="p">[</span><span class="n">lii</span><span class="p">],</span> <span class="n">lk</span><span class="p">)</span>
+        <span class="n">et</span>       <span class="o">=</span> <span class="n">lloyd_fix</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">E0</span><span class="p">)</span>
+        <span class="n">lmask</span>    <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">misday</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">sw</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">vpd</span><span class="o">.</span><span class="n">mask</span>
+        <span class="n">ii</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">lmask</span><span class="p">))</span>
+        <span class="n">lgpp</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ndata</span><span class="p">)</span>
+        <span class="n">lgpp</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">lasslop</span><span class="p">(</span><span class="n">sw</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">et</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">vpd</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">alpha</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">beta0</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">k</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">Rref</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span> <span class="o">-</span> <span class="n">Reco</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+
+    <span class="c1"># 6. GPP</span>
+    <span class="n">GPP</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ndata</span><span class="p">)</span><span class="o">*</span><span class="n">undef</span>
+    <span class="n">ii</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">nee</span><span class="o">.</span><span class="n">mask</span><span class="p">)))</span>
+    <span class="n">GPP</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">Reco</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">-</span> <span class="n">nee</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+
+    <span class="c1"># 7. Set GPP=0 at night, if wanted</span>
+    <span class="k">if</span> <span class="n">nogppnight</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">misday</span> <span class="o">|</span> <span class="n">nee</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">misday</span><span class="o">.</span><span class="n">mask</span> <span class="c1"># night</span>
+        <span class="n">ii</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Reco</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">nee</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="n">GPP</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>  <span class="o">=</span> <span class="mf">0.</span>
+        <span class="c1"># and prohibit negative gpp at any time</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">nee</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">mask</span> <span class="o">|</span> <span class="p">(</span><span class="n">GPP</span><span class="o">&gt;</span><span class="mf">0.</span><span class="p">)</span>
+        <span class="n">ii</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Reco</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">-=</span> <span class="n">GPP</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="n">GPP</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>   <span class="o">=</span> <span class="mf">0.</span>
+
+    <span class="n">dfout</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;GPP&#39;</span><span class="p">:</span><span class="n">GPP</span><span class="p">,</span> <span class="s1">&#39;RECO&#39;</span><span class="p">:</span><span class="n">Reco</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dfout</span>
+
+
+<span class="c1"># -------------------------------------------------------------</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">optionflags</span><span class="o">=</span><span class="n">doctest</span><span class="o">.</span><span class="n">NORMALIZE_WHITESPACE</span><span class="p">)</span>
+
+    <span class="c1"># from fread import fread</span>
+    <span class="c1"># from date2dec import date2dec</span>
+    <span class="c1"># from dec2date import dec2date</span>
+    <span class="c1"># ifile = &#39;test_nee2gpp.csv&#39;</span>
+    <span class="c1"># undef = -9999.</span>
+    <span class="c1"># # Day,Month,Year,Hour,Minute,NEE,rg,Tair,VPD,GPP_f,Reco</span>
+    <span class="c1"># # -,-,-,-,-,umolm-2s-1,Wm-2,degC,hPa,umol_m-2_s-1,umol_m-2_s-1</span>
+    <span class="c1"># # 1,1,2006,0,15,-9999,0,5.235,0.14192,-0.42485,2.89716</span>
+    <span class="c1"># dat   = fread(ifile, skip=2, transpose=True)</span>
+    <span class="c1"># ndat  = dat.shape[1]</span>
+    <span class="c1"># head  = fread(ifile, skip=2, header=True)</span>
+    <span class="c1"># head1 = head[0]</span>
+    <span class="c1"># # date</span>
+    <span class="c1"># jdate = date2dec(dy=dat[0,:], mo=dat[1,:], yr=dat[2,:], hr=dat[3,:], mi=dat[4,:])</span>
+    <span class="c1"># adate = dec2date(jdate, eng=True)</span>
+    <span class="c1"># # colhead</span>
+    <span class="c1"># idx   = []</span>
+    <span class="c1"># for i in head1:</span>
+    <span class="c1">#     if i in [&#39;NEE&#39;, &#39;rg&#39;, &#39;Tair&#39;, &#39;VPD&#39;]: idx.append(head1.index(i))</span>
+    <span class="c1"># colhead = [&#39;FC&#39;, &#39;SW_IN&#39;, &#39;TA&#39;, &#39;VPD&#39;]</span>
+    <span class="c1"># # data</span>
+    <span class="c1"># dfin = dat[idx,:]</span>
+    <span class="c1"># dfin[2,:] = np.where(dfin[2,:] == undef, undef, dfin[2,:]+273.15)</span>
+    <span class="c1"># dfin[3,:] = np.where(dfin[3,:] == undef, undef, dfin[3,:]*100.)</span>
+    <span class="c1"># # flag</span>
+    <span class="c1"># flag = np.where(dfin == undef, 2, 0)</span>
+    <span class="c1"># # isday = np.where(dfin[1,:] &gt; 10., True, False)</span>
+    <span class="c1"># GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;local&#39;)</span>
+    <span class="c1"># print(GPP[1120:1128])</span>
+    <span class="c1"># # [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+    <span class="c1"># #   8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+    <span class="c1"># print(Reco[1120:1128])</span>
+    <span class="c1"># # [1.68311981 1.81012431 1.9874173  2.17108871 2.38759152 2.64372415</span>
+    <span class="c1"># #  2.90076664 3.18592735]</span>
+    <span class="c1"># GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;local&#39;)</span>
+    <span class="c1"># print(GPP[1120:1128])</span>
+    <span class="c1"># # [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+    <span class="c1"># #   8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+    <span class="c1"># GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;global&#39;)</span>
+    <span class="c1"># print(GPP[1120:1128])</span>
+    <span class="c1"># # [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.33166157e+00</span>
+    <span class="c1"># #   8.18228013e+00  1.04092252e+01  8.19395317e+00  1.08427448e+01]</span>
+    <span class="c1"># GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;Reichstein&#39;)</span>
+    <span class="c1"># print(GPP[1120:1128])</span>
+    <span class="c1"># # [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.406068706013192</span>
+    <span class="c1"># #   8.319421516040766 10.624254150217764  8.492456637225963 11.238197347837367]</span>
+    <span class="c1"># GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;reichstein&#39;)</span>
+    <span class="c1"># print(GPP[1120:1128])</span>
+    <span class="c1"># # [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
+    <span class="c1"># #   8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
+    <span class="c1"># GPP, Reco = nee2gpp(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, method=&#39;day&#39;)</span>
+    <span class="c1"># print(GPP[1120:1128])</span>
+    <span class="c1"># # [-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  2.78457540e+00</span>
+    <span class="c1"># #   6.63212545e+00  8.88902165e+00  6.74243873e+00  9.51364527e+00]</span>
+    <span class="c1"># print(Reco[1120:1128])</span>
+    <span class="c1"># # [0.28786696 0.34594516 0.43893276 0.5495954  0.70029545 0.90849165</span>
+    <span class="c1"># #  1.15074873 1.46137527]</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../contents.html">hesseflux</a></h1>
+
+
+
+<p class="blurb">Functions used in the processing and post-processing of Eddy covariance flux data</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../package.html">API</a></li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/mcuntz/hesseflux">hesseflux @ GitHub</a></li>
+    
+    <li class="toctree-l1"><a href="https://doi.org/10.5281/zenodo.3831488">hesseflux @ Zenodo</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/hesseflux/">hesseflux @ PyPI</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../contents.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2009-2022, Matthias Cuntz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

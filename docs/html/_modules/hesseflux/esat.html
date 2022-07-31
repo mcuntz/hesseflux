@@ -1,0 +1,470 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hesseflux.esat &#8212; hesseflux 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for hesseflux.esat</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">esat : Saturation vapour pressure of water and ice.</span>
+
+<span class="sd">This module was written by Matthias Cuntz while at Department of</span>
+<span class="sd">Computational Hydrosystems, Helmholtz Centre for Environmental</span>
+<span class="sd">Research - UFZ, Leipzig, Germany, and continued while at Institut</span>
+<span class="sd">National de Recherche pour l&#39;Agriculture, l&#39;Alimentation et</span>
+<span class="sd">l&#39;Environnement (INRAE), Nancy, France.</span>
+
+<span class="sd">Copyright (c) 2012-2020 Matthias Cuntz - mc (at) macu (dot) de</span>
+<span class="sd">Released under the MIT License; see LICENSE file for details.</span>
+
+<span class="sd">* Written Jan 2012 by Matthias Cuntz (mc (at) macu (dot) de)</span>
+<span class="sd">* Ported to Python 3, Feb 2013, Matthias Cuntz</span>
+<span class="sd">* Changed handling of masked arrays, Oct 2013, Matthias Cuntz</span>
+<span class="sd">* Assert T&gt;0, Apr 2014, Matthias Cuntz</span>
+<span class="sd">* Using numpy docstring format, May 2020, Matthias Cuntz</span>
+
+<span class="sd">.. moduleauthor:: Matthias Cuntz</span>
+
+<span class="sd">The following functions are provided</span>
+
+<span class="sd">.. autosummary::</span>
+<span class="sd">   esat</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;esat&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="esat"><a class="viewcode-back" href="../../esat.html#hesseflux.esat.esat">[docs]</a><span class="k">def</span> <span class="nf">esat</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">liquid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s1">&#39;GoffGratch&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the saturation vapour pressure of water and/or ice.</span>
+
+<span class="sd">    For temperatures above (and equal) 0 degree C (273.15 K),</span>
+<span class="sd">    the vapour pressure over liquid water is calculated.</span>
+<span class="sd">    For temperatures below 0 degree C, the vapour pressure over ice is calculated.</span>
+
+<span class="sd">    The optional parameter liquid=True changes the calculation to vapour pressure</span>
+<span class="sd">    over liquid water over the entire temperature range.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T : float or array_like</span>
+<span class="sd">        Temperature [K]</span>
+<span class="sd">    liquid : bool, optional</span>
+<span class="sd">        If True, use liquid formula for all temperatures.</span>
+<span class="sd">    formula : str, optional</span>
+<span class="sd">        Name of reference to use for calculations, case-insensitive (default: GoffGratch).</span>
+
+<span class="sd">        Note that several formulations do not provide a vapour pressure formulation over ice</span>
+<span class="sd">        and Marti and Mauersberger do not provide a formula over liquid: GoffGratch is used in theses cases.</span>
+
+<span class="sd">        GoffGratch:        Smithsonian Tables, 1984; after Goff and Gratch, 1946 (default)</span>
+
+<span class="sd">        MartiMauersberger: Marti and Mauersberger, 1993</span>
+
+<span class="sd">        MagnusTeten:       Murray, 1967</span>
+
+<span class="sd">        Buck_original:     Buck, 1981</span>
+
+<span class="sd">        Buck:              Buck Research Manual, 1996</span>
+
+<span class="sd">        WMO:               Goff, 1957; WMO 1988, 2000</span>
+
+<span class="sd">        Wexler:            Wexler, 1977</span>
+
+<span class="sd">        Sonntag:           Sonntag, 1994</span>
+
+<span class="sd">        Bolton:            Bolton, 1980</span>
+
+<span class="sd">        Fukuta:            Fukuta, N. and C. M. Gramada, 2003</span>
+
+<span class="sd">        HylandWexler:      Hyland and Wexler, 1983</span>
+
+<span class="sd">        IAPWS:             Wagner and Pruss, 2002</span>
+
+<span class="sd">        MurphyKoop:        Murphy and Koop, 2005</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float or array_like</span>
+<span class="sd">        Saturation water pressure at temperature T in Pascal [Pa].</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    From Holger Voemel: http://cires.colorado.edu/~voemel/vp.html</span>
+
+<span class="sd">    Referred literature cited in code.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f}&#39;.format(esat(293.15)))</span>
+<span class="sd">    2335.847</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f}&#39;.format(esat(253.15)))</span>
+<span class="sd">    103.074</span>
+
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15])))</span>
+<span class="sd">    2335.847 103.074</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;GoffGratch&#39;)))</span>
+<span class="sd">    2335.847 103.074</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;MartiMauersberger&#39;)))</span>
+<span class="sd">    2335.847 103.650</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;MagnusTeten&#39;)))</span>
+<span class="sd">    2335.201 102.771</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;buck&#39;)))</span>
+<span class="sd">    2338.340 103.286</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;Buck_original&#39;)))</span>
+<span class="sd">    2337.282 103.267</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;wmo&#39;)))</span>
+<span class="sd">    2337.080 103.153</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;WEXLER&#39;)))</span>
+<span class="sd">    2323.254 103.074</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;Sonntag&#39;)))</span>
+<span class="sd">    2339.249 103.249</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;Bolton&#39;)))</span>
+<span class="sd">    2336.947 103.074</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;Fukuta&#39;)))</span>
+<span class="sd">    2335.847 103.074</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;HylandWexler&#39;)))</span>
+<span class="sd">    2338.804 103.260</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;IAPWS&#39;)))</span>
+<span class="sd">    2339.194 103.074</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;MurphyKoop&#39;)))</span>
+<span class="sd">    2339.399 103.252</span>
+
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat(np.array([293.15,253.15]), liquid=True)))</span>
+<span class="sd">    2335.847 125.292</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat([293.15,253.15],formula=&#39;Fukuta&#39;, liquid=True)))</span>
+<span class="sd">    2335.847 125.079</span>
+
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat(np.array([293.15,393.15]))))</span>
+<span class="sd">    esat.py: UserWarning: T&gt;373.15 K - something might be wrong with T.</span>
+<span class="sd">    2335.847 198473.378</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*esat(np.array([293.15,93.15]))))</span>
+<span class="sd">    esat.py: UserWarning: T&lt;100 - T probably given in Celsius instead of Kelvin.</span>
+<span class="sd">    2335.847 0.000</span>
+
+<span class="sd">    &gt;&gt;&gt; out = esat(np.ma.array([253.15,-9999.], mask=[False,True]))</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f}&#39;.format(*out.filled(-9999.)))</span>
+<span class="sd">    103.074 -9999.000</span>
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Jan 2012</span>
+<span class="sd">    Modified, Matthias Cuntz, Feb 2013 - ported to Python 3</span>
+<span class="sd">              Matthias Cuntz, Oct 2013 - changed masked array handling</span>
+<span class="sd">              Matthias Cuntz, Apr 2014 - assert</span>
+<span class="sd">              Matthias Cuntz, May 2020 - numpy docstring format</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1"># Constants</span>
+    <span class="n">T0</span> <span class="o">=</span> <span class="mf">273.15</span> <span class="c1"># Celcius &lt;-&gt; Kelvin [K]</span>
+    <span class="n">knownforms</span> <span class="o">=</span> <span class="p">([</span><span class="s1">&#39;Buck&#39;</span><span class="p">,</span> <span class="s1">&#39;Buck_original&#39;</span><span class="p">,</span> <span class="s1">&#39;Bolton&#39;</span><span class="p">,</span> <span class="s1">&#39;Fukuta&#39;</span><span class="p">,</span> <span class="s1">&#39;GoffGratch&#39;</span><span class="p">,</span> <span class="s1">&#39;HylandWexler&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;IAPWS&#39;</span><span class="p">,</span> <span class="s1">&#39;MagnusTeten&#39;</span><span class="p">,</span> <span class="s1">&#39;MartiMauersberger&#39;</span><span class="p">,</span> <span class="s1">&#39;MurphyKoop&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;Sonntag&#39;</span><span class="p">,</span> <span class="s1">&#39;Vaisala&#39;</span><span class="p">,</span> <span class="s1">&#39;Wexler&#39;</span><span class="p">,</span> <span class="s1">&#39;WMO&#39;</span><span class="p">])</span>
+    <span class="n">lknown</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">knownforms</span><span class="p">]</span>
+    <span class="c1">#</span>
+    <span class="c1"># Check input</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">T</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">),</span> <span class="s1">&#39;T&lt;0 - T probably given in Celsius instead of Kelvin.&#39;</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">T</span> <span class="o">&lt;</span> <span class="mf">100.</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;esat.py: UserWarning: T&lt;100 - T probably given in Celsius instead of Kelvin.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">T</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">T0</span><span class="o">+</span><span class="mf">100.</span><span class="p">)):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;esat.py: UserWarning: T&gt;373.15 K - something might be wrong with T.&quot;</span><span class="p">)</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">formula</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">form</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lknown</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Formula not know. Known formulas are </span><span class="si">{:s}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">knownforms</span><span class="p">))</span>
+    <span class="c1">#</span>
+    <span class="c1"># Split input into masked arrays</span>
+    <span class="k">if</span> <span class="n">liquid</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">Tlim</span> <span class="o">=</span> <span class="mf">1e-3</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Tlim</span> <span class="o">=</span> <span class="n">T0</span>
+
+    <span class="k">if</span> <span class="n">T</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">isone</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">ii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">T</span><span class="o">&gt;=</span><span class="n">Tlim</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">jj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">T</span><span class="o">&lt;</span><span class="n">Tlim</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">T_liq</span>  <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">jj</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">T_ice</span>  <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">isone</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">T</span><span class="o">&gt;=</span><span class="n">Tlim</span><span class="p">:</span>
+            <span class="n">ii</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">jj</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">T_liq</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ii</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">jj</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">T_ice</span> <span class="o">=</span> <span class="n">T</span>
+    <span class="n">esat_out</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># to conserve mask</span>
+    <span class="c1">#</span>
+    <span class="c1"># Calc</span>
+    <span class="c1">#</span>
+    <span class="c1"># Liquid</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">TC_liq</span> <span class="o">=</span> <span class="n">T_liq</span> <span class="o">-</span> <span class="n">T0</span>
+        <span class="k">if</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;buck&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Bucks vapour pressure formulation based on Tetens formula</span>
+<span class="sd">               Buck Research, Model CR-1A Hygrometer Operating Manual, Sep 2001&#39;&#39;&#39;</span>
+            <span class="n">esat_liq</span> <span class="o">=</span> <span class="mf">6.1121</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="mf">18.678</span> <span class="o">-</span> <span class="p">(</span><span class="n">TC_liq</span><span class="p">)</span> <span class="o">/</span> <span class="mf">234.5</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">TC_liq</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">257.14</span><span class="o">+</span><span class="n">TC_liq</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;buck_original&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Bucks vapour pressure formulation based on Tetens formula</span>
+<span class="sd">               Buck, A. L., New equations for computing vapour pressure and enhancement factor,</span>
+<span class="sd">               J. Appl. Meteorol., 20, 1527-1532, 1981.&#39;&#39;&#39;</span>
+            <span class="n">esat_liq</span> <span class="o">=</span> <span class="mf">6.1121</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">17.502</span> <span class="o">*</span> <span class="n">TC_liq</span> <span class="o">/</span> <span class="p">(</span><span class="mf">240.97</span><span class="o">+</span><span class="n">TC_liq</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;bolton&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Bolton, D., The computation of equivalent potential temperature</span>
+<span class="sd">               Monthly Weather Report, 108, 1046-1053, 1980. equation (10)&#39;&#39;&#39;</span>
+            <span class="n">esat_liq</span> <span class="o">=</span> <span class="mf">6.112</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">17.67</span> <span class="o">*</span> <span class="n">TC_liq</span> <span class="o">/</span> <span class="p">(</span><span class="n">TC_liq</span><span class="o">+</span><span class="mf">243.5</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;fukuta&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Fukuta, N. and C. M. Gramada, Vapour pressure measurement of supercooled water</span>
+<span class="sd">               J. Atmos. Sci., 60, 1871-1875, 2003.</span>
+<span class="sd">               This paper does not give a vapour pressure formulation, but rather a correction over the Smithsonian Tables.</span>
+<span class="sd">               Thus calculate the table value first, then use the correction to get to the measured value.</span>
+<span class="sd">               This is done only for -39&lt;TC&lt;0.&#39;&#39;&#39;</span>
+            <span class="n">Ts</span>    <span class="o">=</span> <span class="mf">373.16</span>    <span class="c1"># steam point temperature in K</span>
+            <span class="n">ews</span>   <span class="o">=</span> <span class="mf">1013.246</span>  <span class="c1"># saturation pressure at steam point temperature, normal atmosphere</span>
+            <span class="n">esat_liq</span> <span class="o">=</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">7.90298</span><span class="o">*</span><span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T_liq</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span> <span class="o">+</span> <span class="mf">5.02808</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T_liq</span><span class="p">)</span>
+                          <span class="o">-</span> <span class="mf">1.3816e-7</span> <span class="o">*</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">11.344</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">T_liq</span><span class="o">/</span><span class="n">Ts</span><span class="p">))</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+                          <span class="o">+</span> <span class="mf">8.1328e-3</span> <span class="o">*</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">3.49149</span><span class="o">*</span><span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T_liq</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ews</span><span class="p">)))</span>
+            <span class="n">mm</span> <span class="o">=</span> <span class="p">(</span><span class="n">TC_liq</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">TC_liq</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mf">39.</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">mm</span><span class="p">):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">TC_liq</span> <span class="o">+</span> <span class="mf">19.</span>
+                <span class="n">esat_liq</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mm</span><span class="p">,</span> <span class="n">esat_liq</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.9992</span> <span class="o">+</span> <span class="mf">7.113e-4</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="mf">1.847e-4</span><span class="o">*</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">1.189e-5</span><span class="o">*</span><span class="n">x</span><span class="o">**</span><span class="mi">3</span>
+                                                     <span class="o">+</span> <span class="mf">1.130e-7</span><span class="o">*</span><span class="n">x</span><span class="o">**</span><span class="mi">4</span> <span class="o">-</span> <span class="mf">1.743e-8</span><span class="o">*</span><span class="n">x</span><span class="o">**</span><span class="mi">5</span><span class="p">),</span> <span class="n">esat_liq</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="p">((</span><span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;goffgratch&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;martimauersberger&#39;</span><span class="p">)):</span>
+            <span class="sd">&#39;&#39;&#39;Goff Gratch formulation, Smithsonian Meteorological Tables, 5th edition, p. 350, 1984</span>
+<span class="sd">               Original source: Goff and Gratch (1946), p. 107.&#39;&#39;&#39;</span>
+            <span class="n">Ts</span>    <span class="o">=</span> <span class="mf">373.16</span>    <span class="c1"># steam point temperature in K</span>
+            <span class="n">ews</span>   <span class="o">=</span> <span class="mf">1013.246</span>  <span class="c1"># saturation pressure at steam point temperature, normal atmosphere</span>
+            <span class="n">esat_liq</span> <span class="o">=</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">7.90298</span><span class="o">*</span><span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T_liq</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span> <span class="o">+</span> <span class="mf">5.02808</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T_liq</span><span class="p">)</span>
+                          <span class="o">-</span> <span class="mf">1.3816e-7</span> <span class="o">*</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">11.344</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">T_liq</span><span class="o">/</span><span class="n">Ts</span><span class="p">))</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+                          <span class="o">+</span> <span class="mf">8.1328e-3</span> <span class="o">*</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">3.49149</span><span class="o">*</span><span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T_liq</span><span class="o">-</span><span class="mf">1.</span><span class="p">))</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ews</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;hylandwexler&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Hyland, R. W. and A. Wexler, Formulations for the Thermodynamic Properties of the</span>
+<span class="sd">               saturated Phases of H2O from 173.15K to 473.15K, ASHRAE Trans, 89(2A), 500-519, 1983.&#39;&#39;&#39;</span>
+            <span class="n">esat_liq</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mf">0.58002206e4</span><span class="o">/</span><span class="n">T_liq</span> <span class="o">+</span> <span class="mf">0.13914993e1</span> <span class="o">-</span> <span class="mf">0.48640239e-1</span><span class="o">*</span><span class="n">T_liq</span>
+                           <span class="o">+</span> <span class="mf">0.41764768e-4</span><span class="o">*</span><span class="n">T_liq</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">0.14452093e-7</span><span class="o">*</span><span class="n">T_liq</span><span class="o">**</span><span class="mi">3</span>
+                           <span class="o">+</span> <span class="mf">0.65459673e1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T_liq</span><span class="p">))</span> <span class="o">/</span> <span class="mf">100.</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;iapws&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Wagner W. and A. Pruss (2002)</span>
+<span class="sd">               The IAPWS formulation 1995 for the thermodynamic properties of ordinary water substance</span>
+<span class="sd">               for general and scientific use, J. Phys. Chem. Ref. Data, 31(2), 387-535.</span>
+<span class="sd">               This is the &#39;official&#39; formulation from the International Association for the Properties of Water and Steam</span>
+<span class="sd">               The valid range of this formulation is 273.16 &lt;= T &lt;= 647.096 K and is based on the ITS90 temperature scale.&#39;&#39;&#39;</span>
+            <span class="n">Tc</span> <span class="o">=</span> <span class="mf">647.096</span>      <span class="c1"># K   : Temperature at the critical point</span>
+            <span class="n">Pc</span> <span class="o">=</span> <span class="mf">22.064e4</span>     <span class="c1"># hPa : Vapour pressure at the critical point</span>
+            <span class="n">nu</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">T_liq</span><span class="o">/</span><span class="n">Tc</span><span class="p">)</span>
+            <span class="n">a1</span> <span class="o">=</span> <span class="o">-</span><span class="mf">7.85951783</span>
+            <span class="n">a2</span> <span class="o">=</span> <span class="mf">1.84408259</span>
+            <span class="n">a3</span> <span class="o">=</span> <span class="o">-</span><span class="mf">11.7866497</span>
+            <span class="n">a4</span> <span class="o">=</span> <span class="mf">22.6807411</span>
+            <span class="n">a5</span> <span class="o">=</span> <span class="o">-</span><span class="mf">15.9618719</span>
+            <span class="n">a6</span> <span class="o">=</span> <span class="mf">1.80122502</span>
+            <span class="n">esat_liq</span> <span class="o">=</span> <span class="n">Pc</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">Tc</span><span class="o">/</span><span class="n">T_liq</span> <span class="o">*</span> <span class="p">(</span><span class="n">a1</span><span class="o">*</span><span class="n">nu</span> <span class="o">+</span> <span class="n">a2</span><span class="o">*</span><span class="n">nu</span><span class="o">**</span><span class="mf">1.5</span> <span class="o">+</span> <span class="n">a3</span><span class="o">*</span><span class="n">nu</span><span class="o">**</span><span class="mi">3</span> <span class="o">+</span> <span class="n">a4</span><span class="o">*</span><span class="n">nu</span><span class="o">**</span><span class="mf">3.5</span> <span class="o">+</span> <span class="n">a5</span><span class="o">*</span><span class="n">nu</span><span class="o">**</span><span class="mi">4</span> <span class="o">+</span> <span class="n">a6</span><span class="o">*</span><span class="n">nu</span><span class="o">**</span><span class="mf">7.5</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;magnusteten&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Murray, F. W., On the computation of saturation vapour pressure, J. Appl. Meteorol., 6, 203-204, 1967.&#39;&#39;&#39;</span>
+            <span class="n">esat_liq</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">7.5</span><span class="o">*</span><span class="p">(</span><span class="n">TC_liq</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">TC_liq</span><span class="o">+</span><span class="mf">237.5</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.7858</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;murphykoop&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Murphy and Koop, Review of the vapour pressure of ice and supercooled water for atmospheric applications</span>
+<span class="sd">               Q. J. R. Meteorol. Soc (2005), 131, pp. 1539-1565.&#39;&#39;&#39;</span>
+            <span class="n">esat_liq</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">54.842763</span> <span class="o">-</span> <span class="mf">6763.22</span> <span class="o">/</span> <span class="n">T_liq</span> <span class="o">-</span> <span class="mf">4.210</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T_liq</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.000367</span> <span class="o">*</span> <span class="n">T_liq</span>
+                        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="mf">0.0415</span> <span class="o">*</span> <span class="p">(</span><span class="n">T_liq</span> <span class="o">-</span> <span class="mf">218.8</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mf">53.878</span> <span class="o">-</span> <span class="mf">1331.22</span> <span class="o">/</span> <span class="n">T_liq</span> <span class="o">-</span>
+                                                               <span class="mf">9.44523</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T_liq</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.014025</span> <span class="o">*</span> <span class="n">T_liq</span><span class="p">))</span> <span class="o">/</span> <span class="mf">100.</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;sonntag&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Sonntag, D., Advancements in the field of hygrometry, Meteorol. Z., N. F., 3, 51-66, 1994.&#39;&#39;&#39;</span>
+            <span class="n">esat_liq</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="mf">6096.9385</span> <span class="o">*</span> <span class="mf">1.</span><span class="o">/</span><span class="n">T_liq</span> <span class="o">+</span> <span class="mf">16.635794</span> <span class="o">-</span> <span class="mf">2.711193e-2</span> <span class="o">*</span> <span class="n">T_liq</span>
+                              <span class="o">+</span> <span class="mf">1.673952e-5</span> <span class="o">*</span> <span class="n">T_liq</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">2.433502</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T_liq</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;wexler&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Wexler, A., Vapour pressure formulation for ice</span>
+<span class="sd">               Journal of Research of the National Bureau of Standards-A. 81A, 5-20, 1977.&#39;&#39;&#39;</span>
+            <span class="n">esat_liq</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mf">2.9912729e3</span> <span class="o">*</span> <span class="mf">1.</span><span class="o">/</span><span class="n">T_liq</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">6.0170128e3</span> <span class="o">*</span> <span class="mf">1.</span><span class="o">/</span><span class="n">T_liq</span>
+                           <span class="o">+</span> <span class="mf">1.887643854e1</span> <span class="o">-</span> <span class="mf">2.8354721e-2</span> <span class="o">*</span> <span class="n">T_liq</span><span class="o">**</span><span class="mi">1</span>
+                           <span class="o">+</span> <span class="mf">1.7838301e-5</span> <span class="o">*</span> <span class="n">T_liq</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">8.4150417e-10</span> <span class="o">*</span> <span class="n">T_liq</span><span class="o">**</span><span class="mi">3</span>
+                           <span class="o">-</span> <span class="mf">4.4412543e-13</span> <span class="o">*</span> <span class="n">T_liq</span><span class="o">**</span><span class="mi">4</span> <span class="o">+</span> <span class="mf">2.858487</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T_liq</span><span class="p">))</span> <span class="o">/</span> <span class="mf">100.</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;wmo&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Intended WMO formulation, originally published by Goff (1957)</span>
+<span class="sd">               incorrectly referenced by WMO technical regulations, WMO-NO 49, Vol I</span>
+<span class="sd">               General Meteorological Standards and Recommended Practices, App. A, 1988, Corrigendum Aug 2000.&#39;&#39;&#39;</span>
+            <span class="n">Ts</span>   <span class="o">=</span> <span class="mf">273.16</span>    <span class="c1"># steam point temperature in K</span>
+            <span class="n">esat_liq</span> <span class="o">=</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">10.79574</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">Ts</span><span class="o">/</span><span class="n">T_liq</span><span class="p">)</span> <span class="o">-</span> <span class="mf">5.02800</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">T_liq</span><span class="o">/</span><span class="n">Ts</span><span class="p">)</span>
+                              <span class="o">+</span> <span class="mf">1.50475e-4</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">8.2969</span><span class="o">*</span><span class="p">(</span><span class="n">T_liq</span><span class="o">/</span><span class="n">Ts</span><span class="o">-</span><span class="mf">1.</span><span class="p">)))</span>
+                              <span class="o">+</span> <span class="mf">0.42873e-3</span> <span class="o">*</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="o">+</span><span class="mf">4.76955</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">Ts</span><span class="o">/</span><span class="n">T_liq</span><span class="p">))</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+                              <span class="o">+</span> <span class="mf">0.78614</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;formulation not known: </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">formula</span><span class="p">))</span>
+        <span class="n">esat_liq</span> <span class="o">*=</span> <span class="mf">100.</span>
+        <span class="k">if</span> <span class="n">isone</span><span class="p">:</span>
+            <span class="n">esat_out</span> <span class="o">=</span> <span class="n">esat_liq</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">esat_out</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">esat_liq</span>
+    <span class="c1">#</span>
+    <span class="c1"># Ice</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">jj</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">TC_ice</span> <span class="o">=</span> <span class="n">T_ice</span> <span class="o">-</span> <span class="n">T0</span>
+        <span class="k">if</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;buck&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Bucks vapour pressure formulation based on Tetens formula</span>
+<span class="sd">               Buck Research, Model CR-1A Hygrometer Operating Manual, Sep 2001&#39;&#39;&#39;</span>
+            <span class="n">esat_ice</span> <span class="o">=</span> <span class="mf">6.1115</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="mf">23.036</span> <span class="o">-</span> <span class="n">TC_ice</span> <span class="o">/</span> <span class="mf">333.7</span><span class="p">)</span> <span class="o">*</span> <span class="n">TC_ice</span> <span class="o">/</span> <span class="p">(</span><span class="mf">279.82</span><span class="o">+</span><span class="n">TC_ice</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;buck_original&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Bucks vapour pressure formulation based on Tetens formula</span>
+<span class="sd">               Buck, A. L., New equations for computing vapour pressure and enhancement factor,</span>
+<span class="sd">               J. Appl. Meteorol., 20, 1527-1532, 1981.&#39;&#39;&#39;</span>
+            <span class="n">esat_ice</span> <span class="o">=</span> <span class="mf">6.1115</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">22.452</span> <span class="o">*</span> <span class="n">TC_ice</span> <span class="o">/</span> <span class="p">(</span><span class="mf">272.55</span><span class="o">+</span><span class="n">TC_ice</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="p">((</span><span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;goffgratch&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;bolton&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;fukuta&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;iapws&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;wexler&#39;</span><span class="p">)):</span>
+            <span class="sd">&#39;&#39;&#39;Smithsonian Meteorological Tables, 5th edition, p. 350, 1984&#39;&#39;&#39;</span>
+            <span class="n">ei0</span>    <span class="o">=</span> <span class="mf">6.1071</span>   <span class="c1"># mbar</span>
+            <span class="n">Ts</span>     <span class="o">=</span> <span class="mf">273.16</span>   <span class="c1"># freezing point in K</span>
+            <span class="n">esat_ice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mf">9.09718</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T_ice</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span> <span class="o">-</span> <span class="mf">3.56654</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T_ice</span><span class="p">)</span>
+                              <span class="o">+</span> <span class="mf">0.876793</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">T_ice</span><span class="o">/</span><span class="n">Ts</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ei0</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;hylandwexler&#39;</span><span class="p">):</span>
+            <span class="sd">&#39;&#39;&#39;Hyland, R. W. and A. Wexler, Formulations for the Thermodynamic Properties of</span>
+<span class="sd">               the saturated Phases of H2O from 173.15K to 473.15K, ASHRAE Trans, 89(2A), 500-519, 1983.&#39;&#39;&#39;</span>
+            <span class="n">esat_ice</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mf">0.56745359E4</span> <span class="o">/</span> <span class="n">T_ice</span> <span class="o">+</span> <span class="mf">0.63925247E1</span> <span class="o">-</span> <span class="mf">0.96778430E-2</span> <span class="o">*</span> <span class="n">T_ice</span>
+                               <span class="o">+</span> <span class="mf">0.62215701E-6</span> <span class="o">*</span> <span class="n">T_ice</span><span class="o">**</span><span class="mf">2.</span> <span class="o">+</span> <span class="mf">0.20747825E-8</span> <span class="o">*</span> <span class="n">T_ice</span><span class="o">**</span><span class="mf">3.</span>
+                               <span class="o">-</span> <span class="mf">0.94840240E-12</span> <span class="o">*</span> <span class="n">T_ice</span><span class="o">**</span><span class="mf">4.</span> <span class="o">+</span> <span class="mf">0.41635019E1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T_ice</span><span class="p">))</span> <span class="o">/</span> <span class="mf">100.</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;magnusteten&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Murray, F. W., On the computation of saturation vapo rpressure, J. Appl. Meteorol., 6, 203-204, 1967.&#39;&#39;&#39;</span>
+            <span class="n">esat_ice</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">9.5</span> <span class="o">*</span> <span class="n">TC_ice</span><span class="o">/</span><span class="p">(</span><span class="mf">265.5</span><span class="o">+</span><span class="n">TC_ice</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.7858</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;martimauersberger&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Marti, J. and K Mauersberger, A survey and new measurements of ice vapour pressure</span>
+<span class="sd">               at temperatures between 170 and 250 K, GRL 20, 363-366, 1993.&#39;&#39;&#39;</span>
+            <span class="n">esat_ice</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">2663.5</span><span class="o">/</span><span class="n">T_ice</span> <span class="o">+</span> <span class="mf">12.537</span><span class="p">)</span> <span class="o">/</span> <span class="mf">100.</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;murphykoop&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Murphy and Koop, Review of the vapour pressure of ice and supercooled water</span>
+<span class="sd">               for atmospheric applications, Q. J. R. Meteorol. Soc (2005), 131, pp. 1539-1565.&#39;&#39;&#39;</span>
+            <span class="n">esat_ice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">9.550426</span> <span class="o">-</span> <span class="mf">5723.265</span><span class="o">/</span><span class="n">T_ice</span> <span class="o">+</span> <span class="mf">3.53068</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T_ice</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.00728332</span> <span class="o">*</span> <span class="n">T_ice</span><span class="p">)</span> <span class="o">/</span> <span class="mf">100.</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;sonntag&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;Sonntag, D., Advancements in the field of hygrometry, Meteorol. Z., N. F., 3, 51-66, 1994.&#39;&#39;&#39;</span>
+            <span class="n">esat_ice</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mf">6024.5282</span> <span class="o">*</span> <span class="mf">1.</span><span class="o">/</span><span class="n">T_ice</span> <span class="o">+</span> <span class="mf">24.721994</span> <span class="o">+</span> <span class="mf">1.0613868E-2</span> <span class="o">*</span> <span class="n">T_ice</span>
+                               <span class="o">-</span> <span class="mf">1.3198825E-5</span> <span class="o">*</span> <span class="n">T_ice</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">0.49382577</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T_ice</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;wmo&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;WMO formulation, which is very similar to Goff Gratch</span>
+<span class="sd">               WMO technical regulations, WMO-NO 49, Vol I, General Meteorological Standards</span>
+<span class="sd">               and Recommended Practices, Aug 2000, App. A.&#39;&#39;&#39;</span>
+            <span class="n">Ts</span>    <span class="o">=</span> <span class="mf">273.16</span>    <span class="c1"># steam point temperature in K</span>
+            <span class="n">esat_ice</span> <span class="o">=</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">9.09685</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T_ice</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span> <span class="o">-</span> <span class="mf">3.56654</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Ts</span><span class="o">/</span><span class="n">T_ice</span><span class="p">)</span>
+                              <span class="o">+</span> <span class="mf">0.87682</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">T_ice</span><span class="o">/</span><span class="n">Ts</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.78614</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;formulation not known: </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">formula</span><span class="p">))</span>
+        <span class="n">esat_ice</span> <span class="o">*=</span> <span class="mf">100.</span>
+        <span class="k">if</span> <span class="n">isone</span><span class="p">:</span>
+            <span class="n">esat_out</span> <span class="o">=</span> <span class="n">esat_ice</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">esat_out</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span> <span class="o">=</span> <span class="n">esat_ice</span>
+    <span class="c1">#</span>
+    <span class="c1"># Finish</span>
+    <span class="k">return</span> <span class="n">esat_out</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">optionflags</span><span class="o">=</span><span class="n">doctest</span><span class="o">.</span><span class="n">NORMALIZE_WHITESPACE</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../contents.html">hesseflux</a></h1>
+
+
+
+<p class="blurb">Functions used in the processing and post-processing of Eddy covariance flux data</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../package.html">API</a></li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/mcuntz/hesseflux">hesseflux @ GitHub</a></li>
+    
+    <li class="toctree-l1"><a href="https://doi.org/10.5281/zenodo.3831488">hesseflux @ Zenodo</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/hesseflux/">hesseflux @ PyPI</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../contents.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2009-2022, Matthias Cuntz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

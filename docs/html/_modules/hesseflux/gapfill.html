@@ -1,0 +1,855 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hesseflux.gapfill &#8212; hesseflux 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for hesseflux.gapfill</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">gapfill : Fills gaps of flux data from Eddy covariance measurements according</span>
+<span class="sd">          to Reichstein et al. (Global Change Biology, 2005) or estimate flux</span>
+<span class="sd">          uncertainties after Lasslop et al. (Biogeosciences, 2008).</span>
+
+<span class="sd">This module was written by Matthias Cuntz while at Department of</span>
+<span class="sd">Computational Hydrosystems, Helmholtz Centre for Environmental</span>
+<span class="sd">Research - UFZ, Leipzig, Germany, and continued while at Institut</span>
+<span class="sd">National de Recherche pour l&#39;Agriculture, l&#39;Alimentation et</span>
+<span class="sd">l&#39;Environnement (INRAE), Nancy, France.</span>
+
+<span class="sd">Copyright (c) 2012-2020 Matthias Cuntz - mc (at) macu (dot) de</span>
+<span class="sd">Released under the MIT License; see LICENSE file for details.</span>
+
+<span class="sd">* Written Mar 2012 by Matthias Cuntz - mc (at) macu (dot) de</span>
+<span class="sd">* Ported to Python 3, Feb 2013, Matthias Cuntz</span>
+<span class="sd">* Input data can be ND-array, Apr 2014, Matthias Cuntz</span>
+<span class="sd">* Bug in longestmarginalgap: was only working at time series edges, rename it</span>
+<span class="sd">  to longgap, Apr 2014, Matthias Cuntz</span>
+<span class="sd">* Keyword fullday, Apr 2014, Matthias Cuntz</span>
+<span class="sd">* Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz</span>
+<span class="sd">* Using numpy docstring format, May 2020, Matthias Cuntz</span>
+<span class="sd">* error estimates are undef by default, Jun 2021, Matthias Cuntz</span>
+<span class="sd">* mean of values for error estimates, Jun 2021, Matthias Cuntz</span>
+
+<span class="sd">.. moduleauthor:: Matthias Cuntz</span>
+
+<span class="sd">The following functions are provided</span>
+
+<span class="sd">.. autosummary::</span>
+<span class="sd">   gapfill</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;gapfill&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="gapfill"><a class="viewcode-back" href="../../gapfill.html#hesseflux.gapfill.gapfill">[docs]</a><span class="k">def</span> <span class="nf">gapfill</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeformat</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">,</span>
+            <span class="n">colhead</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sw_dev</span><span class="o">=</span><span class="mf">50.</span><span class="p">,</span> <span class="n">ta_dev</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">vpd_dev</span><span class="o">=</span><span class="mf">5.</span><span class="p">,</span>
+            <span class="n">longgap</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">fullday</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">errmean</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fills gaps in flux data from Eddy covariance measurements with</span>
+<span class="sd">    Marginal Distribution Sampling (MDS) according to Reichstein et al.</span>
+<span class="sd">    (Global Change Biology, 2005).</span>
+
+<span class="sd">    This means, if there is a gap in the data, look for similar meteorological</span>
+<span class="sd">    conditions (defined as maximum possible deviations) in a certain time</span>
+<span class="sd">    window and fill with the average of these &#39;similar&#39; values.</span>
+
+<span class="sd">    The routine can also do the same search for similar meteorological</span>
+<span class="sd">    conditions for every data point and calculate its standard deviation as a</span>
+<span class="sd">    measure of uncertainty after Lasslop et al. (Biogeosciences, 2008).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dfin : pandas.Dataframe or numpy.array</span>
+<span class="sd">        time series of fluxes to fill as well as</span>
+<span class="sd">        meteorological variables incoming short-wave radiation,</span>
+<span class="sd">        air temperature, air vapour pressure deficit.</span>
+
+<span class="sd">        `dfin` can be a pandas.Dataframe with the columns</span>
+<span class="sd">        &#39;SW_IN&#39; (or starting with &#39;SW_IN&#39;) for incoming short-wave radiation [W m-2]</span>
+<span class="sd">        &#39;TA&#39;    (or starting with &#39;TA\_&#39;) for air temperature [deg C]</span>
+<span class="sd">        &#39;VPD&#39;   (or starting with &#39;VPD&#39;) for air vapour deficit [hPa]</span>
+<span class="sd">        and columns with ecosystem fluxes with possible missing values (gaps).</span>
+<span class="sd">        The index is taken as date variable.</span>
+
+<span class="sd">        `dfin` can also me a numpy array with the same columns. In this case</span>
+<span class="sd">        `colhead`, `date`, and possibly `dateformat` must be given.</span>
+<span class="sd">    flag : pandas.Dataframe or numpy.array, optional</span>
+<span class="sd">        flag Dataframe or array has the same shape as dfin. Non-zero values in</span>
+<span class="sd">        `flag` will be treated as missing values in `dfin`.</span>
+
+<span class="sd">        `flag` must follow the same rules as `dfin` if pandas.Dataframe.</span>
+
+<span class="sd">        If `flag` is numpy array, `df.columns.values` will be used as</span>
+<span class="sd">        column heads and the index of `dfin` will be copied to `flag`.</span>
+<span class="sd">    date : array_like of string, optional</span>
+<span class="sd">        1D-array_like of calendar dates in format given in `timeformat`.</span>
+
+<span class="sd">        `date` must be given if `dfin` is numpy array.</span>
+<span class="sd">    timeformat : str, optional</span>
+<span class="sd">        Format of dates in `date`, if given (default: &#39;%Y-%m-%d %H:%M:%S&#39;).</span>
+<span class="sd">        See strftime documentation of Python&#39;s datetime module:</span>
+<span class="sd">        https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior</span>
+<span class="sd">    colhed : array_like of str, optional</span>
+<span class="sd">        column names if `dfin` is numpy array. See `dfin` for mandatory</span>
+<span class="sd">        column names.</span>
+<span class="sd">    sw_dev : float, optional</span>
+<span class="sd">        threshold for maximum deviation of global radiation (default: 50)</span>
+<span class="sd">    ta_dev : float, optional</span>
+<span class="sd">        threshold for maximum deviation of air Temperature (default: 2.5)</span>
+<span class="sd">    vpd_dev : float, optional</span>
+<span class="sd">        threshold for maximum deviation of vpd (default: 5.)</span>
+<span class="sd">    longgap : int, optional</span>
+<span class="sd">        avoid extraploation into a gap longer than `longgap` days (default: 60)</span>
+<span class="sd">    fullday : bool, optional</span>
+<span class="sd">        True: move beginning of large gap to start of next day and move end of</span>
+<span class="sd">              large gap to end of last day (default: False)</span>
+<span class="sd">    undef : float, optional</span>
+<span class="sd">        values having `undef` value are treated as missing values in `dfin`</span>
+<span class="sd">        (default: -9999)</span>
+
+<span class="sd">        np.nan is not allowed (not working).</span>
+<span class="sd">    ddof : int, optional</span>
+<span class="sd">        Delta Degrees of Freedom. The divisor used in calculation of standard</span>
+<span class="sd">        deviation for error estimates (`err=True`) is ``N-ddof``, where ``N``</span>
+<span class="sd">        represents the number of elements (default: 1).</span>
+<span class="sd">    err : bool, optional</span>
+<span class="sd">        True: fill every data point with standard deviation instead of mean,</span>
+<span class="sd">        i.e. used for error generation as in Lasslop et al. (Biogeosci 2008)</span>
+<span class="sd">        (default: False)</span>
+<span class="sd">    errmean : bool, optional</span>
+<span class="sd">        True: also return mean value of values for error estimate</span>
+<span class="sd">        `if err == True` (default: False)</span>
+<span class="sd">    shape : bool or tuple, optional</span>
+<span class="sd">        True: output have the same shape as input data if `dfin` is</span>
+<span class="sd">        numpy array; if a tuple is given, then this tuple is used to reshape.</span>
+
+<span class="sd">        False: outputs are 1D arrays if `dfin` is numpy array (default: False).</span>
+<span class="sd">    verbose : int, optional</span>
+<span class="sd">        Verbosity level 0-3 (default: 0). 0 is no output; 3 is very verbose.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.Dataframe(s) or numpy array(s)</span>
+<span class="sd">        `if not err:` filled_data, quality_class</span>
+
+<span class="sd">        `if err and not errmean:` err_estimate</span>
+
+<span class="sd">        `if err and errmean:` err_estimate, mean_estimate</span>
+
+<span class="sd">        pandas.Dataframe(s) will be returned if `dfin` was Dataframe.</span>
+
+<span class="sd">        numpy array(s) will be returned if `dfin` was numpy array.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If `err`, there is no error estimate if there are no meteorological</span>
+<span class="sd">    conditions in the vicinity of the data point (first cycle of</span>
+<span class="sd">    Reichstein et al. GCB 2005).</span>
+
+<span class="sd">    Routine does not work with `undef=np.nan`.</span>
+
+<span class="sd">    Reichstein et al. (2005)</span>
+<span class="sd">        On the separation of net ecosystem exchange into assimilation and</span>
+<span class="sd">        ecosystem respiration: review and improved algorithm</span>
+<span class="sd">        Global Change Biology 11, 1424-1439</span>
+
+<span class="sd">    Lasslop et al. (2008)</span>
+<span class="sd">        Inﬂuences of observation errors in eddy ﬂux data on inverse model</span>
+<span class="sd">        parameter estimation</span>
+<span class="sd">        Biogeosciences, 5, 1311–1324</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from fread import fread</span>
+<span class="sd">    &gt;&gt;&gt; from date2dec import date2dec</span>
+<span class="sd">    &gt;&gt;&gt; from dec2date import dec2date</span>
+<span class="sd">    &gt;&gt;&gt; ifile = &#39;test_gapfill.csv&#39; # Tharandt 1998 = Online tool example file</span>
+<span class="sd">    &gt;&gt;&gt; undef = -9999.</span>
+<span class="sd">    &gt;&gt;&gt; # data</span>
+<span class="sd">    &gt;&gt;&gt; dat   = fread(ifile, skip=2, transpose=True)</span>
+<span class="sd">    &gt;&gt;&gt; ndat  = dat.shape[1]</span>
+<span class="sd">    &gt;&gt;&gt; head  = fread(ifile, skip=2, header=True)</span>
+<span class="sd">    &gt;&gt;&gt; head1 = head[0]</span>
+<span class="sd">    &gt;&gt;&gt; # colhead</span>
+<span class="sd">    &gt;&gt;&gt; idx   = []</span>
+<span class="sd">    &gt;&gt;&gt; for i in head1:</span>
+<span class="sd">    ...     if i in [&#39;NEE&#39;, &#39;LE&#39;, &#39;H&#39;, &#39;Rg&#39;, &#39;Tair&#39;, &#39;VPD&#39;]:</span>
+<span class="sd">    ...         idx.append(head1.index(i))</span>
+<span class="sd">    &gt;&gt;&gt; colhead = [&#39;FC&#39;, &#39;LE&#39;, &#39;H&#39;, &#39;SW_IN&#39;, &#39;TA&#39;, &#39;VPD&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; # data</span>
+<span class="sd">    &gt;&gt;&gt; dfin = dat[idx,:]</span>
+<span class="sd">    &gt;&gt;&gt; # flag</span>
+<span class="sd">    &gt;&gt;&gt; flag = np.where(dfin == undef, 2, 0)</span>
+<span class="sd">    &gt;&gt;&gt; flag[0, :] = dat[head1.index(&#39;qcNEE&#39;), :].astype(int)</span>
+<span class="sd">    &gt;&gt;&gt; flag[1, :] = dat[head1.index(&#39;qcLE&#39;), :].astype(int)</span>
+<span class="sd">    &gt;&gt;&gt; flag[2, :] = dat[head1.index(&#39;qcH&#39;), :].astype(int)</span>
+<span class="sd">    &gt;&gt;&gt; flag[np.where(flag==1)] = 0</span>
+<span class="sd">    &gt;&gt;&gt; # date</span>
+<span class="sd">    &gt;&gt;&gt; day_id  = head1.index(&#39;Day&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; hour_id = head1.index(&#39;Hour&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; ntime   = dat.shape[1]</span>
+<span class="sd">    &gt;&gt;&gt; year  = np.ones(ntime, dtype=int) * 1998</span>
+<span class="sd">    &gt;&gt;&gt; hh    = dat[hour_id, :].astype(int)</span>
+<span class="sd">    &gt;&gt;&gt; mn    = np.rint((dat[hour_id,:] - hh) * 60.).astype(int)</span>
+<span class="sd">    &gt;&gt;&gt; y0    = date2dec(yr=year[0], mo=1, dy=1, hr=hh, mi=mn)</span>
+<span class="sd">    &gt;&gt;&gt; jdate = y0 + dat[day_id, :]</span>
+<span class="sd">    &gt;&gt;&gt; adate = dec2date(jdate, eng=True)</span>
+<span class="sd">    &gt;&gt;&gt; # fill</span>
+<span class="sd">    &gt;&gt;&gt; dat_f, flag_f = gapfill(dfin, flag=flag, date=adate, colhead=colhead,</span>
+<span class="sd">    ...                         undef=undef, verbose=0)</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:d} {:d} {:d} {:d} {:d} {:d}&#39;.format(*flag_f[0, 11006:11012]))</span>
+<span class="sd">    1 1 1 2 2 2</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.2f} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f}&#39;.format(</span>
+<span class="sd">    ...       *dat_f[0, 11006:11012]))</span>
+<span class="sd">    -18.68 -15.63 -19.61 -15.54 -12.40 -15.33</span>
+
+<span class="sd">    &gt;&gt;&gt; # 1D err</span>
+<span class="sd">    &gt;&gt;&gt; dat_std = gapfill(dfin, flag=flag, date=adate, colhead=colhead,</span>
+<span class="sd">    ...                   undef=undef, verbose=0, err=True)</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}&#39;.format(</span>
+<span class="sd">    ...       *dat_std[0, 11006:11012]))</span>
+<span class="sd">    5.372 13.118 6.477 -9999.000 -9999.000 -9999.000</span>
+
+<span class="sd">    &gt;&gt;&gt; dat_err = np.ones(ndat, dtype=int)*(-1)</span>
+<span class="sd">    &gt;&gt;&gt; kk      = np.where((dat_std[0, :] != undef) &amp; (dat_f[0, :] != 0.))[0]</span>
+<span class="sd">    &gt;&gt;&gt; dat_err[kk] = np.abs(dat_std[0,kk]/dat_f[0,kk]*100.).astype(int)</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:d} {:d} {:d} {:d} {:d} {:d}&#39;.format(*dat_err[11006:11012]))</span>
+<span class="sd">    28 83 33 -1 -1 -1</span>
+
+<span class="sd">    &gt;&gt;&gt; # 1D err + mean</span>
+<span class="sd">    &gt;&gt;&gt; dat_std, dat_mean = gapfill(dfin, flag=flag, date=adate,</span>
+<span class="sd">    ...                             colhead=colhead, undef=undef, verbose=0,</span>
+<span class="sd">    ...                             err=True, errmean=True)</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}&#39;.format(</span>
+<span class="sd">    ...       *dat_std[0, 11006:11012]))</span>
+<span class="sd">    5.372 13.118 6.477 -9999.000 -9999.000 -9999.000</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}&#39;.format(</span>
+<span class="sd">    ...       *dat_mean[0, 11006:11012]))</span>
+<span class="sd">    -18.677 -15.633 -19.610 -9999.000 -9999.000 -9999.000</span>
+
+
+<span class="sd">    History</span>
+<span class="sd">    -------</span>
+<span class="sd">    Written,  Matthias Cuntz, Mar 2012 - modified gap_filling.py</span>
+<span class="sd">    Modified, Matthias Cuntz, Feb 2013 - ported to Python 3</span>
+<span class="sd">              Matthias Cuntz, Apr 2014 - assert</span>
+<span class="sd">                                       - data ND-array</span>
+<span class="sd">                                       - longestmarginalgap was only working at</span>
+<span class="sd">                                         beginning and end of time series</span>
+<span class="sd">                                         renamed to longgap</span>
+<span class="sd">                                       - fullday</span>
+<span class="sd">              Matthias Cuntz, Apr 2020 - Input can be pandas Dataframe or</span>
+<span class="sd">                                         numpy array(s)</span>
+<span class="sd">              Matthias Cuntz, May 2020 - numpy docstring format</span>
+<span class="sd">              Matthias Cuntz, Jun 2021 - prefill error estimates with undef</span>
+<span class="sd">                                       - errmean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check input</span>
+    <span class="c1"># numpy or panda</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">)):</span>
+        <span class="n">isnumpy</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">istrans</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">astr</span> <span class="o">=</span> <span class="s1">&#39;colhead must be given if input is numpy.ndarray.&#39;</span>
+        <span class="k">assert</span> <span class="n">colhead</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">astr</span>
+        <span class="k">if</span> <span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">colhead</span><span class="p">):</span>
+            <span class="n">istrans</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">colhead</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">colhead</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">colhead</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">estr</span> <span class="o">=</span> <span class="s1">&#39;Length of colhead must be number of columns in input&#39;</span>
+            <span class="n">estr</span> <span class="o">=</span> <span class="n">estr</span> <span class="o">+</span> <span class="s1">&#39; array. len(colhead)=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">colhead</span><span class="p">))</span>
+            <span class="n">estr</span> <span class="o">=</span> <span class="n">estr</span> <span class="o">+</span> <span class="s1">&#39; shape(input)=(&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">estr</span> <span class="o">=</span> <span class="n">estr</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;).&#39;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">estr</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;date must be given if input is numpy arrary.&#39;</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">timeformat</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Datetime&#39;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">isnumpy</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">istrans</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">astr</span> <span class="o">=</span> <span class="s1">&#39;Input must be either numpy.ndarray or pandas.DataFrame.&#39;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">),</span> <span class="n">astr</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">dfin</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Incoming flags</span>
+    <span class="k">if</span> <span class="n">flag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">)):</span>
+            <span class="n">fisnumpy</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">fistrans</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+                <span class="n">ff</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+                <span class="n">fistrans</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">ff</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">flag</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">estr</span>  <span class="o">=</span> <span class="s1">&#39;flag must have same shape as data array. data:&#39;</span>
+                <span class="n">estr</span> <span class="o">+=</span> <span class="s1">&#39; (</span><span class="si">{:d}</span><span class="s1">,</span><span class="si">{:d}</span><span class="s1">); flag: (</span><span class="si">{:d}</span><span class="s1">,</span><span class="si">{:d}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">estr</span><span class="p">)</span>
+            <span class="n">ff</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fisnumpy</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">fistrans</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">astr</span> <span class="o">=</span> <span class="s1">&#39;Flag must be either numpy.ndarray or pandas.DataFrame.&#39;</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">),</span> <span class="n">astr</span>
+            <span class="n">ff</span> <span class="o">=</span> <span class="n">flag</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fisnumpy</span> <span class="o">=</span> <span class="n">isnumpy</span>
+        <span class="n">fistrans</span> <span class="o">=</span> <span class="n">istrans</span>
+        <span class="c1"># flags: 0: good; 1: input flagged; 2: output flagged</span>
+        <span class="n">ff</span>              <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">ff</span><span class="p">[:]</span>           <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ff</span><span class="p">[</span><span class="n">df</span> <span class="o">==</span> <span class="n">undef</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">ff</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span>   <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># Data and flags</span>
+    <span class="n">sw_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;SW_IN_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;SW_IN&#39;</span><span class="p">):</span>
+            <span class="n">sw_id</span> <span class="o">=</span> <span class="n">cc</span>
+            <span class="k">break</span>
+    <span class="n">ta_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;TA_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;TA&#39;</span><span class="p">):</span>
+            <span class="n">ta_id</span> <span class="o">=</span> <span class="n">cc</span>
+            <span class="k">break</span>
+    <span class="n">vpd_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;VPD_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="s1">&#39;VPD&#39;</span><span class="p">):</span>
+            <span class="n">vpd_id</span> <span class="o">=</span> <span class="n">cc</span>
+            <span class="k">break</span>
+    <span class="n">astr</span> <span class="o">=</span> <span class="s1">&#39;Global radiation with name SW or starting with SW_&#39;</span>
+    <span class="n">astr</span> <span class="o">=</span> <span class="n">astr</span> <span class="o">+</span> <span class="s1">&#39; must be in input.&#39;</span>
+    <span class="k">assert</span> <span class="n">sw_id</span><span class="p">,</span>  <span class="n">astr</span>
+    <span class="n">astr</span> <span class="o">=</span> <span class="s1">&#39;Air temperature with name TA or starting with TA_&#39;</span>
+    <span class="n">astr</span> <span class="o">=</span> <span class="n">astr</span> <span class="o">+</span> <span class="s1">&#39; must be in input.&#39;</span>
+    <span class="k">assert</span> <span class="n">ta_id</span><span class="p">,</span>  <span class="n">astr</span>
+    <span class="n">astr</span> <span class="o">=</span> <span class="s1">&#39;Vapour pressure deficit with name VPD or starting&#39;</span>
+    <span class="n">astr</span> <span class="o">=</span> <span class="n">astr</span> <span class="o">+</span> <span class="s1">&#39; with VPD_ must be in input.&#39;</span>
+    <span class="k">assert</span> <span class="n">vpd_id</span><span class="p">,</span> <span class="n">astr</span>
+
+    <span class="n">sw</span>      <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">sw_id</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">sw_flg</span>  <span class="o">=</span> <span class="n">ff</span><span class="p">[</span><span class="n">sw_id</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">ta</span>      <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">ta_id</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">ta_flg</span>  <span class="o">=</span> <span class="n">ff</span><span class="p">[</span><span class="n">ta_id</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">vpd</span>     <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">vpd_id</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">vpd_flg</span> <span class="o">=</span> <span class="n">ff</span><span class="p">[</span><span class="n">vpd_id</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+    <span class="c1"># dfill is filled data</span>
+    <span class="c1"># ffill is fill flag if not err else error estimate</span>
+    <span class="n">dfill</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">ffill</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ffill</span>    <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">ffill</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Times</span>
+    <span class="c1"># number of data points per week; basic factor of the time window</span>
+    <span class="n">week</span>    <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;1 W&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">nperday</span> <span class="o">=</span> <span class="n">week</span> <span class="o">//</span> <span class="mi">7</span>
+    <span class="n">hour</span>    <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">hour</span> <span class="o">+</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">minute</span><span class="o">/</span><span class="mf">60.</span>
+    <span class="n">day</span>     <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_julian_date</span><span class="p">()</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="c1"># Filling variables</span>
+    <span class="n">ndata</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">hcol</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">hcol</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;SW_IN_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">hcol</span> <span class="o">==</span> <span class="s1">&#39;SW_IN&#39;</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">hcol</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;TA_&#39;</span><span class="p">)</span>    <span class="ow">or</span> <span class="p">(</span><span class="n">hcol</span> <span class="o">==</span> <span class="s1">&#39;TA&#39;</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">hcol</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;VPD_&#39;</span><span class="p">)</span>   <span class="ow">or</span> <span class="p">(</span><span class="n">hcol</span> <span class="o">==</span> <span class="s1">&#39;VPD&#39;</span><span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  Error estimate &#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">hcol</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  Filling &#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">hcol</span><span class="p">))</span>
+
+        <span class="n">data</span>  <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="n">dflag</span> <span class="o">=</span> <span class="n">ff</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+        <span class="n">data_f</span>  <span class="o">=</span> <span class="n">dfill</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="n">dflag_f</span> <span class="o">=</span> <span class="n">ffill</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">data_f</span><span class="p">[:]</span>  <span class="o">=</span> <span class="n">undef</span>
+            <span class="n">dflag_f</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">undef</span>
+
+        <span class="c1"># Large margins</span>
+
+        <span class="c1"># Check for large margins at beginning</span>
+        <span class="n">largegap</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ndata</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">firstvalid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dflag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">lastvalid</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dflag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">nn</span>         <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nperday</span><span class="o">*</span><span class="n">longgap</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">firstvalid</span> <span class="o">&gt;</span> <span class="n">nn</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Large margin at beginning: &#39;</span><span class="p">,</span> <span class="n">firstvalid</span><span class="p">)</span>
+            <span class="n">largegap</span><span class="p">[</span><span class="mi">0</span><span class="p">:(</span><span class="n">firstvalid</span><span class="o">-</span><span class="n">nn</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">lastvalid</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">ndata</span><span class="o">-</span><span class="n">nn</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Large margin at end: &#39;</span><span class="p">,</span> <span class="n">lastvalid</span><span class="o">-</span><span class="n">nn</span><span class="p">)</span>
+            <span class="n">largegap</span><span class="p">[(</span><span class="n">lastvalid</span><span class="o">+</span><span class="n">nn</span><span class="p">):]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Large gaps</span>
+
+        <span class="c1"># search largegap - code from maskgroup.py</span>
+        <span class="n">index</span>  <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">count</span>  <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndata</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dflag</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">index</span> <span class="o">+=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">count</span>  <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">dflag</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dflag</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">index</span> <span class="o">+=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">count</span>  <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">dflag</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">dflag</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dflag</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">length</span> <span class="o">+=</span> <span class="p">[</span><span class="n">count</span><span class="p">]</span>
+                    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">+=</span> <span class="p">[</span><span class="n">count</span><span class="p">]</span>
+
+        <span class="c1"># set largegap</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">length</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">nn</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Large gap: &#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">length</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">largegap</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">length</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># set or unset rest of days in large gaps</span>
+        <span class="k">if</span> <span class="n">fullday</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndata</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># end of large margin</span>
+                <span class="k">if</span> <span class="n">largegap</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">largegap</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">largegap</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">day</span> <span class="o">==</span> <span class="n">day</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="c1"># beginning of large margin</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">largegap</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">largegap</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">largegap</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">day</span> <span class="o">==</span> <span class="n">day</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+        <span class="c1"># Gap filling</span>
+
+        <span class="c1"># flag for all meteorological conditions</span>
+        <span class="n">meteo_flg</span> <span class="o">=</span> <span class="p">(</span><span class="n">ta_flg</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">vpd_flg</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sw_flg</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># flag for all meteorological conditions and data</span>
+        <span class="n">total_flg</span> <span class="o">=</span> <span class="n">meteo_flg</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dflag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Fill loop over all data points</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndata</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">err</span><span class="p">:</span>
+                <span class="c1"># no reason to go further, no gap -&gt; continue</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">dflag</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">largegap</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+            <span class="c1"># 3 Methods</span>
+            <span class="c1">#   1. ta, vpd and global radiation sw;</span>
+            <span class="c1">#   2. just global radiation sw;</span>
+            <span class="c1">#   3. no meteorolgical conditions: take the mean of +- hour</span>
+
+            <span class="c1"># for better overview: dynamic calculation of radiation threshold</span>
+            <span class="c1"># minimum 20; maximum 50 [Wm-2] according to private correspondence</span>
+            <span class="c1"># with Markus Reichstein</span>
+            <span class="n">sw_devmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mf">20.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">sw</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">sw_dev</span><span class="p">))</span>
+
+            <span class="c1"># Method 1: all met conditions</span>
+            <span class="k">if</span> <span class="n">meteo_flg</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                <span class="c1"># search for values around the met-conditions</span>
+                <span class="c1"># in a window of time</span>
+                <span class="c1"># (one week in the first iteration and odd weeks in the next)</span>
+                <span class="n">j1</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">week</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">j2</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">week</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+                <span class="n">jj</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="n">j2</span><span class="p">)</span>
+                <span class="n">win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">jj</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ndata</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+                <span class="c1"># get boolean array where meteo-conditions are in a given width</span>
+                <span class="n">conditions</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sw</span><span class="p">[</span><span class="n">win</span><span class="p">]</span><span class="o">-</span><span class="n">sw</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>   <span class="o">&lt;</span> <span class="n">sw_devmax</span><span class="p">)</span> <span class="o">&amp;</span>
+                               <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ta</span><span class="p">[</span><span class="n">win</span><span class="p">]</span><span class="o">-</span><span class="n">ta</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>   <span class="o">&lt;</span> <span class="n">ta_dev</span><span class="p">)</span> <span class="o">&amp;</span>
+                               <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">vpd</span><span class="p">[</span><span class="n">win</span><span class="p">]</span><span class="o">-</span><span class="n">vpd</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">vpd_dev</span><span class="p">)</span> <span class="o">&amp;</span>
+                               <span class="n">total_flg</span><span class="p">[</span><span class="n">win</span><span class="p">]</span> <span class="p">)</span>
+                <span class="n">num4avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">conditions</span><span class="p">)</span>
+                <span class="c1"># we need at least two samples with similar conditions</span>
+                <span class="k">if</span> <span class="n">num4avg</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">dat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">win</span><span class="p">],</span> <span class="n">mask</span><span class="o">=~</span><span class="n">conditions</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    m1.1: &#39;</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">win</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                              <span class="n">dat</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">))</span>
+                    <span class="n">data_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># assign also quality category of gap filling</span>
+                        <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># --&gt; extend time window to two weeks</span>
+                    <span class="n">j1</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">week</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">j2</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">week</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+                    <span class="n">jj</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="n">j2</span><span class="p">)</span>
+                    <span class="n">win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">jj</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ndata</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+                    <span class="n">conditions</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sw</span><span class="p">[</span><span class="n">win</span><span class="p">]</span>  <span class="o">-</span> <span class="n">sw</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>  <span class="o">&lt;</span> <span class="n">sw_devmax</span><span class="p">)</span> <span class="o">&amp;</span>
+                                   <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ta</span><span class="p">[</span><span class="n">win</span><span class="p">]</span>  <span class="o">-</span> <span class="n">ta</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>  <span class="o">&lt;</span> <span class="n">ta_dev</span><span class="p">)</span> <span class="o">&amp;</span>
+                                   <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">vpd</span><span class="p">[</span><span class="n">win</span><span class="p">]</span> <span class="o">-</span> <span class="n">vpd</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">vpd_dev</span><span class="p">)</span> <span class="o">&amp;</span>
+                                   <span class="n">total_flg</span><span class="p">[</span><span class="n">win</span><span class="p">]</span> <span class="p">)</span>
+                    <span class="n">num4avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">conditions</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">num4avg</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">dat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">win</span><span class="p">],</span> <span class="n">mask</span><span class="o">=~</span><span class="n">conditions</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    m1.2: &#39;</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">win</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                                  <span class="n">dat</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">))</span>
+                        <span class="n">data_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># assign also quality category of gap filling</span>
+                            <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># if you come here, gap-filling rather than error estimate</span>
+
+            <span class="c1"># If nothing is found under similar meteo within two weeks,</span>
+            <span class="c1"># look for global radiation within one week -&gt;</span>
+
+            <span class="c1"># Method 2: just global radiation available</span>
+            <span class="k">if</span> <span class="n">sw_flg</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">j1</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">week</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">j2</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">week</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+                <span class="n">jj</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="n">j2</span><span class="p">)</span>
+                <span class="n">win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">jj</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ndata</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+                <span class="c1"># get boolean array where meteo-conditions are in a given width</span>
+                <span class="n">conditions</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sw</span><span class="p">[</span><span class="n">win</span><span class="p">]</span><span class="o">-</span><span class="n">sw</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">sw_devmax</span><span class="p">)</span> <span class="o">&amp;</span>
+                               <span class="n">total_flg</span><span class="p">[</span><span class="n">win</span><span class="p">]</span> <span class="p">)</span>
+                <span class="n">num4avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">conditions</span><span class="p">)</span>
+                <span class="c1"># we need at least two samples with similar conditions</span>
+                <span class="k">if</span> <span class="n">num4avg</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">dat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">win</span><span class="p">],</span> <span class="n">mask</span><span class="o">=~</span><span class="n">conditions</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    m2: &#39;</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">win</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                              <span class="n">dat</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">))</span>
+                    <span class="n">data_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>  <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                    <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">continue</span>
+
+            <span class="c1"># If still nothing is found under similar sw within one week,</span>
+            <span class="c1"># take the same hour within 1-7 days</span>
+
+            <span class="c1"># Method 3: same hour</span>
+            <span class="n">enough</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+                <span class="n">t_win</span> <span class="o">=</span> <span class="p">(</span><span class="n">nperday</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">//</span><span class="mi">2</span>
+                <span class="n">j1</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">t_win</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">j2</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">t_win</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+                <span class="n">jj</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="n">j2</span><span class="p">)</span>
+                <span class="n">win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">jj</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ndata</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+                <span class="n">conditions</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">hour</span><span class="p">[</span><span class="n">win</span><span class="p">]</span><span class="o">-</span><span class="n">hour</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">1.1</span><span class="p">)</span>
+                               <span class="o">&amp;</span> <span class="p">(</span><span class="n">dflag</span><span class="p">[</span><span class="n">win</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+                <span class="n">num4avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">conditions</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">num4avg</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">dat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">win</span><span class="p">],</span> <span class="n">mask</span><span class="o">=~</span><span class="n">conditions</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    m3.</span><span class="si">{:d}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">j</span><span class="p">,</span> <span class="n">win</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+                              <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">dat</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">))</span>
+                    <span class="n">data_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+                    <span class="k">break</span>
+
+            <span class="c1"># sanity check</span>
+            <span class="k">if</span> <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># If still nothing is found, start a new cycle</span>
+            <span class="c1"># with increased window size</span>
+            <span class="c1"># Method 4: same as 1 but for 3-12 weeks</span>
+            <span class="k">if</span> <span class="n">meteo_flg</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">multi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">):</span>
+                    <span class="n">j1</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">multi</span><span class="o">*</span><span class="n">week</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">j2</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">multi</span><span class="o">*</span><span class="n">week</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+                    <span class="n">jj</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="n">j2</span><span class="p">)</span>
+                    <span class="n">win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">jj</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ndata</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+                    <span class="n">conditions</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sw</span><span class="p">[</span><span class="n">win</span><span class="p">]</span>  <span class="o">-</span> <span class="n">sw</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>  <span class="o">&lt;</span> <span class="n">sw_devmax</span><span class="p">)</span> <span class="o">&amp;</span>
+                                   <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ta</span><span class="p">[</span><span class="n">win</span><span class="p">]</span>  <span class="o">-</span> <span class="n">ta</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>  <span class="o">&lt;</span> <span class="n">ta_dev</span><span class="p">)</span> <span class="o">&amp;</span>
+                                   <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">vpd</span><span class="p">[</span><span class="n">win</span><span class="p">]</span> <span class="o">-</span> <span class="n">vpd</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">vpd_dev</span><span class="p">)</span> <span class="o">&amp;</span>
+                                   <span class="n">total_flg</span><span class="p">[</span><span class="n">win</span><span class="p">]</span> <span class="p">)</span>
+                    <span class="n">num4avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">conditions</span><span class="p">)</span>
+                    <span class="c1"># we need at least two samples with similar conditions</span>
+                    <span class="k">if</span> <span class="n">num4avg</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">dat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">win</span><span class="p">],</span> <span class="n">mask</span><span class="o">=~</span><span class="n">conditions</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    m4.</span><span class="si">{:d}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">multi</span><span class="p">),</span> <span class="n">j</span><span class="p">,</span> <span class="n">win</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+                                  <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">dat</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">))</span>
+                        <span class="n">data_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                        <span class="c1"># assign also quality category of gap filling</span>
+                        <span class="k">if</span> <span class="n">multi</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="k">elif</span> <span class="n">multi</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+                            <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+                        <span class="k">break</span>
+
+                <span class="c1"># Check because continue does not support</span>
+                <span class="c1"># to jump out of two loops</span>
+                <span class="k">if</span> <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+            <span class="c1"># Method 5: same as 2 but for 2-12 weeks</span>
+            <span class="k">if</span> <span class="n">sw_flg</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">multi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">12</span><span class="p">):</span>
+                    <span class="n">j1</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">multi</span><span class="o">*</span><span class="n">week</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">j2</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">multi</span><span class="o">*</span><span class="n">week</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+                    <span class="n">jj</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="n">j2</span><span class="p">)</span>
+                    <span class="n">win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">jj</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ndata</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+                    <span class="c1"># get boolean array where meteo-conditions are</span>
+                    <span class="c1"># in a given width</span>
+                    <span class="n">conditions</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sw</span><span class="p">[</span><span class="n">win</span><span class="p">]</span> <span class="o">-</span> <span class="n">sw</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">sw_devmax</span><span class="p">)</span> <span class="o">&amp;</span>
+                                   <span class="n">total_flg</span><span class="p">[</span><span class="n">win</span><span class="p">]</span> <span class="p">)</span>
+                    <span class="n">num4avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">conditions</span><span class="p">)</span>
+                    <span class="c1"># we need at least two samples with similar conditions</span>
+                    <span class="k">if</span> <span class="n">num4avg</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">dat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">win</span><span class="p">],</span> <span class="n">mask</span><span class="o">=~</span><span class="n">conditions</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    m5.</span><span class="si">{:d}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">multi</span><span class="p">),</span> <span class="n">j</span><span class="p">,</span> <span class="n">win</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+                                  <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">dat</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">))</span>
+                        <span class="n">data_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">multi</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="k">elif</span> <span class="n">multi</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+                        <span class="k">break</span>
+
+                <span class="k">if</span> <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+            <span class="c1"># Method 6: same as 3 but for 3-120 days</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">120</span><span class="p">):</span>
+                <span class="n">t_win</span> <span class="o">=</span> <span class="n">nperday</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+                <span class="n">j1</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">t_win</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">j2</span>  <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">t_win</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+                <span class="n">jj</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="n">j2</span><span class="p">)</span>
+                <span class="n">win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">jj</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ndata</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+                <span class="n">conditions</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">hour</span><span class="p">[</span><span class="n">win</span><span class="p">]</span><span class="o">-</span><span class="n">hour</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">1.1</span><span class="p">)</span>
+                               <span class="o">&amp;</span> <span class="p">(</span><span class="n">dflag</span><span class="p">[</span><span class="n">win</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+                <span class="n">num4avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">conditions</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">num4avg</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">dat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">win</span><span class="p">],</span> <span class="n">mask</span><span class="o">=~</span><span class="n">conditions</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    m6.</span><span class="si">{:d}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">j</span><span class="p">,</span> <span class="n">win</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+                              <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">dat</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">))</span>
+                    <span class="n">data_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>  <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                    <span class="n">dflag_f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+                    <span class="k">break</span>
+
+        <span class="n">dfill</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_f</span>
+        <span class="n">ffill</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span> <span class="o">=</span> <span class="n">dflag_f</span>
+
+    <span class="c1"># Finish</span>
+
+    <span class="k">if</span> <span class="n">isnumpy</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">istrans</span><span class="p">:</span>
+            <span class="n">dfout</span> <span class="o">=</span> <span class="n">dfill</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dfout</span> <span class="o">=</span> <span class="n">dfill</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dfout</span> <span class="o">=</span> <span class="n">dfill</span>
+
+    <span class="k">if</span> <span class="n">fisnumpy</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fistrans</span><span class="p">:</span>
+            <span class="n">ffout</span> <span class="o">=</span> <span class="n">ffill</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ffout</span> <span class="o">=</span> <span class="n">ffill</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ffout</span> <span class="o">=</span> <span class="n">ffill</span>
+
+    <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">errmean</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ffout</span><span class="p">,</span> <span class="n">dfout</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ffout</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">dfout</span><span class="p">,</span> <span class="n">ffout</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">optionflags</span><span class="o">=</span><span class="n">doctest</span><span class="o">.</span><span class="n">NORMALIZE_WHITESPACE</span><span class="p">)</span>
+
+    <span class="c1"># import numpy as np</span>
+    <span class="c1"># from fread import fread</span>
+    <span class="c1"># from date2dec import date2dec</span>
+    <span class="c1"># from dec2date import dec2date</span>
+    <span class="c1"># from autostring import astr</span>
+    <span class="c1"># ifile = &#39;test_gapfill.csv&#39; # Tharandt 1998 = Online tool example file</span>
+    <span class="c1"># undef = -9999.</span>
+    <span class="c1"># # Day Hour NEE         qcNEE  LE    qcLE  H       qcH  Rg    Tair  Tsoil  rH     VPD  Ustar</span>
+    <span class="c1"># # --  --   umolm-2s-1  --     Wm-2  --    Wm-2    --   Wm-2  degC  degC   %      hPa  ms-1</span>
+    <span class="c1"># # 1   0.5  -1.21       1      1.49  1     -11.77  1    0     7.4   4.19   55.27  4.6  0.72</span>
+    <span class="c1"># dat   = fread(ifile, skip=2, transpose=True)</span>
+    <span class="c1"># # dat = dat[:,:1000]</span>
+    <span class="c1"># ndat  = dat.shape[1]</span>
+    <span class="c1"># head  = fread(ifile, skip=2, header=True)</span>
+    <span class="c1"># head1 = head[0]</span>
+    <span class="c1"># # colhead</span>
+    <span class="c1"># idx   = []</span>
+    <span class="c1"># for i in head1:</span>
+    <span class="c1">#     if i in [&#39;NEE&#39;, &#39;LE&#39;, &#39;H&#39;, &#39;Rg&#39;, &#39;Tair&#39;, &#39;VPD&#39;]: idx.append(head1.index(i))</span>
+    <span class="c1"># colhead = [&#39;FC&#39;, &#39;LE&#39;, &#39;H&#39;, &#39;SW_IN&#39;, &#39;TA&#39;, &#39;VPD&#39;]</span>
+    <span class="c1"># # data</span>
+    <span class="c1"># dfin = dat[idx,:]</span>
+    <span class="c1"># # flag</span>
+    <span class="c1"># flag = np.where(dfin == undef, 2, 0)</span>
+    <span class="c1"># flag[0,:] = dat[head1.index(&#39;qcNEE&#39;),:].astype(int)</span>
+    <span class="c1"># flag[1,:] = dat[head1.index(&#39;qcLE&#39;),:].astype(int)</span>
+    <span class="c1"># flag[2,:] = dat[head1.index(&#39;qcH&#39;),:].astype(int)</span>
+    <span class="c1"># flag[np.where(flag==1)] = 0</span>
+    <span class="c1"># # date</span>
+    <span class="c1"># day_id  = head1.index(&#39;Day&#39;)</span>
+    <span class="c1"># hour_id = head1.index(&#39;Hour&#39;)</span>
+    <span class="c1"># ntime   = dat.shape[1]</span>
+    <span class="c1"># year  = np.ones(ntime, dtype=int) * 1998</span>
+    <span class="c1"># hh    = dat[hour_id,:].astype(int)</span>
+    <span class="c1"># mn    = np.rint((dat[hour_id,:]-hh)*60.).astype(int)</span>
+    <span class="c1"># y0    = date2dec(yr=year[0], mo=1, dy=1, hr=hh, mi=mn)</span>
+    <span class="c1"># jdate = y0 + dat[day_id,:]</span>
+    <span class="c1"># adate = dec2date(jdate, eng=True)</span>
+    <span class="c1"># # fill</span>
+    <span class="c1"># dat_f, flag_f = gapfill(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, verbose=0)</span>
+    <span class="c1"># print(astr(flag_f[0,11006:11012],0,pp=True))</span>
+    <span class="c1"># # [&#39;1&#39; &#39;1&#39; &#39;1&#39; &#39;2&#39; &#39;2&#39; &#39;2&#39;]</span>
+    <span class="c1"># print(astr(dat_f[0,11006:11012],3,pp=True))</span>
+    <span class="c1"># # [&#39;-18.678&#39; &#39;-15.633&#39; &#39;-19.610&#39; &#39;-15.536&#39; &#39;-12.402&#39; &#39;-15.329&#39;]</span>
+
+    <span class="c1"># # 1D err</span>
+    <span class="c1"># dat_std = gapfill(dfin, flag=flag, date=adate, colhead=colhead, undef=undef, verbose=0, err=True)</span>
+    <span class="c1"># print(astr(dat_std[0,11006:11012],3,pp=True))</span>
+    <span class="c1"># # [&#39;    5.372&#39; &#39;   13.118&#39; &#39;    6.477&#39; &#39;-9999.000&#39; &#39;-9999.000&#39; &#39;-9999.000&#39;]</span>
+
+    <span class="c1"># dat_err     = np.ones(ndat, dtype=int)*(-1)</span>
+    <span class="c1"># kk          = np.where((dat_std[0,:] != undef) &amp; (dat_f[0,:] != 0.))[0]</span>
+    <span class="c1"># dat_err[kk] = np.abs(dat_std[0,kk]/dat_f[0,kk]*100.).astype(int)</span>
+    <span class="c1"># print(astr(dat_err[11006:11012],pp=True))</span>
+    <span class="c1"># # [&#39; 28&#39; &#39; 83&#39; &#39; 33&#39; &#39; -1&#39; &#39; -1&#39; &#39; -1&#39;]</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../contents.html">hesseflux</a></h1>
+
+
+
+<p class="blurb">Functions used in the processing and post-processing of Eddy covariance flux data</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../package.html">API</a></li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/mcuntz/hesseflux">hesseflux @ GitHub</a></li>
+    
+    <li class="toctree-l1"><a href="https://doi.org/10.5281/zenodo.3831488">hesseflux @ Zenodo</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/hesseflux/">hesseflux @ PyPI</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../contents.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2009-2022, Matthias Cuntz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

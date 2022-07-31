@@ -20,12 +20,21 @@
 # NOTE:
 # pip install sphinx_rtd_theme
 # is needed in order to build the documentation
+import datetime
+import warnings
 import os
 import sys
-# this line is needed, if hesseflux is not installed yet
-sys.path.insert(0, os.path.abspath("../../"))
-
+# this line is needed, if pyjams is not installed yet
+sys.path.insert(
+    0, os.path.dirname(os.path.abspath(__file__)) + '/../../src')
 from hesseflux import __version__ as ver
+
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+    message=("Matplotlib is currently using agg, which is a non-GUI backend,"
+             " so cannot show the figure."),
+)
 
 
 def skip(app, what, name, obj, skip, options):
@@ -52,12 +61,12 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.coverage",
-    "sphinx.ext.imgmath",
+    # "sphinx.ext.imgmath",
+    "sphinx.ext.mathjax",
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",  # parameters look better than with numpydoc only
-    "sphinx.ext.mathjax",
     "numpydoc",
 ]
 
@@ -97,8 +106,9 @@ source_suffix = ".rst"
 master_doc = "contents"
 
 # General information about the project.
+curr_year = datetime.datetime.now().year
 project = "hesseflux"
-copyright = "2009-2020, Matthias Cuntz"
+copyright = "2009-{}, Matthias Cuntz".format(curr_year)
 author = "Matthias Cuntz"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -115,7 +125,7 @@ release = ver
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -130,49 +140,54 @@ pygments_style = "sphinx"
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-html_theme = "sphinx_rtd_theme"
-# html_theme = 'bizstyle'
-# html_theme = 'sphinxdoc'
-# html_theme = 'alabaster'
-
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#
-html_theme_options = {
-    #    'canonical_url': '',
-    #    'analytics_id': '',
-    "logo_only": False,
-    "display_version": True,
-    "prev_next_buttons_location": "top",
-    #    'style_external_links': False,
-    #    'vcs_pageview_mode': '',
-    # Toc options
-    "collapse_navigation": False,
-    "sticky_navigation": True,
-    "navigation_depth": 4,
-    "includehidden": True,
-    "titles_only": False,
-}
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
 
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-#
-# This is required for the alabaster theme
-# refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
+# html_theme = "sphinx_rtd_theme"
+# html_theme_options = {
+#     #    'canonical_url': '',
+#     #    'analytics_id': '',
+#     "logo_only": False,
+#     "display_version": True,
+#     "prev_next_buttons_location": "top",
+#     #    'style_external_links': False,
+#     #    'vcs_pageview_mode': '',
+#     # Toc options
+#     "collapse_navigation": False,
+#     "sticky_navigation": True,
+#     "navigation_depth": 4,
+#     "includehidden": True,
+#     "titles_only": False,
+# }
+
+html_theme = 'alabaster'
 html_sidebars = {
-    "**": [
-        "localtoc.html",
-        "relations.html",  # needs 'show_related': True theme option to display
-        "searchbox.html",
-        "sourcelink.html",
+    '**': [
+        'about.html',
+        'navigation.html',
+        'relations.html',
+        'searchbox.html',
     ]
 }
+html_theme_options = {
+    'description': ('Functions used in the processing and post-processing'
+                    ' of Eddy covariance flux data'),
+    'extra_nav_links': {
+        'hesseflux @ GitHub': "https://github.com/mcuntz/hesseflux",
+        'hesseflux @ Zenodo': "https://doi.org/10.5281/zenodo.3831488",
+        'hesseflux @ PyPI': "https://pypi.org/project/hesseflux/"
+    },
+}
+
+# # Add any paths that contain custom static files (such as style sheets) here,
+# # relative to this directory. They are copied after the builtin static files,
+# # so a file named "default.css" will overwrite the builtin "default.css".
+html_static_path = ['_static']
+
+# # These paths are either relative to html_static_path
+# # or fully qualified paths (eg. https://...)
+html_css_files = ['css/custom.css']
 
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -208,8 +223,8 @@ latex_documents = [
     (
         master_doc,
         "hesseflux.tex",
-        "hesseflux Documentation",
-        "Matthias Cuntz",
+        "Documentation of hesseflux",
+        author,
         "manual",
     )
 ]
@@ -233,10 +248,10 @@ texinfo_documents = [
     (
         master_doc,
         "hesseflux",
-        "hesseflux Documentation",
+        "Documentation of hesseflux",
         author,
         "hesseflux",
-        "Eddy tools of FR-Hes.",
+        "Functions for processing and post-processing Eddy covariance data",
         "Miscellaneous",
     )
 ]
@@ -248,15 +263,19 @@ suppress_warnings = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    "Python":     ("https://docs.python.org/3/",                   None),
-    "NumPy":      ("https://numpy.org/doc/stable/",                None),
-    "SciPy":      ("https://docs.scipy.org/doc/scipy/reference/",  None),
-    "matplotlib": ("https://matplotlib.org/",                      None),
-    "cython":     ("https://cython.readthedocs.io/en/latest/",     None),
-    "Sphinx":     ("https://www.sphinx-doc.org/en/master/",        None),
-    "Pandas":     ("https://pandas.pydata.org/docs/",              None),
-    "schwimmbad": ("https://schwimmbad.readthedocs.io/en/latest/", None),
-    "mpi4py":     ("https://mpi4py.readthedocs.io/en/latest/",     None),
-    "emcee":      ("https://emcee.readthedocs.io/en/latest/",      None),
-    "pyeee":      ("https://pyeee.readthedocs.io/en/latest/",      None),
+    "Python":      ("https://docs.python.org/3/",                    None),
+    "NumPy":       ("https://numpy.org/doc/stable/",                 None),
+    "SciPy":       ("https://docs.scipy.org/doc/scipy/reference/",   None),
+    "matplotlib":  ("https://matplotlib.org/",                       None),
+    "Pandas":      ("https://pandas.pydata.org/docs/",               None),
+    "cython":      ("https://cython.readthedocs.io/en/latest/",      None),
+    "cftime":      ("https://unidata.github.io/cftime/",             None),
+    # "netcdf4-python": ("https://unidata.github.io/netcdf4-python/",  None),
+    "openpyxl":    ("https://openpyxl.readthedocs.io/en/stable/",    None),
+    "Sphinx":      ("https://www.sphinx-doc.org/en/master/",         None),
+    "schwimmbad":  ("https://schwimmbad.readthedocs.io/en/latest/",  None),
+    "mpi4py":      ("https://mpi4py.readthedocs.io/en/latest/",      None),
+    "emcee":       ("https://emcee.readthedocs.io/en/latest/",       None),
+    "pyeee":       ("https://pyeee.readthedocs.io/en/latest/",       None),
+    "partialwrap": ("https://partialwrap.readthedocs.io/en/latest/", None),
 }

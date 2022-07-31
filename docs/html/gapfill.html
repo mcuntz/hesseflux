@@ -1,0 +1,355 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hesseflux.gapfill &#8212; hesseflux 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="hesseflux.logtools.logtools" href="logtools.logtools.html" />
+    <link rel="prev" title="hesseflux.functions.sa_test_functions" href="functions.sa_test_functions.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-hesseflux.gapfill">
+<span id="hesseflux-gapfill"></span><h1>hesseflux.gapfill<a class="headerlink" href="#module-hesseflux.gapfill" title="Permalink to this headline">¶</a></h1>
+<dl class="simple">
+<dt>gapfill<span class="classifier">Fills gaps of flux data from Eddy covariance measurements according</span></dt><dd><p>to Reichstein et al. (Global Change Biology, 2005) or estimate flux
+uncertainties after Lasslop et al. (Biogeosciences, 2008).</p>
+</dd>
+</dl>
+<p>This module was written by Matthias Cuntz while at Department of
+Computational Hydrosystems, Helmholtz Centre for Environmental
+Research - UFZ, Leipzig, Germany, and continued while at Institut
+National de Recherche pour l’Agriculture, l’Alimentation et
+l’Environnement (INRAE), Nancy, France.</p>
+<p>Copyright (c) 2012-2020 Matthias Cuntz - mc (at) macu (dot) de
+Released under the MIT License; see LICENSE file for details.</p>
+<ul class="simple">
+<li><p>Written Mar 2012 by Matthias Cuntz - mc (at) macu (dot) de</p></li>
+<li><p>Ported to Python 3, Feb 2013, Matthias Cuntz</p></li>
+<li><p>Input data can be ND-array, Apr 2014, Matthias Cuntz</p></li>
+<li><p>Bug in longestmarginalgap: was only working at time series edges, rename it
+to longgap, Apr 2014, Matthias Cuntz</p></li>
+<li><p>Keyword fullday, Apr 2014, Matthias Cuntz</p></li>
+<li><p>Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz</p></li>
+<li><p>Using numpy docstring format, May 2020, Matthias Cuntz</p></li>
+<li><p>error estimates are undef by default, Jun 2021, Matthias Cuntz</p></li>
+<li><p>mean of values for error estimates, Jun 2021, Matthias Cuntz</p></li>
+</ul>
+<p>The following functions are provided</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.gapfill.gapfill" title="hesseflux.gapfill.gapfill"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gapfill</span></code></a>(dfin[, flag, date, timeformat, ...])</p></td>
+<td><p>Fills gaps in flux data from Eddy covariance measurements with Marginal Distribution Sampling (MDS) according to Reichstein et al. (Global Change Biology, 2005).</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.gapfill.gapfill">
+<span class="sig-name descname"><span class="pre">gapfill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeformat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%Y-%m-%d</span> <span class="pre">%H:%M:%S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colhead</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sw_dev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ta_dev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vpd_dev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longgap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fullday</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddof</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errmean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/gapfill.html#gapfill"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.gapfill.gapfill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fills gaps in flux data from Eddy covariance measurements with
+Marginal Distribution Sampling (MDS) according to Reichstein et al.
+(Global Change Biology, 2005).</p>
+<p>This means, if there is a gap in the data, look for similar meteorological
+conditions (defined as maximum possible deviations) in a certain time
+window and fill with the average of these ‘similar’ values.</p>
+<p>The routine can also do the same search for similar meteorological
+conditions for every data point and calculate its standard deviation as a
+measure of uncertainty after Lasslop et al. (Biogeosciences, 2008).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dfin</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em>) – <p>time series of fluxes to fill as well as
+meteorological variables incoming short-wave radiation,
+air temperature, air vapour pressure deficit.</p>
+<p><cite>dfin</cite> can be a pandas.Dataframe with the columns
+‘SW_IN’ (or starting with ‘SW_IN’) for incoming short-wave radiation [W m-2]
+‘TA’    (or starting with ‘TA_’) for air temperature [deg C]
+‘VPD’   (or starting with ‘VPD’) for air vapour deficit [hPa]
+and columns with ecosystem fluxes with possible missing values (gaps).
+The index is taken as date variable.</p>
+<p><cite>dfin</cite> can also me a numpy array with the same columns. In this case
+<cite>colhead</cite>, <cite>date</cite>, and possibly <cite>dateformat</cite> must be given.</p>
+</p></li>
+<li><p><strong>flag</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em><em>, </em><em>optional</em>) – <p>flag Dataframe or array has the same shape as dfin. Non-zero values in
+<cite>flag</cite> will be treated as missing values in <cite>dfin</cite>.</p>
+<p><cite>flag</cite> must follow the same rules as <cite>dfin</cite> if pandas.Dataframe.</p>
+<p>If <cite>flag</cite> is numpy array, <cite>df.columns.values</cite> will be used as
+column heads and the index of <cite>dfin</cite> will be copied to <cite>flag</cite>.</p>
+</p></li>
+<li><p><strong>date</strong> (<em>array_like of string</em><em>, </em><em>optional</em>) – <p>1D-array_like of calendar dates in format given in <cite>timeformat</cite>.</p>
+<p><cite>date</cite> must be given if <cite>dfin</cite> is numpy array.</p>
+</p></li>
+<li><p><strong>timeformat</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Format of dates in <cite>date</cite>, if given (default: ‘%Y-%m-%d %H:%M:%S’).
+See strftime documentation of Python’s datetime module:
+<a class="reference external" href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior">https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior</a></p></li>
+<li><p><strong>colhed</strong> (<em>array_like of str</em><em>, </em><em>optional</em>) – column names if <cite>dfin</cite> is numpy array. See <cite>dfin</cite> for mandatory
+column names.</p></li>
+<li><p><strong>sw_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – threshold for maximum deviation of global radiation (default: 50)</p></li>
+<li><p><strong>ta_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – threshold for maximum deviation of air Temperature (default: 2.5)</p></li>
+<li><p><strong>vpd_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – threshold for maximum deviation of vpd (default: 5.)</p></li>
+<li><p><strong>longgap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – avoid extraploation into a gap longer than <cite>longgap</cite> days (default: 60)</p></li>
+<li><p><strong>fullday</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – <dl class="simple">
+<dt>True: move beginning of large gap to start of next day and move end of</dt><dd><p>large gap to end of last day (default: False)</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – <p>values having <cite>undef</cite> value are treated as missing values in <cite>dfin</cite>
+(default: -9999)</p>
+<p>np.nan is not allowed (not working).</p>
+</p></li>
+<li><p><strong>ddof</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Delta Degrees of Freedom. The divisor used in calculation of standard
+deviation for error estimates (<cite>err=True</cite>) is <code class="docutils literal notranslate"><span class="pre">N-ddof</span></code>, where <code class="docutils literal notranslate"><span class="pre">N</span></code>
+represents the number of elements (default: 1).</p></li>
+<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – True: fill every data point with standard deviation instead of mean,
+i.e. used for error generation as in Lasslop et al. (Biogeosci 2008)
+(default: False)</p></li>
+<li><p><strong>errmean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – True: also return mean value of values for error estimate
+<cite>if err == True</cite> (default: False)</p></li>
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a><em>, </em><em>optional</em>) – <p>True: output have the same shape as input data if <cite>dfin</cite> is
+numpy array; if a tuple is given, then this tuple is used to reshape.</p>
+<p>False: outputs are 1D arrays if <cite>dfin</cite> is numpy array (default: False).</p>
+</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Verbosity level 0-3 (default: 0). 0 is no output; 3 is very verbose.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p><cite>if not err:</cite> filled_data, quality_class</p>
+<p><cite>if err and not errmean:</cite> err_estimate</p>
+<p><cite>if err and errmean:</cite> err_estimate, mean_estimate</p>
+<p>pandas.Dataframe(s) will be returned if <cite>dfin</cite> was Dataframe.</p>
+<p>numpy array(s) will be returned if <cite>dfin</cite> was numpy array.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.Dataframe(s) or numpy array(s)</p>
+</dd>
+</dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>If <cite>err</cite>, there is no error estimate if there are no meteorological
+conditions in the vicinity of the data point (first cycle of
+Reichstein et al. GCB 2005).</p>
+<p>Routine does not work with <cite>undef=np.nan</cite>.</p>
+<dl class="simple">
+<dt>Reichstein et al. (2005)</dt><dd><p>On the separation of net ecosystem exchange into assimilation and
+ecosystem respiration: review and improved algorithm
+Global Change Biology 11, 1424-1439</p>
+</dd>
+<dt>Lasslop et al. (2008)</dt><dd><p>Inﬂuences of observation errors in eddy ﬂux data on inverse model
+parameter estimation
+Biogeosciences, 5, 1311–1324</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fread</span> <span class="kn">import</span> <span class="n">fread</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">date2dec</span> <span class="kn">import</span> <span class="n">date2dec</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dec2date</span> <span class="kn">import</span> <span class="n">dec2date</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ifile</span> <span class="o">=</span> <span class="s1">&#39;test_gapfill.csv&#39;</span> <span class="c1"># Tharandt 1998 = Online tool example file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">undef</span> <span class="o">=</span> <span class="o">-</span><span class="mf">9999.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dat</span>   <span class="o">=</span> <span class="n">fread</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ndat</span>  <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">head</span>  <span class="o">=</span> <span class="n">fread</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">head1</span> <span class="o">=</span> <span class="n">head</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># colhead</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">idx</span>   <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">head1</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;NEE&#39;</span><span class="p">,</span> <span class="s1">&#39;LE&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;Rg&#39;</span><span class="p">,</span> <span class="s1">&#39;Tair&#39;</span><span class="p">,</span> <span class="s1">&#39;VPD&#39;</span><span class="p">]:</span>
+<span class="gp">... </span>        <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">colhead</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FC&#39;</span><span class="p">,</span> <span class="s1">&#39;LE&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;SW_IN&#39;</span><span class="p">,</span> <span class="s1">&#39;TA&#39;</span><span class="p">,</span> <span class="s1">&#39;VPD&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfin</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">idx</span><span class="p">,:]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># flag</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dfin</span> <span class="o">==</span> <span class="n">undef</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;qcNEE&#39;</span><span class="p">),</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;qcLE&#39;</span><span class="p">),</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;qcH&#39;</span><span class="p">),</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">flag</span><span class="o">==</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># date</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">day_id</span>  <span class="o">=</span> <span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;Day&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hour_id</span> <span class="o">=</span> <span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;Hour&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ntime</span>   <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">year</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ntime</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1998</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hh</span>    <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">hour_id</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mn</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">((</span><span class="n">dat</span><span class="p">[</span><span class="n">hour_id</span><span class="p">,:]</span> <span class="o">-</span> <span class="n">hh</span><span class="p">)</span> <span class="o">*</span> <span class="mf">60.</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y0</span>    <span class="o">=</span> <span class="n">date2dec</span><span class="p">(</span><span class="n">yr</span><span class="o">=</span><span class="n">year</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mo</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">hr</span><span class="o">=</span><span class="n">hh</span><span class="p">,</span> <span class="n">mi</span><span class="o">=</span><span class="n">mn</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jdate</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">+</span> <span class="n">dat</span><span class="p">[</span><span class="n">day_id</span><span class="p">,</span> <span class="p">:]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adate</span> <span class="o">=</span> <span class="n">dec2date</span><span class="p">(</span><span class="n">jdate</span><span class="p">,</span> <span class="n">eng</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># fill</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dat_f</span><span class="p">,</span> <span class="n">flag_f</span> <span class="o">=</span> <span class="n">gapfill</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span>
+<span class="gp">... </span>                        <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">flag_f</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11006</span><span class="p">:</span><span class="mi">11012</span><span class="p">]))</span>
+<span class="go">1 1 1 2 2 2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.2f}</span><span class="s1"> </span><span class="si">{:.2f}</span><span class="s1"> </span><span class="si">{:.2f}</span><span class="s1"> </span><span class="si">{:.2f}</span><span class="s1"> </span><span class="si">{:.2f}</span><span class="s1"> </span><span class="si">{:.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="gp">... </span>      <span class="o">*</span><span class="n">dat_f</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11006</span><span class="p">:</span><span class="mi">11012</span><span class="p">]))</span>
+<span class="go">-18.68 -15.63 -19.61 -15.54 -12.40 -15.33</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># 1D err</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dat_std</span> <span class="o">=</span> <span class="n">gapfill</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="gp">... </span>      <span class="o">*</span><span class="n">dat_std</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11006</span><span class="p">:</span><span class="mi">11012</span><span class="p">]))</span>
+<span class="go">5.372 13.118 6.477 -9999.000 -9999.000 -9999.000</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dat_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ndat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kk</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">dat_std</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">!=</span> <span class="n">undef</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dat_f</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">!=</span> <span class="mf">0.</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dat_err</span><span class="p">[</span><span class="n">kk</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dat_std</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">kk</span><span class="p">]</span><span class="o">/</span><span class="n">dat_f</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">kk</span><span class="p">]</span><span class="o">*</span><span class="mf">100.</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">dat_err</span><span class="p">[</span><span class="mi">11006</span><span class="p">:</span><span class="mi">11012</span><span class="p">]))</span>
+<span class="go">28 83 33 -1 -1 -1</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># 1D err + mean</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dat_std</span><span class="p">,</span> <span class="n">dat_mean</span> <span class="o">=</span> <span class="n">gapfill</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span>
+<span class="gp">... </span>                            <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="gp">... </span>                            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errmean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="gp">... </span>      <span class="o">*</span><span class="n">dat_std</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11006</span><span class="p">:</span><span class="mi">11012</span><span class="p">]))</span>
+<span class="go">5.372 13.118 6.477 -9999.000 -9999.000 -9999.000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="gp">... </span>      <span class="o">*</span><span class="n">dat_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11006</span><span class="p">:</span><span class="mi">11012</span><span class="p">]))</span>
+<span class="go">-18.677 -15.633 -19.610 -9999.000 -9999.000 -9999.000</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="contents.html">hesseflux</a></h1>
+
+
+
+<p class="blurb">Functions used in the processing and post-processing of Eddy covariance flux data</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="package.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="package.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="argsort.html">hesseflux.argsort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ascii2ascii.html">hesseflux.ascii2ascii</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.const.html">hesseflux.const.const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.html">hesseflux.const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="date2dec.html">hesseflux.date2dec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dec2date.html">hesseflux.dec2date</a></li>
+<li class="toctree-l2"><a class="reference internal" href="division.html">hesseflux.division</a></li>
+<li class="toctree-l2"><a class="reference internal" href="esat.html">hesseflux.esat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fgui.html">hesseflux.fgui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fread.html">hesseflux.fread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fsread.html">hesseflux.fsread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.fit_functions.html">hesseflux.functions.fit_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.general_functions.html">hesseflux.functions.general_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.logistic_function.html">hesseflux.functions.logistic_function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.opti_test_functions.html">hesseflux.functions.opti_test_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html">hesseflux.functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.sa_test_functions.html">hesseflux.functions.sa_test_functions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">hesseflux.gapfill</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logtools.logtools.html">hesseflux.logtools.logtools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logtools.html">hesseflux.logtools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mad.html">hesseflux.mad</a></li>
+<li class="toctree-l2"><a class="reference internal" href="madspikes.html">hesseflux.madspikes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nee2gpp.html">hesseflux.nee2gpp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sread.html">hesseflux.sread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ustarfilter.html">hesseflux.ustarfilter</a></li>
+</ul>
+</li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/mcuntz/hesseflux">hesseflux @ GitHub</a></li>
+    
+    <li class="toctree-l1"><a href="https://doi.org/10.5281/zenodo.3831488">hesseflux @ Zenodo</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/hesseflux/">hesseflux @ PyPI</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="contents.html">Documentation overview</a><ul>
+  <li><a href="package.html">API</a><ul>
+      <li>Previous: <a href="functions.sa_test_functions.html" title="previous chapter">hesseflux.functions.sa_test_functions</a></li>
+      <li>Next: <a href="logtools.logtools.html" title="next chapter">hesseflux.logtools.logtools</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2009-2022, Matthias Cuntz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/gapfill.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

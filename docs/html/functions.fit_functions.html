@@ -1,0 +1,1707 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hesseflux.functions.fit_functions &#8212; hesseflux 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="hesseflux.functions.general_functions" href="functions.general_functions.html" />
+    <link rel="prev" title="hesseflux.fsread" href="fsread.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-hesseflux.functions.fit_functions">
+<span id="hesseflux-functions-fit-functions"></span><h1>hesseflux.functions.fit_functions<a class="headerlink" href="#module-hesseflux.functions.fit_functions" title="Permalink to this headline">¶</a></h1>
+<p>Module defines common functions that are used in curve_fit or fmin
+parameter estimations.</p>
+<p>For all fit functions, it defines the functions in two forms (ex. of 3
+params):</p>
+<blockquote>
+<div><p><cite>func(x, p1, p2, p3)</cite></p>
+<p><cite>func_p(x, p)</cite> with <cite>p[0:3]</cite></p>
+</div></blockquote>
+<p>The first form can be used, for example, with
+<cite>scipy.optimize.curve_fit</cite> (ex. function f1x=a+b/x):</p>
+<blockquote>
+<div><p><cite>p, cov = scipy.optimize.curve_fit(functions.f1x, x, y, p0=[p0,p1])</cite></p>
+</div></blockquote>
+<p>It also defines two cost functions along with the fit functions, one
+with the absolute sum, one with the squared sum of the deviations:</p>
+<blockquote>
+<div><p><cite>cost_func</cite>    <cite>sum(abs(obs-func))</cite></p>
+<p><cite>cost2_func</cite>   <cite>sum((obs-func)**2)</cite></p>
+</div></blockquote>
+<p>These cost functions can be used, for example, with
+<cite>scipy.optimize.minimize</cite>:</p>
+<blockquote>
+<div><p><cite>p = scipy.optimize.minimize(jams.functions.cost_f1x, np.array([p1,p2]), args=(x,y), method=’Nelder-Mead’, options={‘disp’:False})</cite></p>
+</div></blockquote>
+<p>Note the different argument orders:</p>
+<blockquote>
+<div><p><cite>curvefit</cite> needs <cite>f(x,*args)</cite> with the independent variable as the
+first argument and the parameters to fit as separate remaining
+arguments.</p>
+<p><cite>minimize</cite> is a general minimiser with respect to the first argument,
+i.e. <cite>func(p,*args)</cite>.</p>
+</div></blockquote>
+<p>The module provides also two common cost functions (absolute and
+squared deviations) where any function in the form <cite>func(x, p)</cite> can be
+used as second argument:</p>
+<blockquote>
+<div><p><cite>cost_abs(p, func, x, y)</cite></p>
+<p><cite>cost_square(p, func, x, y)</cite></p>
+</div></blockquote>
+<p>This means, for example <cite>cost_f1x(p, x, y)</cite> is the same as
+<cite>cost_abs(p, functions.f1x_p, x, y)</cite>.
+For example:</p>
+<blockquote>
+<div><p><cite>p = scipy.optimize.minimize(jams.functions.cost_abs, np.array([p1,p2]), args=(functions.f1x_p,x,y), method=’Nelder-Mead’, options={‘disp’:False})</cite></p>
+</div></blockquote>
+<p>The current functions are (the functions have the name in the first
+column. The seond form has a ‘_p’ appended to the name. The cost
+functions, which have ‘cost_’ and ‘cost2_’ prepended to the name.):</p>
+<blockquote>
+<div><p>arrhenius         1 param:  Arrhenius temperature dependence of biochemical rates: <cite>exp((T-TC25)*E/(T25*R*(T+T0)))</cite>, parameter: E</p>
+<p>f1x               2 params: General 1/x function: <cite>a + b/x</cite></p>
+<p>fexp              3 params: General exponential function: <cite>a + b * exp(c*x)</cite></p>
+<p>gauss             2 params: Gauss function: <cite>1/(sig*sqrt(2*pi)) *exp(-(x-mu)**2/(2*sig**2))</cite>, parameter: mu, sig</p>
+<p>lasslop           6 params: Lasslop et al. (2010) a rectangular, hyperbolic light-response GPP with Lloyd &amp; Taylor (1994) respiration and the maximum canopy uptake rate at light saturation decreases exponentially with VPD as in Koerner (1995)</p>
+<p>line0             1 params: Straight line: <cite>a*x</cite></p>
+<p>line              2 params: Straight line: <cite>a + b*x</cite></p>
+<p>lloyd_fix         2 params: Lloyd &amp; Taylor (1994) Arrhenius type with T0=-46.02 degC and Tref=10 degC</p>
+<p>lloyd_only_rref   1 param:  Lloyd &amp; Taylor (1994) Arrhenius type with fixed exponential term</p>
+<p>logistic          3 params: Logistic function: <cite>a/(1+exp(-b(x-c)))</cite></p>
+<p>logistic_offset   4 params: Logistic function with offset: <cite>a/(1+exp(-b(x-c))) + d</cite></p>
+<p>logistic2_offset  7 params: Double logistic function with offset <cite>L1/(1+exp(-k1(x-x01))) - L2/(1+exp(-k2(x-x02))) + a</cite></p>
+<p>poly              n params: General polynomial: <cite>c0 + c1*x + c2*x**2 + … + cn*x**n</cite></p>
+<p>sabx              2 params: sqrt(f1x), i.e. general sqrt(1/x) function: <cite>sqrt(a + b/x)</cite></p>
+<p>see               3 params: Sequential Elementary Effects fitting function: <cite>a*(x-b)**c</cite></p>
+</div></blockquote>
+<p>This module was written by Matthias Cuntz while at Department of
+Computational Hydrosystems, Helmholtz Centre for Environmental
+Research - UFZ, Leipzig, Germany, and continued while at Institut
+National de Recherche pour l’Agriculture, l’Alimentation et
+l’Environnement (INRAE), Nancy, France.</p>
+<p>Copyright (c) 2012-2020 Matthias Cuntz - mc (at) macu (dot) de
+Released under the MIT License; see LICENSE file for details.</p>
+<ul class="simple">
+<li><p>Written Dec 2012 by Matthias Cuntz (mc (at) macu (dot) de)</p></li>
+<li><p>Ported to Python 3, Feb 2013, Matthias Cuntz</p></li>
+<li><p>Added general cost functions cost_abs and cost_square, May 2013, Matthias Cuntz</p></li>
+<li><p>Added line0, Feb 2014, Matthias Cuntz</p></li>
+<li><p>Removed multiline_p, May 2020, Matthias Cuntz</p></li>
+<li><p>Changed to Sphinx docstring and numpydoc, May 2020, Matthias Cuntz</p></li>
+</ul>
+<p>The following functions are provided:</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_abs" title="hesseflux.functions.fit_functions.cost_abs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_abs</span></code></a>(p, func, x, y)</p></td>
+<td><p>General cost function for robust optimising <cite>func(x,p)</cite> vs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_square" title="hesseflux.functions.fit_functions.cost_square"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_square</span></code></a>(p, func, x, y)</p></td>
+<td><p>General cost function for optimising <cite>func(x,p)</cite> vs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.arrhenius" title="hesseflux.functions.fit_functions.arrhenius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arrhenius</span></code></a>(T, E)</p></td>
+<td><p>Arrhenius temperature dependence of rates.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.arrhenius_p" title="hesseflux.functions.fit_functions.arrhenius_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arrhenius_p</span></code></a>(T, p)</p></td>
+<td><p>Arrhenius temperature dependence of rates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_arrhenius" title="hesseflux.functions.fit_functions.cost_arrhenius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_arrhenius</span></code></a>(p, T, rate)</p></td>
+<td><p>Sum of absolute deviations of obs and arrhenius function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_arrhenius" title="hesseflux.functions.fit_functions.cost2_arrhenius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_arrhenius</span></code></a>(p, T, rate)</p></td>
+<td><p>Sum of squared deviations of obs and arrhenius.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.f1x" title="hesseflux.functions.fit_functions.f1x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f1x</span></code></a>(x, a, b)</p></td>
+<td><p>General 1/x function: a + b/x</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.f1x_p" title="hesseflux.functions.fit_functions.f1x_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f1x_p</span></code></a>(x, p)</p></td>
+<td><p>General 1/x function: a + b/x</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_f1x" title="hesseflux.functions.fit_functions.cost_f1x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_f1x</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of absolute deviations of obs and general 1/x function: a + b/x</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_f1x" title="hesseflux.functions.fit_functions.cost2_f1x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_f1x</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of squared deviations of obs and general 1/x function: a + b/x</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.fexp" title="hesseflux.functions.fit_functions.fexp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fexp</span></code></a>(x, a, b, c)</p></td>
+<td><p>General exponential function: a + b * exp(c*x)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.fexp_p" title="hesseflux.functions.fit_functions.fexp_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fexp_p</span></code></a>(x, p)</p></td>
+<td><p>General exponential function: a + b * exp(c*x)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_fexp" title="hesseflux.functions.fit_functions.cost_fexp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_fexp</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of absolute deviations of obs and general exponential function: a + b * exp(c*x)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_fexp" title="hesseflux.functions.fit_functions.cost2_fexp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_fexp</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of squared deviations of obs and general exponential function: a + b * exp(c*x)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.gauss" title="hesseflux.functions.fit_functions.gauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gauss</span></code></a>(x, mu, sig)</p></td>
+<td><p>Gauss function: 1 / (sqrt(2*pi)*sig) * exp( -(x-mu)**2 / (2*sig**2) )</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.gauss_p" title="hesseflux.functions.fit_functions.gauss_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gauss_p</span></code></a>(x, p)</p></td>
+<td><p>Gauss function: 1 / (sqrt(2*pi)*sig) * exp( -(x-mu)**2 / (2*sig**2) )</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_gauss" title="hesseflux.functions.fit_functions.cost_gauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_gauss</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of absolute deviations of obs and Gauss function: 1 / (sqrt(2*pi)*sig) * exp( -(x-mu)**2 / (2*sig**2) )</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_gauss" title="hesseflux.functions.fit_functions.cost2_gauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_gauss</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of squared deviations of obs and Gauss function: 1 / (sqrt(2*pi)*sig) * exp( -(x-mu)**2 / (2*sig**2) )</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.lasslop" title="hesseflux.functions.fit_functions.lasslop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lasslop</span></code></a>(Rg, et, VPD, alpha, beta0, k, Rref)</p></td>
+<td><p>Lasslop et al. (2010) is the rectangular, hyperbolic light-response of NEE as by Falge et al. (2001), where the respiration is calculated with Lloyd &amp; Taylor (1994), and the maximum canopy uptake rate at light saturation decreases exponentially with VPD as in Koerner (1995).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.lasslop_p" title="hesseflux.functions.fit_functions.lasslop_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lasslop_p</span></code></a>(Rg, et, VPD, p)</p></td>
+<td><p>Lasslop et al. (2010) is the rectangular, hyperbolic light-response of NEE as by Falge et al. (2001), where the respiration is calculated with Lloyd &amp; Taylor (1994), and the maximum canopy uptake rate at light saturation decreases exponentially with VPD as in Koerner (1995).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_lasslop" title="hesseflux.functions.fit_functions.cost_lasslop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_lasslop</span></code></a>(p, Rg, et, VPD, NEE)</p></td>
+<td><p>Sum of absolute deviations of obs and Lasslop.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_lasslop" title="hesseflux.functions.fit_functions.cost2_lasslop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_lasslop</span></code></a>(p, Rg, et, VPD, NEE)</p></td>
+<td><p>Sum of squared deviations of obs and Lasslop.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.line" title="hesseflux.functions.fit_functions.line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line</span></code></a>(x, a, b)</p></td>
+<td><p>Straight line: a + b*x</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.line_p" title="hesseflux.functions.fit_functions.line_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_p</span></code></a>(x, p)</p></td>
+<td><p>Straight line: a + b*x</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_line" title="hesseflux.functions.fit_functions.cost_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_line</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of absolute deviations of obs and straight line: a + b*x</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_line" title="hesseflux.functions.fit_functions.cost2_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_line</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of squared deviations of obs and straight line: a + b*x</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.line0" title="hesseflux.functions.fit_functions.line0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line0</span></code></a>(x, a)</p></td>
+<td><p>Straight line through origin: a*x</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.line0_p" title="hesseflux.functions.fit_functions.line0_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line0_p</span></code></a>(x, p)</p></td>
+<td><p>Straight line through origin: a*x</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_line0" title="hesseflux.functions.fit_functions.cost_line0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_line0</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of absolute deviations of obs and straight line through origin: a*x</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_line0" title="hesseflux.functions.fit_functions.cost2_line0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_line0</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of squared deviations of obs and straight line through origin: a*x</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.lloyd_fix" title="hesseflux.functions.fit_functions.lloyd_fix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lloyd_fix</span></code></a>(T, Rref, E0)</p></td>
+<td><p>Lloyd &amp; Taylor (1994) Arrhenius type with T0=-46.02 degC and Tref=10 degC</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.lloyd_fix_p" title="hesseflux.functions.fit_functions.lloyd_fix_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lloyd_fix_p</span></code></a>(T, p)</p></td>
+<td><p>Lloyd &amp; Taylor (1994) Arrhenius type with T0=-46.02 degC and Tref=10 degC</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_lloyd_fix" title="hesseflux.functions.fit_functions.cost_lloyd_fix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_lloyd_fix</span></code></a>(p, T, resp)</p></td>
+<td><p>Sum of absolute deviations of obs and Lloyd &amp; Taylor (1994) Arrhenius type.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_lloyd_fix" title="hesseflux.functions.fit_functions.cost2_lloyd_fix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_lloyd_fix</span></code></a>(p, T, resp)</p></td>
+<td><p>Sum of squared deviations of obs and Lloyd &amp; Taylor (1994) Arrhenius type.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.lloyd_only_rref" title="hesseflux.functions.fit_functions.lloyd_only_rref"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lloyd_only_rref</span></code></a>(et, Rref)</p></td>
+<td><p>If E0 is know in Lloyd &amp; Taylor (1994) then one can calc the exponential term outside the routine and the fitting becomes linear.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.lloyd_only_rref_p" title="hesseflux.functions.fit_functions.lloyd_only_rref_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lloyd_only_rref_p</span></code></a>(et, p)</p></td>
+<td><p>If E0 is know in Lloyd &amp; Taylor (1994) then one can calc the exponential term outside the routine and the fitting becomes linear.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_lloyd_only_rref" title="hesseflux.functions.fit_functions.cost_lloyd_only_rref"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_lloyd_only_rref</span></code></a>(p, et, resp)</p></td>
+<td><p>Sum of absolute deviations of obs and Lloyd &amp; Taylor with known exponential term.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_lloyd_only_rref" title="hesseflux.functions.fit_functions.cost2_lloyd_only_rref"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_lloyd_only_rref</span></code></a>(p, et, resp)</p></td>
+<td><p>Sum of squared deviations of obs and Lloyd &amp; Taylor with known exponential term.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.sabx" title="hesseflux.functions.fit_functions.sabx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sabx</span></code></a>(x, a, b)</p></td>
+<td><p>Square root of general 1/x function: sqrt(a + b/x)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.sabx_p" title="hesseflux.functions.fit_functions.sabx_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sabx_p</span></code></a>(x, p)</p></td>
+<td><p>Square root of general 1/x function: sqrt(a + b/x)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_sabx" title="hesseflux.functions.fit_functions.cost_sabx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_sabx</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of absolute deviations of obs and square root of general 1/x function: sqrt(a + b/x)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_sabx" title="hesseflux.functions.fit_functions.cost2_sabx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_sabx</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of squared deviations of obs and square root of general 1/x function: sqrt(a + b/x)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.poly" title="hesseflux.functions.fit_functions.poly"><code class="xref py py-obj docutils literal notranslate"><span class="pre">poly</span></code></a>(x, *args)</p></td>
+<td><p>General polynomial: c0 + c1*x + c2*x**2 + .</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.poly_p" title="hesseflux.functions.fit_functions.poly_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">poly_p</span></code></a>(x, p)</p></td>
+<td><p>General polynomial: c0 + c1*x + c2*x**2 + .</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_poly" title="hesseflux.functions.fit_functions.cost_poly"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_poly</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of absolute deviations of obs and general polynomial: c0 + c1*x + c2*x**2 + .</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_poly" title="hesseflux.functions.fit_functions.cost2_poly"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_poly</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of squared deviations of obs and general polynomial: c0 + c1*x + c2*x**2 + .</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_logistic" title="hesseflux.functions.fit_functions.cost_logistic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_logistic</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of absolute deviations of obs and logistic function L/(1+exp(-k(x-x0)))</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_logistic" title="hesseflux.functions.fit_functions.cost2_logistic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_logistic</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of squared deviations of obs and logistic function L/(1+exp(-k(x-x0)))</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_logistic_offset" title="hesseflux.functions.fit_functions.cost_logistic_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_logistic_offset</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of absolute deviations of obs and logistic function 1/x function: L/(1+exp(-k(x-x0))) + a</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_logistic_offset" title="hesseflux.functions.fit_functions.cost2_logistic_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_logistic_offset</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of squared deviations of obs and logistic function 1/x function: L/(1+exp(-k(x-x0))) + a</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_logistic2_offset" title="hesseflux.functions.fit_functions.cost_logistic2_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_logistic2_offset</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of absolute deviations of obs and double logistic function with offset: L1/(1+exp(-k1(x-x01))) - L2/(1+exp(-k2(x-x02))) + a</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_logistic2_offset" title="hesseflux.functions.fit_functions.cost2_logistic2_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_logistic2_offset</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of squared deviations of obs and double logistic function with offset: L1/(1+exp(-k1(x-x01))) - L2/(1+exp(-k2(x-x02))) + a</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.see" title="hesseflux.functions.fit_functions.see"><code class="xref py py-obj docutils literal notranslate"><span class="pre">see</span></code></a>(x, a, b, c)</p></td>
+<td><p>Fit function of Sequential Elementary Effects: a * (x-b)**c</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.see_p" title="hesseflux.functions.fit_functions.see_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">see_p</span></code></a>(x, p)</p></td>
+<td><p>Fit function of Sequential Elementary Effects: a * (x-b)**c</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost_see" title="hesseflux.functions.fit_functions.cost_see"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_see</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of absolute deviations of obs and fit function of Sequential Elementary Effects: a * (x-b)**c</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.fit_functions.cost2_see" title="hesseflux.functions.fit_functions.cost2_see"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost2_see</span></code></a>(p, x, y)</p></td>
+<td><p>Sum of squared deviations of obs and fit function of Sequential Elementary Effects: a * (x-b)**c</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.arrhenius">
+<span class="sig-name descname"><span class="pre">arrhenius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#arrhenius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.arrhenius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arrhenius temperature dependence of rates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – temperature [degC]</p></li>
+<li><p><strong>E</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – activation energy [J]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.arrhenius_p">
+<span class="sig-name descname"><span class="pre">arrhenius_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#arrhenius_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.arrhenius_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arrhenius temperature dependence of rates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – temperature [degC]</p></li>
+<li><p><strong>p</strong> (<em>iterable</em>) – <cite>p[0]</cite> is activation energy [J]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_arrhenius">
+<span class="sig-name descname"><span class="pre">cost2_arrhenius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_arrhenius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_arrhenius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and arrhenius.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <cite>p[0]</cite> is activation energy [J]</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_f1x">
+<span class="sig-name descname"><span class="pre">cost2_f1x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_f1x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_f1x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and general 1/x function: a + b/x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_fexp">
+<span class="sig-name descname"><span class="pre">cost2_fexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_fexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_fexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and general exponential function: a + b * exp(c*x)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=3</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+<p><cite>p[2]</cite> c</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_gauss">
+<span class="sig-name descname"><span class="pre">cost2_gauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_gauss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_gauss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and Gauss function: 1 / (sqrt(2*pi)*sig) * exp( -(x-mu)**2 / (2*sig**2) )</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> mean</p>
+<p><cite>p[1]</cite> width</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_lasslop">
+<span class="sig-name descname"><span class="pre">cost2_lasslop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Rg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">et</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VPD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NEE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_lasslop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_lasslop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and Lasslop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=4</cite>)</p>
+<p><cite>p[0]</cite> Light use efficiency, i.e. initial slope of light response curve [umol(C) J-1]</p>
+<p><cite>p[1]</cite> Maximum CO2 uptake rate at VPD0=10 hPa [umol(C) m-2 s-1]</p>
+<p><cite>p[2]</cite> e-folding of exponential decrease of maximum CO2 uptake with VPD increase [Pa-1]</p>
+<p><cite>p[3]</cite> Respiration at Tref (10 degC) [umol(C) m-2 s-1]</p>
+</p></li>
+<li><p><strong>Rg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Global radiation [W m-2]</p></li>
+<li><p><strong>et</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Exponential in Lloyd &amp; Taylor: np.exp(E0*(1./(Tref-T0)-1./(T-T0))) []</p></li>
+<li><p><strong>VPD</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Vapour Pressure Deficit [Pa]</p></li>
+<li><p><strong>NEE</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Observed net ecosystem exchange [umol(CO2) m-2 s-1]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_line">
+<span class="sig-name descname"><span class="pre">cost2_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and straight line: a + b*x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_line0">
+<span class="sig-name descname"><span class="pre">cost2_line0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_line0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_line0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and straight line through origin: a*x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <cite>p[0]</cite> is a</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_lloyd_fix">
+<span class="sig-name descname"><span class="pre">cost2_lloyd_fix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_lloyd_fix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_lloyd_fix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and Lloyd &amp; Taylor (1994) Arrhenius type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> Respiration at Tref=10 degC [umol(C) m-2 s-1]</p>
+<p><cite>p[1]</cite> Activation energy [K]</p>
+</p></li>
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Temperature [K]</p></li>
+<li><p><strong>resp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Observed respiration [umol(C) m-2 s-1]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_lloyd_only_rref">
+<span class="sig-name descname"><span class="pre">cost2_lloyd_only_rref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">et</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_lloyd_only_rref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_lloyd_only_rref" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and Lloyd &amp; Taylor with known exponential term.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <cite>p[0]</cite> is respiration at Tref=10 degC [umol(C) m-2 s-1]</p></li>
+<li><p><strong>et</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – exp-term in Lloyd &amp; Taylor</p></li>
+<li><p><strong>resp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Observed respiration [umol(C) m-2 s-1]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_logistic">
+<span class="sig-name descname"><span class="pre">cost2_logistic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_logistic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_logistic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and logistic function L/(1+exp(-k(x-x0)))</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=3</cite>)</p>
+<p><cite>p[0]</cite> L  - Maximum of logistic function</p>
+<p><cite>p[1]</cite> k  - Steepness of logistic function</p>
+<p><cite>p[2]</cite> x0 - Inflection point of logistic function</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_logistic2_offset">
+<span class="sig-name descname"><span class="pre">cost2_logistic2_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_logistic2_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_logistic2_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and double logistic function with offset:
+L1/(1+exp(-k1(x-x01))) - L2/(1+exp(-k2(x-x02))) + a</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=7</cite>)</p>
+<p><cite>p[0]</cite> L1  - Maximum of first logistic function</p>
+<p><cite>p[1]</cite> k1  - Steepness of first logistic function</p>
+<p><cite>p[2]</cite> x01 - Inflection point of first logistic function</p>
+<p><cite>p[3]</cite> L2  - Maximum of second logistic function</p>
+<p><cite>p[4]</cite> k2  - Steepness of second logistic function</p>
+<p><cite>p[5]</cite> x02 - Inflection point of second logistic function</p>
+<p><cite>p[6]</cite> a   - Offset of double logistic function</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_logistic_offset">
+<span class="sig-name descname"><span class="pre">cost2_logistic_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_logistic_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_logistic_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and logistic function 1/x function: L/(1+exp(-k(x-x0))) + a</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=4</cite>)</p>
+<p><cite>p[0]</cite> L  - Maximum of logistic function</p>
+<p><cite>p[1]</cite> k  - Steepness of logistic function</p>
+<p><cite>p[2]</cite> x0 - Inflection point of logistic function</p>
+<p><cite>p[3]</cite> a  - Offset of logistic function</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_poly">
+<span class="sig-name descname"><span class="pre">cost2_poly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_poly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_poly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and general polynomial: c0 + c1*x + c2*x**2 + … + cn*x**n</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – parameters (<cite>len(p)=n+1</cite>)</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_sabx">
+<span class="sig-name descname"><span class="pre">cost2_sabx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_sabx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_sabx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and square root of general 1/x function: sqrt(a + b/x)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost2_see">
+<span class="sig-name descname"><span class="pre">cost2_see</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost2_see"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost2_see" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of squared deviations of obs and fit function of Sequential Elementary Effects: a * (x-b)**c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=3</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+<p><cite>p[2]</cite> c</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_abs">
+<span class="sig-name descname"><span class="pre">cost_abs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_abs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_abs" title="Permalink to this definition">¶</a></dt>
+<dd><p>General cost function for robust optimising <cite>func(x,p)</cite> vs. <cite>y</cite> with sum of absolute deviations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – parameters</p></li>
+<li><p><strong>func</strong> (<em>callable</em>) – <cite>fun(x,p) -&gt; float</cite></p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_arrhenius">
+<span class="sig-name descname"><span class="pre">cost_arrhenius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_arrhenius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_arrhenius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and arrhenius function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <cite>p[0]</cite> is activation energy [J]</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_f1x">
+<span class="sig-name descname"><span class="pre">cost_f1x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_f1x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_f1x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and general 1/x function: a + b/x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_fexp">
+<span class="sig-name descname"><span class="pre">cost_fexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_fexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_fexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and general exponential function: a + b * exp(c*x)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=3</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+<p><cite>p[2]</cite> c</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_gauss">
+<span class="sig-name descname"><span class="pre">cost_gauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_gauss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_gauss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and Gauss function: 1 / (sqrt(2*pi)*sig) * exp( -(x-mu)**2 / (2*sig**2) )</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> mean</p>
+<p><cite>p[1]</cite> width</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_lasslop">
+<span class="sig-name descname"><span class="pre">cost_lasslop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Rg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">et</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VPD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NEE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_lasslop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_lasslop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and Lasslop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=4</cite>)</p>
+<p><cite>p[0]</cite> Light use efficiency, i.e. initial slope of light response curve [umol(C) J-1]</p>
+<p><cite>p[1]</cite> Maximum CO2 uptake rate at VPD0=10 hPa [umol(C) m-2 s-1]</p>
+<p><cite>p[2]</cite> e-folding of exponential decrease of maximum CO2 uptake with VPD increase [Pa-1]</p>
+<p><cite>p[3]</cite> Respiration at Tref (10 degC) [umol(C) m-2 s-1]</p>
+</p></li>
+<li><p><strong>Rg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Global radiation [W m-2]</p></li>
+<li><p><strong>et</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Exponential in Lloyd &amp; Taylor: np.exp(E0*(1./(Tref-T0)-1./(T-T0))) []</p></li>
+<li><p><strong>VPD</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Vapour Pressure Deficit [Pa]</p></li>
+<li><p><strong>NEE</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Observed net ecosystem exchange [umol(CO2) m-2 s-1]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_line">
+<span class="sig-name descname"><span class="pre">cost_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and straight line: a + b*x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_line0">
+<span class="sig-name descname"><span class="pre">cost_line0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_line0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_line0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and straight line through origin: a*x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <cite>p[0]</cite> is a</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_lloyd_fix">
+<span class="sig-name descname"><span class="pre">cost_lloyd_fix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_lloyd_fix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_lloyd_fix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and Lloyd &amp; Taylor (1994) Arrhenius type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> Respiration at Tref=10 degC [umol(C) m-2 s-1]</p>
+<p><cite>p[1]</cite> Activation energy [K]</p>
+</p></li>
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Temperature [K]</p></li>
+<li><p><strong>resp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Observed respiration [umol(C) m-2 s-1]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_lloyd_only_rref">
+<span class="sig-name descname"><span class="pre">cost_lloyd_only_rref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">et</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_lloyd_only_rref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_lloyd_only_rref" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and Lloyd &amp; Taylor with known exponential term.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <cite>p[0]</cite> is respiration at Tref=10 degC [umol(C) m-2 s-1]</p></li>
+<li><p><strong>et</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – exp-term in Lloyd &amp; Taylor</p></li>
+<li><p><strong>resp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Observed respiration [umol(C) m-2 s-1]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_logistic">
+<span class="sig-name descname"><span class="pre">cost_logistic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_logistic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_logistic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and logistic function L/(1+exp(-k(x-x0)))</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=3</cite>)</p>
+<p><cite>p[0]</cite> L  - Maximum of logistic function</p>
+<p><cite>p[1]</cite> k  - Steepness of logistic function</p>
+<p><cite>p[2]</cite> x0 - Inflection point of logistic function</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_logistic2_offset">
+<span class="sig-name descname"><span class="pre">cost_logistic2_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_logistic2_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_logistic2_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and double logistic function with offset:
+L1/(1+exp(-k1(x-x01))) - L2/(1+exp(-k2(x-x02))) + a</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=7</cite>)</p>
+<p><cite>p[0]</cite> L1  - Maximum of first logistic function</p>
+<p><cite>p[1]</cite> k1  - Steepness of first logistic function</p>
+<p><cite>p[2]</cite> x01 - Inflection point of first logistic function</p>
+<p><cite>p[3]</cite> L2  - Maximum of second logistic function</p>
+<p><cite>p[4]</cite> k2  - Steepness of second logistic function</p>
+<p><cite>p[5]</cite> x02 - Inflection point of second logistic function</p>
+<p><cite>p[6]</cite> a   - Offset of double logistic function</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_logistic_offset">
+<span class="sig-name descname"><span class="pre">cost_logistic_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_logistic_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_logistic_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and logistic function 1/x function: L/(1+exp(-k(x-x0))) + a</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=4</cite>)</p>
+<p><cite>p[0]</cite> L  - Maximum of logistic function</p>
+<p><cite>p[1]</cite> k  - Steepness of logistic function</p>
+<p><cite>p[2]</cite> x0 - Inflection point of logistic function</p>
+<p><cite>p[3]</cite> a  - Offset of logistic function</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_poly">
+<span class="sig-name descname"><span class="pre">cost_poly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_poly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_poly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and general polynomial: c0 + c1*x + c2*x**2 + … + cn*x**n</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – parameters (<cite>len(p)=n+1</cite>)</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_sabx">
+<span class="sig-name descname"><span class="pre">cost_sabx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_sabx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_sabx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and square root of general 1/x function: sqrt(a + b/x)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_see">
+<span class="sig-name descname"><span class="pre">cost_see</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_see"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_see" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of absolute deviations of obs and fit function of Sequential Elementary Effects: a * (x-b)**c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=3</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+<p><cite>p[2]</cite> c</p>
+</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of absolute deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.cost_square">
+<span class="sig-name descname"><span class="pre">cost_square</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#cost_square"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.cost_square" title="Permalink to this definition">¶</a></dt>
+<dd><p>General cost function for optimising <cite>func(x,p)</cite> vs. <cite>y</cite> with sum of square deviations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – parameters</p></li>
+<li><p><strong>func</strong> (<em>callable</em>) – <cite>fun(x,p) -&gt; float</cite></p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – dependent variable, observations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of squared deviations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.f1x">
+<span class="sig-name descname"><span class="pre">f1x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#f1x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.f1x" title="Permalink to this definition">¶</a></dt>
+<dd><p>General 1/x function: a + b/x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – first parameter</p></li>
+<li><p><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – second parameter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.f1x_p">
+<span class="sig-name descname"><span class="pre">f1x_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#f1x_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.f1x_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>General 1/x function: a + b/x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.fexp">
+<span class="sig-name descname"><span class="pre">fexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#fexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.fexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>General exponential function: a + b * exp(c*x)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – first parameter</p></li>
+<li><p><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – second parameter</p></li>
+<li><p><strong>c</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – third parameter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.fexp_p">
+<span class="sig-name descname"><span class="pre">fexp_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#fexp_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.fexp_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>General exponential function: a + b * exp(c*x)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=3</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+<p><cite>p[2]</cite> c</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.gauss">
+<span class="sig-name descname"><span class="pre">gauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#gauss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.gauss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gauss function: 1 / (sqrt(2*pi)*sig) * exp( -(x-mu)**2 / (2*sig**2) )</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>mu</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – mean</p></li>
+<li><p><strong>sig</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – width</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.gauss_p">
+<span class="sig-name descname"><span class="pre">gauss_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#gauss_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.gauss_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gauss function: 1 / (sqrt(2*pi)*sig) * exp( -(x-mu)**2 / (2*sig**2) )</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> mean</p>
+<p><cite>p[1]</cite> width</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.lasslop">
+<span class="sig-name descname"><span class="pre">lasslop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Rg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">et</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VPD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Rref</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#lasslop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.lasslop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lasslop et al. (2010) is the rectangular, hyperbolic light-response
+of NEE as by Falge et al. (2001), where the respiration is calculated
+with Lloyd &amp; Taylor (1994), and the maximum canopy uptake rate at
+light saturation decreases exponentially with VPD as in Koerner (1995).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Rg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Global radiation [W m-2]</p></li>
+<li><p><strong>et</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Exponential in Lloyd &amp; Taylor: np.exp(E0*(1./(Tref-T0)-1./(T-T0))) []</p></li>
+<li><p><strong>VPD</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Vapour Pressure Deficit [Pa]</p></li>
+<li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Light use efficiency, i.e. initial slope of light response curve [umol(C) J-1]</p></li>
+<li><p><strong>beta0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Maximum CO2 uptake rate at VPD0=10 hPa [umol(C) m-2 s-1]</p></li>
+<li><p><strong>k</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – e-folding of exponential decrease of maximum CO2 uptake with VPD increase [Pa-1]</p></li>
+<li><p><strong>Rref</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Respiration at Tref (10 degC) [umol(C) m-2 s-1]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>net ecosystem exchange [umol(CO2) m-2 s-1]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.lasslop_p">
+<span class="sig-name descname"><span class="pre">lasslop_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Rg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">et</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VPD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#lasslop_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.lasslop_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lasslop et al. (2010) is the rectangular, hyperbolic light-response
+of NEE as by Falge et al. (2001), where the respiration is calculated
+with Lloyd &amp; Taylor (1994), and the maximum canopy uptake rate at
+light saturation decreases exponentially with VPD as in Koerner (1995).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Rg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Global radiation [W m-2]</p></li>
+<li><p><strong>et</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Exponential in Lloyd &amp; Taylor: np.exp(E0*(1./(Tref-T0)-1./(T-T0))) []</p></li>
+<li><p><strong>VPD</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Vapour Pressure Deficit [Pa]</p></li>
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=4</cite>)</p>
+<p><cite>p[0]</cite> Light use efficiency, i.e. initial slope of light response curve [umol(C) J-1]</p>
+<p><cite>p[1]</cite> Maximum CO2 uptake rate at VPD0=10 hPa [umol(C) m-2 s-1]</p>
+<p><cite>p[2]</cite> e-folding of exponential decrease of maximum CO2 uptake with VPD increase [Pa-1]</p>
+<p><cite>p[3]</cite> Respiration at Tref (10 degC) [umol(C) m-2 s-1]</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>net ecosystem exchange [umol(CO2) m-2 s-1]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.line">
+<span class="sig-name descname"><span class="pre">line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Straight line: a + b*x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – first parameter</p></li>
+<li><p><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – second parameter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.line0">
+<span class="sig-name descname"><span class="pre">line0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#line0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.line0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Straight line through origin: a*x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – first parameter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.line0_p">
+<span class="sig-name descname"><span class="pre">line0_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#line0_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.line0_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Straight line through origin: a*x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <cite>p[0]</cite> is a</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.line_p">
+<span class="sig-name descname"><span class="pre">line_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#line_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.line_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Straight line: a + b*x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.lloyd_fix">
+<span class="sig-name descname"><span class="pre">lloyd_fix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Rref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#lloyd_fix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.lloyd_fix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lloyd &amp; Taylor (1994) Arrhenius type with T0=-46.02 degC and Tref=10 degC</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Temperature [K]</p></li>
+<li><p><strong>Rref</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Respiration at Tref=10 degC [umol(C) m-2 s-1]</p></li>
+<li><p><strong>E0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Activation energy [K]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Respiration [umol(C) m-2 s-1]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.lloyd_fix_p">
+<span class="sig-name descname"><span class="pre">lloyd_fix_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#lloyd_fix_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.lloyd_fix_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lloyd &amp; Taylor (1994) Arrhenius type with T0=-46.02 degC and Tref=10 degC</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – Temperature [K]</p></li>
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> Respiration at Tref=10 degC [umol(C) m-2 s-1]</p>
+<p><cite>p[1]</cite> Activation energy [K]</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Respiration [umol(C) m-2 s-1]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.lloyd_only_rref">
+<span class="sig-name descname"><span class="pre">lloyd_only_rref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">et</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Rref</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#lloyd_only_rref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.lloyd_only_rref" title="Permalink to this definition">¶</a></dt>
+<dd><p>If E0 is know in Lloyd &amp; Taylor (1994) then one can calc
+the exponential term outside the routine and the fitting
+becomes linear. One could also use functions.line0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>et</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – exp-term in Lloyd &amp; Taylor</p></li>
+<li><p><strong>Rref</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Respiration at Tref=10 degC [umol(C) m-2 s-1]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Respiration [umol(C) m-2 s-1]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.lloyd_only_rref_p">
+<span class="sig-name descname"><span class="pre">lloyd_only_rref_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">et</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#lloyd_only_rref_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.lloyd_only_rref_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>If E0 is know in Lloyd &amp; Taylor (1994) then one can calc
+the exponential term outside the routine and the fitting
+becomes linear. One could also use functions.line0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>et</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – exp-term in Lloyd &amp; Taylor</p></li>
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <cite>p[0]</cite> is respiration at Tref=10 degC [umol(C) m-2 s-1]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Respiration [umol(C) m-2 s-1]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.poly">
+<span class="sig-name descname"><span class="pre">poly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#poly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.poly" title="Permalink to this definition">¶</a></dt>
+<dd><p>General polynomial: c0 + c1*x + c2*x**2 + … + cn*x**n</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>*args</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – parameters <cite>len(args)=n+1</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.poly_p">
+<span class="sig-name descname"><span class="pre">poly_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#poly_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.poly_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>General polynomial: c0 + c1*x + c2*x**2 + … + cn*x**n</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – parameters (<cite>len(p)=n+1</cite>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.sabx">
+<span class="sig-name descname"><span class="pre">sabx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#sabx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.sabx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Square root of general 1/x function: sqrt(a + b/x)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – first parameter</p></li>
+<li><p><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – second parameter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.sabx_p">
+<span class="sig-name descname"><span class="pre">sabx_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#sabx_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.sabx_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Square root of general 1/x function: sqrt(a + b/x)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=2</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.see">
+<span class="sig-name descname"><span class="pre">see</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#see"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.see" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit function of Sequential Elementary Effects: a * (x-b)**c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – first parameter</p></li>
+<li><p><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – second parameter</p></li>
+<li><p><strong>c</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – third parameter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.fit_functions.see_p">
+<span class="sig-name descname"><span class="pre">see_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/fit_functions.html#see_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.fit_functions.see_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit function of Sequential Elementary Effects: a * (x-b)**c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array_like of floats</em>) – independent variable</p></li>
+<li><p><strong>p</strong> (<em>iterable of floats</em>) – <p>parameters (<cite>len(p)=3</cite>)</p>
+<p><cite>p[0]</cite> a</p>
+<p><cite>p[1]</cite> b</p>
+<p><cite>p[2]</cite> c</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function value(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="contents.html">hesseflux</a></h1>
+
+
+
+<p class="blurb">Functions used in the processing and post-processing of Eddy covariance flux data</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="package.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="package.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="argsort.html">hesseflux.argsort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ascii2ascii.html">hesseflux.ascii2ascii</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.const.html">hesseflux.const.const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.html">hesseflux.const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="date2dec.html">hesseflux.date2dec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dec2date.html">hesseflux.dec2date</a></li>
+<li class="toctree-l2"><a class="reference internal" href="division.html">hesseflux.division</a></li>
+<li class="toctree-l2"><a class="reference internal" href="esat.html">hesseflux.esat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fgui.html">hesseflux.fgui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fread.html">hesseflux.fread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fsread.html">hesseflux.fsread</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">hesseflux.functions.fit_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.general_functions.html">hesseflux.functions.general_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.logistic_function.html">hesseflux.functions.logistic_function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.opti_test_functions.html">hesseflux.functions.opti_test_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html">hesseflux.functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.sa_test_functions.html">hesseflux.functions.sa_test_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gapfill.html">hesseflux.gapfill</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logtools.logtools.html">hesseflux.logtools.logtools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logtools.html">hesseflux.logtools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mad.html">hesseflux.mad</a></li>
+<li class="toctree-l2"><a class="reference internal" href="madspikes.html">hesseflux.madspikes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nee2gpp.html">hesseflux.nee2gpp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sread.html">hesseflux.sread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ustarfilter.html">hesseflux.ustarfilter</a></li>
+</ul>
+</li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/mcuntz/hesseflux">hesseflux @ GitHub</a></li>
+    
+    <li class="toctree-l1"><a href="https://doi.org/10.5281/zenodo.3831488">hesseflux @ Zenodo</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/hesseflux/">hesseflux @ PyPI</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="contents.html">Documentation overview</a><ul>
+  <li><a href="package.html">API</a><ul>
+      <li>Previous: <a href="fsread.html" title="previous chapter">hesseflux.fsread</a></li>
+      <li>Next: <a href="functions.general_functions.html" title="next chapter">hesseflux.functions.general_functions</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2009-2022, Matthias Cuntz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/functions.fit_functions.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

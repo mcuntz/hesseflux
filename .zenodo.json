@@ -1,0 +1,44 @@
+{
+    "language": "eng",
+    "license": "MIT",
+    "title": "hesseflux: a Python library to process and post-process Eddy covariance data",
+    "related_identifiers": [
+        {
+        "scheme": "url",
+        "identifier": "https://github.com/mcuntz/hesseflux/",
+        "relation": "isDerivedFrom",
+        "resource_type": "software"
+    },
+        {
+        "scheme": "url",
+        "identifier": "https://mcuntz.github.io/hesseflux/",
+        "relation": "isDocumentedBy",
+        "resource_type": "publication-softwaredocumentation"
+    },
+        {
+        "scheme": "url",
+        "identifier": "https://pypi.org/project/hesseflux/",
+        "relation": "isIdenticalTo",
+        "resource_type": "software"
+    }
+    ],
+    "upload_type": "software",
+    "keywords": [
+        "Eddy covariance",
+        "spike detection",
+        "gap-filling",
+        "imputation",
+        "u* filtering",
+        "FR-Hes",
+        "ICOS"
+    ],
+    "creators": [
+        {
+        "orcid": "0000-0002-5966-1829",
+        "affiliation": "Institut National de Recherche pour l'Agriculture, l'Alimentation et l'Environnement - INRAE, Nancy, France",
+        "name": "Matthias Cuntz"
+    }
+    ],
+    "access_right": "open",
+    "description": "<p><strong>hesseflux</strong> collects functions used for processing Eddy covariance data of the <a href=\"https://www.icos-cp.eu/\">ICOS</a> ecosystem site <a href=\"https://www.icos-france.fr/en/static3/the-network\">FR-Hes</a>.</p>\n\n<p>The post-processing functionality for Eddy flux data is similar to the R-package <a href=\"https://cran.r-project.org/web/packages/REddyProc/index.html\">REddyProc</a> and includes basically the steps described in <a href=\"https://doi.org/10.5194/bg-3-571-2006\">Papale et al. (Biogeosciences, 2006)</a> plus some extensions such as the daytime method of flux partitioning (<a href=\"https://doi.org/10.1111/j.1365-2486.2009.02041.x\">Lasslop et al., Global Change Biology 2010</a>).</p>\n\n<p>Full documentation is available at <a href=\"https://mcuntz.github.io/hesseflux/\">https://mcuntz.github.io/hesseflux/</a></p>\n\n<p>v2.0 was the initial public release.</p>"
+}

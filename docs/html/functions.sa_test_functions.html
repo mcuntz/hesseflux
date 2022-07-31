@@ -1,0 +1,550 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hesseflux.functions.sa_test_functions &#8212; hesseflux 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="hesseflux.gapfill" href="gapfill.html" />
+    <link rel="prev" title="hesseflux.functions" href="functions.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-hesseflux.functions.sa_test_functions">
+<span id="hesseflux-functions-sa-test-functions"></span><h1>hesseflux.functions.sa_test_functions<a class="headerlink" href="#module-hesseflux.functions.sa_test_functions" title="Permalink to this headline">¶</a></h1>
+<dl>
+<dt>Module provides test functions for parameter sensitivity analysis from</dt><dd><dl class="simple">
+<dt>Ishigami and Homma (1990) An importance qualification technique in uncertainty analysis for computer models,</dt><dd><p>Proceedings of the isuma ‘90, First International Symposium on Uncertainty
+Modelling and Analysis, University of Maryland, Dec. 03 - Dec 05 1990, 398-403</p>
+</dd>
+<dt>Oakley and O’Hagan (2004) Probabilistic sensitivity analysis of complex models: a Bayesian approach</dt><dd><ol class="upperalpha simple" start="10">
+<li><ol class="upperalpha simple" start="18">
+<li><p>Statist. Soc. B 66, Part 3, 751-769.</p></li>
+</ol>
+</li>
+</ol>
+</dd>
+<dt>Morris (1991)             Factorial sampling plans for preliminary computational experiments,</dt><dd><p>Technometrics 33, 161-174.</p>
+</dd>
+</dl>
+<p>Saltelli et al. (2008)    Global Sensitivity Analysis. The Primer, John Wiley &amp; Sons, pp. 292</p>
+<dl class="simple">
+<dt>Saltelli et al. (2010)    Variance based sensitivity analysis of model output, Design and estimator</dt><dd><p>for the total sensitivity index, Comp. Phys. Comm. 181, 259-270.</p>
+</dd>
+<dt>Sobol’ (1990),            Sensitivity estimates for nonlinear mathematical models,</dt><dd><p>Matematicheskoe Modelirovanie 2, 112-118 (in Russian),
+translated in English in Sobol’ (1993).</p>
+</dd>
+<dt>Sobol’ (1993)             Sensitivity analysis for non-linear mathematical models,</dt><dd><p>Mathematical Modelling and Computational Experiment 1, 407-414,
+English translation of Russian original paper Sobol’ (1990).</p>
+</dd>
+</dl>
+</dd>
+<dt>Current functions are:</dt><dd><p>B                     B of Saltelli et al. (2010)</p>
+<p>G / g                 G-function attributed to Sobol’ (1990, 1993), given by Saltelli et al. (2008, 2010)</p>
+<p>Gstar                 G* of Saltelli et al. (2010)</p>
+<p>ishigami_homma        Ishigami and Homma (1990), given by Saltelli et al. (2008, page 179)</p>
+<p>K / bratley           K  of Saltelli et al. (2010)</p>
+<p>fmorris / morris      After Morris (1991)</p>
+<dl class="simple">
+<dt>oakley_ohagan         Oakley and O’Hagan (2004), parameters given in Saltelli et al. (2008)</dt><dd><p>or on <a class="reference external" href="http://www.jeremy-oakley.staff.shef.ac.uk/psa_example.txt">http://www.jeremy-oakley.staff.shef.ac.uk/psa_example.txt</a></p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>This module was written by Matthias Cuntz &amp; Juliane Mai while at
+Department of Computational Hydrosystems, Helmholtz Centre for
+Environmental Research - UFZ, Leipzig, Germany, and continued by
+Matthias Cuntz while at Institut National de Recherche pour l’Agriculture,
+l’Alimentation et l’Environnement (INRAE), Nancy, France.</p>
+<p>Copyright (c) 2015-2020 Matthias Cuntz - mc (at) macu (dot) de
+Released under the MIT License; see LICENSE file for details.</p>
+<ul class="simple">
+<li><p>Written Mar 2015 by Matthias Cuntz (mc (at) macu (dot) de) &amp; Juliane Mai</p></li>
+<li><p>Added functions to properly test PAWN method: linear, product, ratio, and ishigami_homma_easy, Dec 2017, Juliane Mai</p></li>
+<li><p>Provide morris function under the name fmorris and the K function under the name bratley, Nov 2019, Matthias Cuntz</p></li>
+<li><p>Changed to Sphinx docstring and numpydoc, Dec 2019, Matthias Cuntz</p></li>
+<li><p>Distinguish iterable and array_like parameter types, Jan 2020, Matthias Cuntz</p></li>
+</ul>
+<p>The following functions are provided:</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.B" title="hesseflux.functions.sa_test_functions.B"><code class="xref py py-obj docutils literal notranslate"><span class="pre">B</span></code></a>(X)</p></td>
+<td><p>B function, Saltelli et al. (2010) Comp.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.g" title="hesseflux.functions.sa_test_functions.g"><code class="xref py py-obj docutils literal notranslate"><span class="pre">g</span></code></a>(X, a)</p></td>
+<td><p>G-function</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.G" title="hesseflux.functions.sa_test_functions.G"><code class="xref py py-obj docutils literal notranslate"><span class="pre">G</span></code></a>(X, a)</p></td>
+<td><p>G-function</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.Gstar" title="hesseflux.functions.sa_test_functions.Gstar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gstar</span></code></a>(X, alpha, delta, a)</p></td>
+<td><p>G* example, Saltelli et al. (2010) Comp.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.K" title="hesseflux.functions.sa_test_functions.K"><code class="xref py py-obj docutils literal notranslate"><span class="pre">K</span></code></a>(X)</p></td>
+<td><p>K example, Saltelli et al. (2010) Comp.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.bratley" title="hesseflux.functions.sa_test_functions.bratley"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bratley</span></code></a>(*args)</p></td>
+<td><p>K example, Saltelli et al. (2010) Comp.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.fmorris" title="hesseflux.functions.sa_test_functions.fmorris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fmorris</span></code></a>(X, beta0, beta1, beta2, beta3, beta4)</p></td>
+<td><p>Morris-function, Morris (1991) Technometrics 33, 161-174</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.morris" title="hesseflux.functions.sa_test_functions.morris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">morris</span></code></a>(*args)</p></td>
+<td><p>Morris-function, Morris (1991) Technometrics 33, 161-174</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.oakley_ohagan" title="hesseflux.functions.sa_test_functions.oakley_ohagan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">oakley_ohagan</span></code></a>(X)</p></td>
+<td><p>Oakley and O'Hagan (2004) J.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.ishigami_homma" title="hesseflux.functions.sa_test_functions.ishigami_homma"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ishigami_homma</span></code></a>(X, a, b)</p></td>
+<td><p>Ishigami and Homma (1990), given by Saltelli et al. (2008, page 179).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.linear" title="hesseflux.functions.sa_test_functions.linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">linear</span></code></a>(X, a, b)</p></td>
+<td><p>Linear test function to test PAWN method:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.product" title="hesseflux.functions.sa_test_functions.product"><code class="xref py py-obj docutils literal notranslate"><span class="pre">product</span></code></a>(X)</p></td>
+<td><p>Product test function to test PAWN method:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.ratio" title="hesseflux.functions.sa_test_functions.ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ratio</span></code></a>(X)</p></td>
+<td><p>Ratio test function:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hesseflux.functions.sa_test_functions.ishigami_homma_easy" title="hesseflux.functions.sa_test_functions.ishigami_homma_easy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ishigami_homma_easy</span></code></a>(X)</p></td>
+<td><p>Simplified Ishigami and Homma function to test PAWN method:</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.B">
+<span class="sig-name descname"><span class="pre">B</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#B"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.B" title="Permalink to this definition">¶</a></dt>
+<dd><p>B function, Saltelli et al. (2010) Comp. Phys. Comm. 181, p. 259-270</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>array_like</em>) – (nX,) or (nX,npoints) array of floats</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>B</strong> – float or (npoints,) floats of B function values at <cite>X</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.G">
+<span class="sig-name descname"><span class="pre">G</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#G"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.G" title="Permalink to this definition">¶</a></dt>
+<dd><p>G-function</p>
+<p>Sobol’ (1990) Matematicheskoe Modelirovanie 2, 112-118 (in Russian)</p>
+<p>Sobol’ (1993) Mathematical Modelling and Computational Experiment 1, 407-414 (English translation)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>array_like</em>) – (nX,) or (nX,npoints) array of floats</p></li>
+<li><p><strong>a</strong> (<em>array_like</em>) – (nX,) array of floats</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>g</strong> – float or (npoints,) floats of G function values at <cite>X</cite> with parameters <cite>a</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.Gstar">
+<span class="sig-name descname"><span class="pre">Gstar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#Gstar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.Gstar" title="Permalink to this definition">¶</a></dt>
+<dd><p>G* example, Saltelli et al. (2010) Comp. Phys. Comm., 181, p. 259-270</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>array_like</em>) – (nX,) or (nX,npoints) array of floats</p></li>
+<li><p><strong>alpha</strong> (<em>array_like</em>) – (nX,) array of floats</p></li>
+<li><p><strong>delta</strong> (<em>array_like</em>) – (nX,) array of floats</p></li>
+<li><p><strong>a</strong> (<em>array_like</em>) – (nX,) array of floats</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>G*</strong> – float or (npoints,) floats of G* function values at <cite>X</cite> with parameters <cite>alpha</cite>, <cite>delta</cite> and <cite>a</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.K">
+<span class="sig-name descname"><span class="pre">K</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#K"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.K" title="Permalink to this definition">¶</a></dt>
+<dd><p>K example, Saltelli et al. (2010) Comp. Phys. Comm., 181, p. 259-270</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>array_like</em>) – (nX,) or (nX,npoints) array of floats</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>K</strong> – float or (npoints,) floats of K function values at <cite>X</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.bratley">
+<span class="sig-name descname"><span class="pre">bratley</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#bratley"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.bratley" title="Permalink to this definition">¶</a></dt>
+<dd><p>K example, Saltelli et al. (2010) Comp. Phys. Comm., 181, p. 259-270</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>array_like</em>) – (nX,) or (nX,npoints) array of floats</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>bratley</strong> – float or (npoints,) floats of K function values at <cite>X</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.fmorris">
+<span class="sig-name descname"><span class="pre">fmorris</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#fmorris"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.fmorris" title="Permalink to this definition">¶</a></dt>
+<dd><p>Morris-function, Morris (1991) Technometrics 33, 161-174</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>array_like</em>) – (20,) or (20,npoints) array of floats</p></li>
+<li><p><strong>beta0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – float</p></li>
+<li><p><strong>beta1</strong> (<em>array_like</em>) – (20,) array of floats</p></li>
+<li><p><strong>beta2</strong> (<em>array_like</em>) – (20,20) array of floats</p></li>
+<li><p><strong>beta3</strong> (<em>array_like</em>) – (20,20,20) array of floats</p></li>
+<li><p><strong>beta4</strong> (<em>array_like</em>) – (20,20,20,20) array of floats</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>fmorris</strong> – float or (npoints,) floats of Morris function values at <cite>X</cite> with parameters <cite>beta0-beta4</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.g">
+<span class="sig-name descname"><span class="pre">g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.g" title="Permalink to this definition">¶</a></dt>
+<dd><p>G-function</p>
+<p>Sobol’ (1990) Matematicheskoe Modelirovanie 2, 112-118 (in Russian)</p>
+<p>Sobol’ (1993) Mathematical Modelling and Computational Experiment 1, 407-414 (English translation)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>array_like</em>) – (nX,) or (nX,npoints) array of floats</p></li>
+<li><p><strong>a</strong> (<em>array_like</em>) – (nX,) array of floats</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>G</strong> – float or (npoints,) floats of G function values at <cite>X</cite> with parameters <cite>a</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.ishigami_homma">
+<span class="sig-name descname"><span class="pre">ishigami_homma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#ishigami_homma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.ishigami_homma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ishigami and Homma (1990), given by Saltelli et al. (2008, page 179)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>array_like</em>) – (3,) or (3,npoints) array of floats</p></li>
+<li><p><strong>a</strong> (<em>array_like</em>) – float or (npoints,) array of floats</p></li>
+<li><p><strong>b</strong> (<em>array_like</em>) – float or (npoints,) array of floats</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ishigami_homma</strong> – float or (npoints,) floats of Ishigami and Homma function values at <cite>X</cite> with parameters <cite>a</cite> and <cite>b</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.ishigami_homma_easy">
+<span class="sig-name descname"><span class="pre">ishigami_homma_easy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#ishigami_homma_easy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.ishigami_homma_easy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simplified Ishigami and Homma function to test PAWN method:</p>
+<blockquote>
+<div><p><cite>Y = sin(X[0]) + X[1]</cite></p>
+</div></blockquote>
+<p>with <cite>X[0],X[1]</cite> ~ <cite>Uniform[-Pi,Pi]</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>array_like</em>) – (2,) or (2,npoints) array of floats</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ishigami_homma_easy</strong> – float or (npoints,) floats of simplified Ishigami and Homma function values at <cite>X</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.linear">
+<span class="sig-name descname"><span class="pre">linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#linear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.linear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linear test function to test PAWN method:</p>
+<blockquote>
+<div><p><cite>Y = a*X + b</cite></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>array_like</em>) – (1,) or (1,npoints) array of floats</p></li>
+<li><p><strong>a</strong> (<em>array_like</em>) – float or (npoints,) array of floats</p></li>
+<li><p><strong>b</strong> (<em>array_like</em>) – float or (npoints,) array of floats</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>linear</strong> – float or (npoints,) floats of linear function values at <cite>X</cite> with parameters <cite>a</cite> and <cite>b</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.morris">
+<span class="sig-name descname"><span class="pre">morris</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#morris"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.morris" title="Permalink to this definition">¶</a></dt>
+<dd><p>Morris-function, Morris (1991) Technometrics 33, 161-174</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>array_like</em>) – (20,) or (20,npoints) array of floats</p></li>
+<li><p><strong>beta0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – float</p></li>
+<li><p><strong>beta1</strong> (<em>array_like</em>) – (20,) array of floats</p></li>
+<li><p><strong>beta2</strong> (<em>array_like</em>) – (20,20) array of floats</p></li>
+<li><p><strong>beta3</strong> (<em>array_like</em>) – (20,20,20) array of floats</p></li>
+<li><p><strong>beta4</strong> (<em>array_like</em>) – (20,20,20,20) array of floats</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>morris</strong> – float or (npoints,) floats of Morris function values at <cite>X</cite> with parameters <cite>beta0-beta4</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.oakley_ohagan">
+<span class="sig-name descname"><span class="pre">oakley_ohagan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#oakley_ohagan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.oakley_ohagan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Oakley and O’Hagan (2004) J. R. Statist. Soc. B 66, Part 3, 751-769</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>array_like</em>) – (15,) or (15,npoints) array of floats</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>oakley_ohagan</strong> – float or (npoints,) floats of Oakley and O’Hagan function values at <cite>X</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.product">
+<span class="sig-name descname"><span class="pre">product</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#product"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.product" title="Permalink to this definition">¶</a></dt>
+<dd><p>Product test function to test PAWN method:</p>
+<blockquote>
+<div><p><cite>Y = X[0] * X[1]</cite></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>array_like</em>) – (2,) or (2,npoints) array of floats</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>product</strong> – float or (npoints,) floats of product function values at <cite>X</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hesseflux.functions.sa_test_functions.ratio">
+<span class="sig-name descname"><span class="pre">ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/functions/sa_test_functions.html#ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.functions.sa_test_functions.ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ratio test function:</p>
+<blockquote>
+<div><p><cite>Y = X[0] / X[1]</cite></p>
+</div></blockquote>
+<p>Simple nonlinear model proposed by Liu et al. (2006):</p>
+<blockquote>
+<div><p>Liu, H., Sudjianto, A., Chen, W., 2006.
+Relative entropy based method for probabilistic sensitivity analysis in engineering design.
+J. Mech. Des. 128, 326-336.</p>
+</div></blockquote>
+<p>Used by Pianosi &amp; Wagener, Environmental Modelling &amp; Software (2015)</p>
+<blockquote>
+<div><p>Pianosi, F. &amp; Wagener T., 2015
+A simple and efficient method for global sensitivity analysis based on cumulative distribution functions.
+Environmental Modelling &amp; Software 67, 1-11.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>array_like</em>) – (2,) or (2,npoints) array of floats</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ratio</strong> – float or (npoints,) floats of ratio function values at <cite>X</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a> or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="contents.html">hesseflux</a></h1>
+
+
+
+<p class="blurb">Functions used in the processing and post-processing of Eddy covariance flux data</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="package.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="package.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="argsort.html">hesseflux.argsort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ascii2ascii.html">hesseflux.ascii2ascii</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.const.html">hesseflux.const.const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.html">hesseflux.const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="date2dec.html">hesseflux.date2dec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dec2date.html">hesseflux.dec2date</a></li>
+<li class="toctree-l2"><a class="reference internal" href="division.html">hesseflux.division</a></li>
+<li class="toctree-l2"><a class="reference internal" href="esat.html">hesseflux.esat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fgui.html">hesseflux.fgui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fread.html">hesseflux.fread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fsread.html">hesseflux.fsread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.fit_functions.html">hesseflux.functions.fit_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.general_functions.html">hesseflux.functions.general_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.logistic_function.html">hesseflux.functions.logistic_function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.opti_test_functions.html">hesseflux.functions.opti_test_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html">hesseflux.functions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">hesseflux.functions.sa_test_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gapfill.html">hesseflux.gapfill</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logtools.logtools.html">hesseflux.logtools.logtools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logtools.html">hesseflux.logtools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mad.html">hesseflux.mad</a></li>
+<li class="toctree-l2"><a class="reference internal" href="madspikes.html">hesseflux.madspikes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nee2gpp.html">hesseflux.nee2gpp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sread.html">hesseflux.sread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ustarfilter.html">hesseflux.ustarfilter</a></li>
+</ul>
+</li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/mcuntz/hesseflux">hesseflux @ GitHub</a></li>
+    
+    <li class="toctree-l1"><a href="https://doi.org/10.5281/zenodo.3831488">hesseflux @ Zenodo</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/hesseflux/">hesseflux @ PyPI</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="contents.html">Documentation overview</a><ul>
+  <li><a href="package.html">API</a><ul>
+      <li>Previous: <a href="functions.html" title="previous chapter">hesseflux.functions</a></li>
+      <li>Next: <a href="gapfill.html" title="next chapter">hesseflux.gapfill</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2009-2022, Matthias Cuntz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/functions.sa_test_functions.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

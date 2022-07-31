@@ -1,0 +1,1739 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hesseflux.functions.fit_functions &#8212; hesseflux 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for hesseflux.functions.fit_functions</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module defines common functions that are used in curve_fit or fmin</span>
+<span class="sd">parameter estimations.</span>
+
+<span class="sd">For all fit functions, it defines the functions in two forms (ex. of 3</span>
+<span class="sd">params):</span>
+
+<span class="sd">    `func(x, p1, p2, p3)`</span>
+
+<span class="sd">    `func_p(x, p)` with `p[0:3]`</span>
+
+<span class="sd">The first form can be used, for example, with</span>
+<span class="sd">`scipy.optimize.curve_fit` (ex. function f1x=a+b/x):</span>
+
+<span class="sd">    `p, cov = scipy.optimize.curve_fit(functions.f1x, x, y, p0=[p0,p1])`</span>
+
+<span class="sd">It also defines two cost functions along with the fit functions, one</span>
+<span class="sd">with the absolute sum, one with the squared sum of the deviations:</span>
+
+<span class="sd">    `cost_func`    `sum(abs(obs-func))`</span>
+
+<span class="sd">    `cost2_func`   `sum((obs-func)**2)`</span>
+
+<span class="sd">These cost functions can be used, for example, with</span>
+<span class="sd">`scipy.optimize.minimize`:</span>
+
+<span class="sd">    `p = scipy.optimize.minimize(jams.functions.cost_f1x, np.array([p1,p2]), args=(x,y), method=&#39;Nelder-Mead&#39;, options={&#39;disp&#39;:False})`</span>
+
+<span class="sd">Note the different argument orders:</span>
+
+<span class="sd">    `curvefit` needs `f(x,*args)` with the independent variable as the</span>
+<span class="sd">    first argument and the parameters to fit as separate remaining</span>
+<span class="sd">    arguments.</span>
+
+<span class="sd">    `minimize` is a general minimiser with respect to the first argument,</span>
+<span class="sd">    i.e. `func(p,*args)`.</span>
+
+<span class="sd">The module provides also two common cost functions (absolute and</span>
+<span class="sd">squared deviations) where any function in the form `func(x, p)` can be</span>
+<span class="sd">used as second argument:</span>
+
+<span class="sd">    `cost_abs(p, func, x, y)`</span>
+
+<span class="sd">    `cost_square(p, func, x, y)`</span>
+
+<span class="sd">This means, for example `cost_f1x(p, x, y)` is the same as</span>
+<span class="sd">`cost_abs(p, functions.f1x_p, x, y)`.</span>
+<span class="sd">For example:</span>
+
+<span class="sd">    `p = scipy.optimize.minimize(jams.functions.cost_abs, np.array([p1,p2]), args=(functions.f1x_p,x,y), method=&#39;Nelder-Mead&#39;, options={&#39;disp&#39;:False})`</span>
+
+<span class="sd">The current functions are (the functions have the name in the first</span>
+<span class="sd">column. The seond form has a &#39;\_p&#39; appended to the name. The cost</span>
+<span class="sd">functions, which have &#39;cost\_&#39; and &#39;cost2\_&#39; prepended to the name.):</span>
+
+<span class="sd">    arrhenius         1 param:  Arrhenius temperature dependence of biochemical rates: `exp((T-TC25)*E/(T25*R*(T+T0)))`, parameter: E</span>
+
+<span class="sd">    f1x               2 params: General 1/x function: `a + b/x`</span>
+
+<span class="sd">    fexp              3 params: General exponential function: `a + b * exp(c*x)`</span>
+
+<span class="sd">    gauss             2 params: Gauss function: `1/(sig*sqrt(2*pi)) *exp(-(x-mu)**2/(2*sig**2))`, parameter: mu, sig</span>
+
+<span class="sd">    lasslop           6 params: Lasslop et al. (2010) a rectangular, hyperbolic light-response GPP with Lloyd &amp; Taylor (1994) respiration and the maximum canopy uptake rate at light saturation decreases exponentially with VPD as in Koerner (1995)</span>
+
+<span class="sd">    line0             1 params: Straight line: `a*x`</span>
+
+<span class="sd">    line              2 params: Straight line: `a + b*x`</span>
+
+<span class="sd">    lloyd_fix         2 params: Lloyd &amp; Taylor (1994) Arrhenius type with T0=-46.02 degC and Tref=10 degC</span>
+
+<span class="sd">    lloyd_only_rref   1 param:  Lloyd &amp; Taylor (1994) Arrhenius type with fixed exponential term</span>
+
+<span class="sd">    logistic          3 params: Logistic function: `a/(1+exp(-b(x-c)))`</span>
+
+<span class="sd">    logistic_offset   4 params: Logistic function with offset: `a/(1+exp(-b(x-c))) + d`</span>
+
+<span class="sd">    logistic2_offset  7 params: Double logistic function with offset `L1/(1+exp(-k1(x-x01))) - L2/(1+exp(-k2(x-x02))) + a`</span>
+
+<span class="sd">    poly              n params: General polynomial: `c0 + c1*x + c2*x**2 + ... + cn*x**n`</span>
+
+<span class="sd">    sabx              2 params: sqrt(f1x), i.e. general sqrt(1/x) function: `sqrt(a + b/x)`</span>
+
+<span class="sd">    see               3 params: Sequential Elementary Effects fitting function: `a*(x-b)**c`</span>
+
+<span class="sd">This module was written by Matthias Cuntz while at Department of</span>
+<span class="sd">Computational Hydrosystems, Helmholtz Centre for Environmental</span>
+<span class="sd">Research - UFZ, Leipzig, Germany, and continued while at Institut</span>
+<span class="sd">National de Recherche pour l&#39;Agriculture, l&#39;Alimentation et</span>
+<span class="sd">l&#39;Environnement (INRAE), Nancy, France.</span>
+
+<span class="sd">Copyright (c) 2012-2020 Matthias Cuntz - mc (at) macu (dot) de</span>
+<span class="sd">Released under the MIT License; see LICENSE file for details.</span>
+
+<span class="sd">* Written Dec 2012 by Matthias Cuntz (mc (at) macu (dot) de)</span>
+<span class="sd">* Ported to Python 3, Feb 2013, Matthias Cuntz</span>
+<span class="sd">* Added general cost functions cost_abs and cost_square, May 2013, Matthias Cuntz</span>
+<span class="sd">* Added line0, Feb 2014, Matthias Cuntz</span>
+<span class="sd">* Removed multiline_p, May 2020, Matthias Cuntz</span>
+<span class="sd">* Changed to Sphinx docstring and numpydoc, May 2020, Matthias Cuntz</span>
+
+<span class="sd">.. moduleauthor:: Matthias Cuntz</span>
+
+<span class="sd">The following functions are provided:</span>
+
+<span class="sd">.. autosummary::</span>
+<span class="sd">   cost_abs</span>
+<span class="sd">   cost_square</span>
+<span class="sd">   arrhenius</span>
+<span class="sd">   arrhenius_p</span>
+<span class="sd">   cost_arrhenius</span>
+<span class="sd">   cost2_arrhenius</span>
+<span class="sd">   f1x</span>
+<span class="sd">   f1x_p</span>
+<span class="sd">   cost_f1x</span>
+<span class="sd">   cost2_f1x</span>
+<span class="sd">   fexp</span>
+<span class="sd">   fexp_p</span>
+<span class="sd">   cost_fexp</span>
+<span class="sd">   cost2_fexp</span>
+<span class="sd">   gauss</span>
+<span class="sd">   gauss_p</span>
+<span class="sd">   cost_gauss</span>
+<span class="sd">   cost2_gauss</span>
+<span class="sd">   lasslop</span>
+<span class="sd">   lasslop_p</span>
+<span class="sd">   cost_lasslop</span>
+<span class="sd">   cost2_lasslop</span>
+<span class="sd">   line</span>
+<span class="sd">   line_p</span>
+<span class="sd">   cost_line</span>
+<span class="sd">   cost2_line</span>
+<span class="sd">   line0</span>
+<span class="sd">   line0_p</span>
+<span class="sd">   cost_line0</span>
+<span class="sd">   cost2_line0</span>
+<span class="sd">   lloyd_fix</span>
+<span class="sd">   lloyd_fix_p</span>
+<span class="sd">   cost_lloyd_fix</span>
+<span class="sd">   cost2_lloyd_fix</span>
+<span class="sd">   lloyd_only_rref</span>
+<span class="sd">   lloyd_only_rref_p</span>
+<span class="sd">   cost_lloyd_only_rref</span>
+<span class="sd">   cost2_lloyd_only_rref</span>
+<span class="sd">   sabx</span>
+<span class="sd">   sabx_p</span>
+<span class="sd">   cost_sabx</span>
+<span class="sd">   cost2_sabx</span>
+<span class="sd">   poly</span>
+<span class="sd">   poly_p</span>
+<span class="sd">   cost_poly</span>
+<span class="sd">   cost2_poly</span>
+<span class="sd">   cost_logistic</span>
+<span class="sd">   cost2_logistic</span>
+<span class="sd">   cost_logistic_offset</span>
+<span class="sd">   cost2_logistic_offset</span>
+<span class="sd">   cost_logistic2_offset</span>
+<span class="sd">   cost2_logistic2_offset</span>
+<span class="sd">   see</span>
+<span class="sd">   see_p</span>
+<span class="sd">   cost_see</span>
+<span class="sd">   cost2_see</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="k">try</span><span class="p">:</span>        <span class="c1"># import package</span>
+    <span class="kn">from</span> <span class="nn">.logistic_function</span> <span class="kn">import</span> <span class="n">logistic_p</span><span class="p">,</span> <span class="n">logistic_offset_p</span><span class="p">,</span> <span class="n">logistic2_offset_p</span>
+    <span class="kn">from</span> <span class="nn">..const</span> <span class="kn">import</span> <span class="n">T0</span><span class="p">,</span> <span class="n">T25</span><span class="p">,</span> <span class="n">R</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>    <span class="c1"># e.g. python nee2gpp.py</span>
+        <span class="kn">from</span> <span class="nn">functions.logistic_function</span> <span class="kn">import</span> <span class="n">logistic_p</span><span class="p">,</span> <span class="n">logistic_offset_p</span><span class="p">,</span> <span class="n">logistic2_offset_p</span>
+        <span class="kn">from</span> <span class="nn">const</span> <span class="kn">import</span> <span class="n">T0</span><span class="p">,</span> <span class="n">T25</span><span class="p">,</span> <span class="n">R</span>
+    <span class="k">except</span><span class="p">:</span> <span class="c1"># python fit_functions.py</span>
+        <span class="kn">from</span> <span class="nn">logistic_function</span> <span class="kn">import</span> <span class="n">logistic_p</span><span class="p">,</span> <span class="n">logistic_offset_p</span><span class="p">,</span> <span class="n">logistic2_offset_p</span>
+        <span class="n">T0</span>  <span class="o">=</span> <span class="mf">273.15</span>    <span class="c1"># Celcius &lt;-&gt; Kelvin [K]</span>
+        <span class="n">T25</span> <span class="o">=</span> <span class="mf">298.15</span>    <span class="c1"># Standard ambient temperature [K]</span>
+        <span class="n">R</span>   <span class="o">=</span> <span class="mf">8.3144621</span> <span class="c1"># Ideal gas constant [J K^-1 mol^-1]</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cost_abs&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_square&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;arrhenius&#39;</span><span class="p">,</span> <span class="s1">&#39;arrhenius_p&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_arrhenius&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_arrhenius&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;f1x&#39;</span><span class="p">,</span> <span class="s1">&#39;f1x_p&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_f1x&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_f1x&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;fexp&#39;</span><span class="p">,</span> <span class="s1">&#39;fexp_p&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_fexp&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_fexp&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;gauss&#39;</span><span class="p">,</span> <span class="s1">&#39;gauss_p&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_gauss&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_gauss&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;lasslop&#39;</span><span class="p">,</span> <span class="s1">&#39;lasslop_p&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_lasslop&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_lasslop&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="s1">&#39;line_p&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_line&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_line&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;line0&#39;</span><span class="p">,</span> <span class="s1">&#39;line0_p&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_line0&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_line0&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;lloyd_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;lloyd_fix_p&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_lloyd_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_lloyd_fix&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;lloyd_only_rref&#39;</span><span class="p">,</span> <span class="s1">&#39;lloyd_only_rref_p&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_lloyd_only_rref&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_lloyd_only_rref&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;sabx&#39;</span><span class="p">,</span> <span class="s1">&#39;sabx_p&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_sabx&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_sabx&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="s1">&#39;poly_p&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_poly&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_poly&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;cost_logistic&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_logistic&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;cost_logistic_offset&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_logistic_offset&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;cost_logistic2_offset&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_logistic2_offset&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;see&#39;</span><span class="p">,</span> <span class="s1">&#39;see_p&#39;</span><span class="p">,</span> <span class="s1">&#39;cost_see&#39;</span><span class="p">,</span> <span class="s1">&#39;cost2_see&#39;</span><span class="p">]</span>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># general cost functions</span>
+<div class="viewcode-block" id="cost_abs"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_abs">[docs]</a><span class="k">def</span> <span class="nf">cost_abs</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    General cost function for robust optimising `func(x,p)` vs. `y` with sum of absolute deviations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters</span>
+<span class="sd">    func : callable</span>
+<span class="sd">        `fun(x,p) -&gt; float`</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost_square"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_square">[docs]</a><span class="k">def</span> <span class="nf">cost_square</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    General cost function for optimising `func(x,p)` vs. `y` with sum of square deviations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters</span>
+<span class="sd">    func : callable</span>
+<span class="sd">        `fun(x,p) -&gt; float`</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># arrhenius</span>
+<div class="viewcode-block" id="arrhenius"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.arrhenius">[docs]</a><span class="k">def</span> <span class="nf">arrhenius</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">E</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Arrhenius temperature dependence of rates.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T : float or array_like of floats</span>
+<span class="sd">        temperature [degC]</span>
+<span class="sd">    E : float</span>
+<span class="sd">        activation energy [J]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">T</span><span class="o">-</span><span class="p">(</span><span class="n">T25</span><span class="o">-</span><span class="n">T0</span><span class="p">))</span><span class="o">*</span><span class="n">E</span><span class="o">/</span><span class="p">(</span><span class="n">T25</span><span class="o">*</span><span class="n">R</span><span class="o">*</span><span class="p">(</span><span class="n">T</span><span class="o">+</span><span class="n">T0</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="arrhenius_p"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.arrhenius_p">[docs]</a><span class="k">def</span> <span class="nf">arrhenius_p</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Arrhenius temperature dependence of rates.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T : float or array_like of floats</span>
+<span class="sd">        temperature [degC]</span>
+<span class="sd">    p : iterable</span>
+<span class="sd">        `p[0]` is activation energy [J]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">T</span><span class="o">-</span><span class="p">(</span><span class="n">T25</span><span class="o">-</span><span class="n">T0</span><span class="p">))</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">T25</span><span class="o">*</span><span class="n">R</span><span class="o">*</span><span class="p">(</span><span class="n">T</span><span class="o">+</span><span class="n">T0</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost_arrhenius"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_arrhenius">[docs]</a><span class="k">def</span> <span class="nf">cost_arrhenius</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">rate</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and arrhenius function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        `p[0]` is activation energy [J]</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rate</span><span class="o">-</span><span class="n">arrhenius_p</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost2_arrhenius"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_arrhenius">[docs]</a><span class="k">def</span> <span class="nf">cost2_arrhenius</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">rate</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and arrhenius.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        `p[0]` is activation energy [J]</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">rate</span><span class="o">-</span><span class="n">arrhenius_p</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># a+b/x</span>
+<div class="viewcode-block" id="f1x"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.f1x">[docs]</a><span class="k">def</span> <span class="nf">f1x</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    General 1/x function: a + b/x</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    a : float</span>
+<span class="sd">        first parameter</span>
+<span class="sd">    b : float</span>
+<span class="sd">        second parameter</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">/</span><span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="f1x_p"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.f1x_p">[docs]</a><span class="k">def</span> <span class="nf">f1x_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    General 1/x function: a + b/x</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="cost_f1x"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_f1x">[docs]</a><span class="k">def</span> <span class="nf">cost_f1x</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and general 1/x function: a + b/x</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">f1x_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost2_f1x"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_f1x">[docs]</a><span class="k">def</span> <span class="nf">cost2_f1x</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and general 1/x function: a + b/x</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">f1x_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># a+b*exp(c*x)</span>
+<div class="viewcode-block" id="fexp"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.fexp">[docs]</a><span class="k">def</span> <span class="nf">fexp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    General exponential function: a + b * exp(c*x)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    a : float</span>
+<span class="sd">        first parameter</span>
+<span class="sd">    b : float</span>
+<span class="sd">        second parameter</span>
+<span class="sd">    c : float</span>
+<span class="sd">        third parameter</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">c</span><span class="o">*</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="fexp_p"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.fexp_p">[docs]</a><span class="k">def</span> <span class="nf">fexp_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    General exponential function: a + b * exp(c*x)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=3`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+
+<span class="sd">        `p[2]` c</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cost_fexp"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_fexp">[docs]</a><span class="k">def</span> <span class="nf">cost_fexp</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and general exponential function: a + b * exp(c*x)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=3`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+
+<span class="sd">        `p[2]` c</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">fexp_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost2_fexp"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_fexp">[docs]</a><span class="k">def</span> <span class="nf">cost2_fexp</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and general exponential function: a + b * exp(c*x)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=3`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+
+<span class="sd">        `p[2]` c</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">fexp_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># Gauss: 1/(sig*sqrt(2*pi)) *exp(-(x-mu)**2/(2*sig**2))</span>
+<div class="viewcode-block" id="gauss"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.gauss">[docs]</a><span class="k">def</span> <span class="nf">gauss</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">mu</span><span class="p">,</span><span class="n">sig</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gauss function: 1 / (sqrt(2*pi)*sig) * exp( -(x-mu)**2 / (2*sig**2) )</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    mu : float</span>
+<span class="sd">        mean</span>
+<span class="sd">    sig : float</span>
+<span class="sd">        width</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">mu</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sig</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="n">sig</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="gauss_p"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.gauss_p">[docs]</a><span class="k">def</span> <span class="nf">gauss_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gauss function: 1 / (sqrt(2*pi)*sig) * exp( -(x-mu)**2 / (2*sig**2) )</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` mean</span>
+
+<span class="sd">        `p[1]` width</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="cost_gauss"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_gauss">[docs]</a><span class="k">def</span> <span class="nf">cost_gauss</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and Gauss function: 1 / (sqrt(2*pi)*sig) * exp( -(x-mu)**2 / (2*sig**2) )</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` mean</span>
+
+<span class="sd">        `p[1]` width</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">gauss_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost2_gauss"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_gauss">[docs]</a><span class="k">def</span> <span class="nf">cost2_gauss</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and Gauss function: 1 / (sqrt(2*pi)*sig) * exp( -(x-mu)**2 / (2*sig**2) )</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` mean</span>
+
+<span class="sd">        `p[1]` width</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">gauss_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># lasslop</span>
+<div class="viewcode-block" id="lasslop"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.lasslop">[docs]</a><span class="k">def</span> <span class="nf">lasslop</span><span class="p">(</span><span class="n">Rg</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">VPD</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta0</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">Rref</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Lasslop et al. (2010) is the rectangular, hyperbolic light-response</span>
+<span class="sd">    of NEE as by Falge et al. (2001), where the respiration is calculated</span>
+<span class="sd">    with Lloyd &amp; Taylor (1994), and the maximum canopy uptake rate at</span>
+<span class="sd">    light saturation decreases exponentially with VPD as in Koerner (1995).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Rg : float or array_like of floats</span>
+<span class="sd">        Global radiation [W m-2]</span>
+<span class="sd">    et : float or array_like of floats</span>
+<span class="sd">        Exponential in Lloyd &amp; Taylor: np.exp(E0*(1./(Tref-T0)-1./(T-T0))) []</span>
+<span class="sd">    VPD : float or array_like of floats</span>
+<span class="sd">        Vapour Pressure Deficit [Pa]</span>
+<span class="sd">    alpha : float</span>
+<span class="sd">        Light use efficiency, i.e. initial slope of light response curve [umol(C) J-1]</span>
+<span class="sd">    beta0 : float</span>
+<span class="sd">        Maximum CO2 uptake rate at VPD0=10 hPa [umol(C) m-2 s-1]</span>
+<span class="sd">    k : float</span>
+<span class="sd">        e-folding of exponential decrease of maximum CO2 uptake with VPD increase [Pa-1]</span>
+<span class="sd">    Rref : float</span>
+<span class="sd">        Respiration at Tref (10 degC) [umol(C) m-2 s-1]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        net ecosystem exchange [umol(CO2) m-2 s-1]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Lloyd &amp; Taylor (1994)</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">Rref</span><span class="o">*</span><span class="n">et</span>
+    <span class="c1"># Koerner (1995)</span>
+    <span class="n">VPD0</span>  <span class="o">=</span> <span class="mf">1000.</span> <span class="c1"># 10 hPa</span>
+    <span class="n">kk</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="o">-</span><span class="n">k</span><span class="o">*</span><span class="p">(</span><span class="n">VPD</span><span class="o">-</span><span class="n">VPD0</span><span class="p">),</span> <span class="o">-</span><span class="mf">600.</span><span class="p">,</span> <span class="mf">600.</span><span class="p">)</span>
+    <span class="n">beta</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">VPD</span> <span class="o">&gt;</span> <span class="n">VPD0</span><span class="p">,</span> <span class="n">beta0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">kk</span><span class="p">),</span> <span class="n">beta0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">alpha</span><span class="o">*</span><span class="n">beta</span><span class="o">*</span><span class="n">Rg</span><span class="o">/</span><span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">Rg</span><span class="o">+</span><span class="n">beta</span><span class="p">)</span> <span class="o">+</span> <span class="n">gamma</span></div>
+
+
+<div class="viewcode-block" id="lasslop_p"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.lasslop_p">[docs]</a><span class="k">def</span> <span class="nf">lasslop_p</span><span class="p">(</span><span class="n">Rg</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">VPD</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Lasslop et al. (2010) is the rectangular, hyperbolic light-response</span>
+<span class="sd">    of NEE as by Falge et al. (2001), where the respiration is calculated</span>
+<span class="sd">    with Lloyd &amp; Taylor (1994), and the maximum canopy uptake rate at</span>
+<span class="sd">    light saturation decreases exponentially with VPD as in Koerner (1995).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Rg : float or array_like of floats</span>
+<span class="sd">        Global radiation [W m-2]</span>
+<span class="sd">    et : float or array_like of floats</span>
+<span class="sd">        Exponential in Lloyd &amp; Taylor: np.exp(E0*(1./(Tref-T0)-1./(T-T0))) []</span>
+<span class="sd">    VPD : float or array_like of floats</span>
+<span class="sd">        Vapour Pressure Deficit [Pa]</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=4`)</span>
+
+<span class="sd">        `p[0]` Light use efficiency, i.e. initial slope of light response curve [umol(C) J-1]</span>
+
+<span class="sd">        `p[1]` Maximum CO2 uptake rate at VPD0=10 hPa [umol(C) m-2 s-1]</span>
+
+<span class="sd">        `p[2]` e-folding of exponential decrease of maximum CO2 uptake with VPD increase [Pa-1]</span>
+
+<span class="sd">        `p[3]` Respiration at Tref (10 degC) [umol(C) m-2 s-1]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        net ecosystem exchange [umol(CO2) m-2 s-1]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Lloyd &amp; Taylor (1994)</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="n">et</span>
+    <span class="c1"># Koerner (1995)</span>
+    <span class="n">VPD0</span>  <span class="o">=</span> <span class="mf">1000.</span> <span class="c1"># 10 hPa</span>
+    <span class="n">kk</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">VPD</span><span class="o">-</span><span class="n">VPD0</span><span class="p">),</span> <span class="o">-</span><span class="mf">600.</span><span class="p">,</span> <span class="mf">600.</span><span class="p">)</span>
+    <span class="n">beta</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">VPD</span> <span class="o">&gt;</span> <span class="n">VPD0</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">kk</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">beta</span><span class="o">*</span><span class="n">Rg</span><span class="o">/</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">Rg</span><span class="o">+</span><span class="n">beta</span><span class="p">)</span> <span class="o">+</span> <span class="n">gamma</span></div>
+
+
+<div class="viewcode-block" id="cost_lasslop"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_lasslop">[docs]</a><span class="k">def</span> <span class="nf">cost_lasslop</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Rg</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">VPD</span><span class="p">,</span> <span class="n">NEE</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and Lasslop.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=4`)</span>
+
+<span class="sd">        `p[0]` Light use efficiency, i.e. initial slope of light response curve [umol(C) J-1]</span>
+
+<span class="sd">        `p[1]` Maximum CO2 uptake rate at VPD0=10 hPa [umol(C) m-2 s-1]</span>
+
+<span class="sd">        `p[2]` e-folding of exponential decrease of maximum CO2 uptake with VPD increase [Pa-1]</span>
+
+<span class="sd">        `p[3]` Respiration at Tref (10 degC) [umol(C) m-2 s-1]</span>
+<span class="sd">    Rg : float or array_like of floats</span>
+<span class="sd">        Global radiation [W m-2]</span>
+<span class="sd">    et : float or array_like of floats</span>
+<span class="sd">        Exponential in Lloyd &amp; Taylor: np.exp(E0*(1./(Tref-T0)-1./(T-T0))) []</span>
+<span class="sd">    VPD : float or array_like of floats</span>
+<span class="sd">        Vapour Pressure Deficit [Pa]</span>
+<span class="sd">    NEE : float or array_like of floats</span>
+<span class="sd">        Observed net ecosystem exchange [umol(CO2) m-2 s-1]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">NEE</span><span class="o">-</span><span class="n">lasslop</span><span class="p">(</span><span class="n">Rg</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">VPD</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">])))</span></div>
+
+
+<div class="viewcode-block" id="cost2_lasslop"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_lasslop">[docs]</a><span class="k">def</span> <span class="nf">cost2_lasslop</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Rg</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">VPD</span><span class="p">,</span> <span class="n">NEE</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and Lasslop.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=4`)</span>
+
+<span class="sd">        `p[0]` Light use efficiency, i.e. initial slope of light response curve [umol(C) J-1]</span>
+
+<span class="sd">        `p[1]` Maximum CO2 uptake rate at VPD0=10 hPa [umol(C) m-2 s-1]</span>
+
+<span class="sd">        `p[2]` e-folding of exponential decrease of maximum CO2 uptake with VPD increase [Pa-1]</span>
+
+<span class="sd">        `p[3]` Respiration at Tref (10 degC) [umol(C) m-2 s-1]</span>
+<span class="sd">    Rg : float or array_like of floats</span>
+<span class="sd">        Global radiation [W m-2]</span>
+<span class="sd">    et : float or array_like of floats</span>
+<span class="sd">        Exponential in Lloyd &amp; Taylor: np.exp(E0*(1./(Tref-T0)-1./(T-T0))) []</span>
+<span class="sd">    VPD : float or array_like of floats</span>
+<span class="sd">        Vapour Pressure Deficit [Pa]</span>
+<span class="sd">    NEE : float or array_like of floats</span>
+<span class="sd">        Observed net ecosystem exchange [umol(CO2) m-2 s-1]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">NEE</span><span class="o">-</span><span class="n">lasslop</span><span class="p">(</span><span class="n">Rg</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">VPD</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># a+b*x</span>
+<div class="viewcode-block" id="line"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.line">[docs]</a><span class="k">def</span> <span class="nf">line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Straight line: a + b*x</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    a : float</span>
+<span class="sd">        first parameter</span>
+<span class="sd">    b : float</span>
+<span class="sd">        second parameter</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">*</span><span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="line_p"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.line_p">[docs]</a><span class="k">def</span> <span class="nf">line_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Straight line: a + b*x</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="cost_line"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_line">[docs]</a><span class="k">def</span> <span class="nf">cost_line</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and straight line: a + b*x</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">line_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost2_line"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_line">[docs]</a><span class="k">def</span> <span class="nf">cost2_line</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and straight line: a + b*x</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">line_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># b*x</span>
+<div class="viewcode-block" id="line0"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.line0">[docs]</a><span class="k">def</span> <span class="nf">line0</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">a</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Straight line through origin: a*x</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    a : float</span>
+<span class="sd">        first parameter</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">*</span><span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="line0_p"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.line0_p">[docs]</a><span class="k">def</span> <span class="nf">line0_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Straight line through origin: a*x</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        `p[0]` is a</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">p</span><span class="o">*</span><span class="n">x</span></div>
+
+  
+<div class="viewcode-block" id="cost_line0"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_line0">[docs]</a><span class="k">def</span> <span class="nf">cost_line0</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and straight line through origin: a*x</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        `p[0]` is a</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">line0_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+  
+<div class="viewcode-block" id="cost2_line0"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_line0">[docs]</a><span class="k">def</span> <span class="nf">cost2_line0</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and straight line through origin: a*x</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        `p[0]` is a</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">line0_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># lloyd_fix</span>
+<div class="viewcode-block" id="lloyd_fix"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.lloyd_fix">[docs]</a><span class="k">def</span> <span class="nf">lloyd_fix</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">Rref</span><span class="p">,</span> <span class="n">E0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Lloyd &amp; Taylor (1994) Arrhenius type with T0=-46.02 degC and Tref=10 degC</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T : float or array_like of floats</span>
+<span class="sd">        Temperature [K]</span>
+<span class="sd">    Rref : float</span>
+<span class="sd">        Respiration at Tref=10 degC [umol(C) m-2 s-1]</span>
+<span class="sd">    E0 : float</span>
+<span class="sd">        Activation energy [K]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Respiration [umol(C) m-2 s-1]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Tref</span> <span class="o">=</span> <span class="mf">283.15</span> <span class="c1">#  10    [degC]</span>
+    <span class="n">T0</span>   <span class="o">=</span> <span class="mf">227.13</span> <span class="c1"># -46.02 [degC]</span>
+    <span class="k">return</span> <span class="n">Rref</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">E0</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">Tref</span><span class="o">-</span><span class="n">T0</span><span class="p">)</span><span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">T</span><span class="o">-</span><span class="n">T0</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="lloyd_fix_p"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.lloyd_fix_p">[docs]</a><span class="k">def</span> <span class="nf">lloyd_fix_p</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Lloyd &amp; Taylor (1994) Arrhenius type with T0=-46.02 degC and Tref=10 degC</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T : float or array_like of floats</span>
+<span class="sd">        Temperature [K]</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` Respiration at Tref=10 degC [umol(C) m-2 s-1]</span>
+
+<span class="sd">        `p[1]` Activation energy [K]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Respiration [umol(C) m-2 s-1]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Tref</span> <span class="o">=</span> <span class="mf">283.15</span> <span class="c1">#  10    [degC]</span>
+    <span class="n">T0</span>   <span class="o">=</span> <span class="mf">227.13</span> <span class="c1"># -46.02 [degC]</span>
+    <span class="k">return</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">Tref</span><span class="o">-</span><span class="n">T0</span><span class="p">)</span><span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">T</span><span class="o">-</span><span class="n">T0</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost_lloyd_fix"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_lloyd_fix">[docs]</a><span class="k">def</span> <span class="nf">cost_lloyd_fix</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and Lloyd &amp; Taylor (1994) Arrhenius type.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` Respiration at Tref=10 degC [umol(C) m-2 s-1]</span>
+
+<span class="sd">        `p[1]` Activation energy [K]</span>
+<span class="sd">    T : float or array_like of floats</span>
+<span class="sd">        Temperature [K]</span>
+<span class="sd">    resp : float or array_like of floats</span>
+<span class="sd">        Observed respiration [umol(C) m-2 s-1]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">resp</span><span class="o">-</span><span class="n">lloyd_fix_p</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost2_lloyd_fix"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_lloyd_fix">[docs]</a><span class="k">def</span> <span class="nf">cost2_lloyd_fix</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and Lloyd &amp; Taylor (1994) Arrhenius type.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` Respiration at Tref=10 degC [umol(C) m-2 s-1]</span>
+
+<span class="sd">        `p[1]` Activation energy [K]</span>
+<span class="sd">    T : float or array_like of floats</span>
+<span class="sd">        Temperature [K]</span>
+<span class="sd">    resp : float or array_like of floats</span>
+<span class="sd">        Observed respiration [umol(C) m-2 s-1]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">resp</span><span class="o">-</span><span class="n">lloyd_fix_p</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># lloyd_only_rref</span>
+<div class="viewcode-block" id="lloyd_only_rref"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.lloyd_only_rref">[docs]</a><span class="k">def</span> <span class="nf">lloyd_only_rref</span><span class="p">(</span><span class="n">et</span><span class="p">,</span> <span class="n">Rref</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If E0 is know in Lloyd &amp; Taylor (1994) then one can calc</span>
+<span class="sd">    the exponential term outside the routine and the fitting</span>
+<span class="sd">    becomes linear. One could also use functions.line0.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    et : float or array_like of floats</span>
+<span class="sd">        exp-term in Lloyd &amp; Taylor</span>
+<span class="sd">    Rref : float</span>
+<span class="sd">        Respiration at Tref=10 degC [umol(C) m-2 s-1]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Respiration [umol(C) m-2 s-1]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Rref</span><span class="o">*</span><span class="n">et</span></div>
+
+
+<div class="viewcode-block" id="lloyd_only_rref_p"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.lloyd_only_rref_p">[docs]</a><span class="k">def</span> <span class="nf">lloyd_only_rref_p</span><span class="p">(</span><span class="n">et</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If E0 is know in Lloyd &amp; Taylor (1994) then one can calc</span>
+<span class="sd">    the exponential term outside the routine and the fitting</span>
+<span class="sd">    becomes linear. One could also use functions.line0.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    et : float or array_like of floats</span>
+<span class="sd">        exp-term in Lloyd &amp; Taylor</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        `p[0]` is respiration at Tref=10 degC [umol(C) m-2 s-1]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Respiration [umol(C) m-2 s-1]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">et</span></div>
+
+
+<div class="viewcode-block" id="cost_lloyd_only_rref"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_lloyd_only_rref">[docs]</a><span class="k">def</span> <span class="nf">cost_lloyd_only_rref</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and Lloyd &amp; Taylor with known exponential term.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        `p[0]` is respiration at Tref=10 degC [umol(C) m-2 s-1]</span>
+<span class="sd">    et : float or array_like of floats</span>
+<span class="sd">        exp-term in Lloyd &amp; Taylor</span>
+<span class="sd">    resp : float or array_like of floats</span>
+<span class="sd">        Observed respiration [umol(C) m-2 s-1]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">resp</span><span class="o">-</span><span class="n">lloyd_only_rref_p</span><span class="p">(</span><span class="n">et</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost2_lloyd_only_rref"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_lloyd_only_rref">[docs]</a><span class="k">def</span> <span class="nf">cost2_lloyd_only_rref</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and Lloyd &amp; Taylor with known exponential term.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        `p[0]` is respiration at Tref=10 degC [umol(C) m-2 s-1]</span>
+<span class="sd">    et : float or array_like of floats</span>
+<span class="sd">        exp-term in Lloyd &amp; Taylor</span>
+<span class="sd">    resp : float or array_like of floats</span>
+<span class="sd">        Observed respiration [umol(C) m-2 s-1]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">resp</span><span class="o">-</span><span class="n">lloyd_only_rref_p</span><span class="p">(</span><span class="n">et</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># sqrt(a + b/x) - theoretical form of Jackknife-after-bootstrap</span>
+
+<div class="viewcode-block" id="sabx"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.sabx">[docs]</a><span class="k">def</span> <span class="nf">sabx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Square root of general 1/x function: sqrt(a + b/x)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    a : float</span>
+<span class="sd">        first parameter</span>
+<span class="sd">    b : float</span>
+<span class="sd">        second parameter</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">/</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sabx_p"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.sabx_p">[docs]</a><span class="k">def</span> <span class="nf">sabx_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Square root of general 1/x function: sqrt(a + b/x)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">x</span><span class="p">)</span></div>
+
+  
+<div class="viewcode-block" id="cost_sabx"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_sabx">[docs]</a><span class="k">def</span> <span class="nf">cost_sabx</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and square root of general 1/x function: sqrt(a + b/x)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">sabx_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="cost2_sabx"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_sabx">[docs]</a><span class="k">def</span> <span class="nf">cost2_sabx</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and square root of general 1/x function: sqrt(a + b/x)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=2`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">sabx_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># c0 + c1*x + c2*x**2 + ... + cn*x**n</span>
+<div class="viewcode-block" id="poly"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.poly">[docs]</a><span class="k">def</span> <span class="nf">poly</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    General polynomial: c0 + c1*x + c2*x**2 + ... + cn*x**n</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    *args : float</span>
+<span class="sd">        parameters `len(args)=n+1`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">polynomial</span><span class="o">.</span><span class="n">polynomial</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">))</span></div>
+
+  
+<div class="viewcode-block" id="poly_p"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.poly_p">[docs]</a><span class="k">def</span> <span class="nf">poly_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    General polynomial: c0 + c1*x + c2*x**2 + ... + cn*x**n</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=n+1`)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">polynomial</span><span class="o">.</span><span class="n">polynomial</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span></div>
+
+  
+<div class="viewcode-block" id="cost_poly"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_poly">[docs]</a><span class="k">def</span> <span class="nf">cost_poly</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and general polynomial: c0 + c1*x + c2*x**2 + ... + cn*x**n</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=n+1`)</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">poly_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost2_poly"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_poly">[docs]</a><span class="k">def</span> <span class="nf">cost2_poly</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and general polynomial: c0 + c1*x + c2*x**2 + ... + cn*x**n</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=n+1`)</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">poly_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># a/(1+exp(-b(x-c))) - logistic function</span>
+<div class="viewcode-block" id="cost_logistic"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_logistic">[docs]</a><span class="k">def</span> <span class="nf">cost_logistic</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and logistic function L/(1+exp(-k(x-x0)))</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=3`)</span>
+<span class="sd">        </span>
+<span class="sd">        `p[0]` L  - Maximum of logistic function</span>
+
+<span class="sd">        `p[1]` k  - Steepness of logistic function</span>
+
+<span class="sd">        `p[2]` x0 - Inflection point of logistic function</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">logistic_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost2_logistic"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_logistic">[docs]</a><span class="k">def</span> <span class="nf">cost2_logistic</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and logistic function L/(1+exp(-k(x-x0)))</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=3`)</span>
+<span class="sd">        </span>
+<span class="sd">        `p[0]` L  - Maximum of logistic function</span>
+
+<span class="sd">        `p[1]` k  - Steepness of logistic function</span>
+
+<span class="sd">        `p[2]` x0 - Inflection point of logistic function</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">logistic_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># a/(1+exp(-b(x-c))) + d - logistic function with offset</span>
+<div class="viewcode-block" id="cost_logistic_offset"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_logistic_offset">[docs]</a><span class="k">def</span> <span class="nf">cost_logistic_offset</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and logistic function 1/x function: L/(1+exp(-k(x-x0))) + a</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=4`)</span>
+<span class="sd">        </span>
+<span class="sd">        `p[0]` L  - Maximum of logistic function</span>
+
+<span class="sd">        `p[1]` k  - Steepness of logistic function</span>
+
+<span class="sd">        `p[2]` x0 - Inflection point of logistic function</span>
+
+<span class="sd">        `p[3]` a  - Offset of logistic function</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">logistic_offset_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost2_logistic_offset"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_logistic_offset">[docs]</a><span class="k">def</span> <span class="nf">cost2_logistic_offset</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and logistic function 1/x function: L/(1+exp(-k(x-x0))) + a</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=4`)</span>
+<span class="sd">        </span>
+<span class="sd">        `p[0]` L  - Maximum of logistic function</span>
+
+<span class="sd">        `p[1]` k  - Steepness of logistic function</span>
+
+<span class="sd">        `p[2]` x0 - Inflection point of logistic function</span>
+
+<span class="sd">        `p[3]` a  - Offset of logistic function</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">logistic_offset_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># L1/(1+exp(-k1(x-x01))) - L2/(1+exp(-k2(x-x02))) + a2 - double logistic function with offset</span>
+<div class="viewcode-block" id="cost_logistic2_offset"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_logistic2_offset">[docs]</a><span class="k">def</span> <span class="nf">cost_logistic2_offset</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and double logistic function with offset:</span>
+<span class="sd">    L1/(1+exp(-k1(x-x01))) - L2/(1+exp(-k2(x-x02))) + a</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=7`)</span>
+<span class="sd">        </span>
+<span class="sd">        `p[0]` L1  - Maximum of first logistic function</span>
+
+<span class="sd">        `p[1]` k1  - Steepness of first logistic function</span>
+
+<span class="sd">        `p[2]` x01 - Inflection point of first logistic function</span>
+<span class="sd">        </span>
+<span class="sd">        `p[3]` L2  - Maximum of second logistic function</span>
+
+<span class="sd">        `p[4]` k2  - Steepness of second logistic function</span>
+
+<span class="sd">        `p[5]` x02 - Inflection point of second logistic function</span>
+
+<span class="sd">        `p[6]` a   - Offset of double logistic function</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">logistic2_offset_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost2_logistic2_offset"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_logistic2_offset">[docs]</a><span class="k">def</span> <span class="nf">cost2_logistic2_offset</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and double logistic function with offset:</span>
+<span class="sd">    L1/(1+exp(-k1(x-x01))) - L2/(1+exp(-k2(x-x02))) + a</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=7`)</span>
+<span class="sd">        </span>
+<span class="sd">        `p[0]` L1  - Maximum of first logistic function</span>
+
+<span class="sd">        `p[1]` k1  - Steepness of first logistic function</span>
+
+<span class="sd">        `p[2]` x01 - Inflection point of first logistic function</span>
+<span class="sd">        </span>
+<span class="sd">        `p[3]` L2  - Maximum of second logistic function</span>
+
+<span class="sd">        `p[4]` k2  - Steepness of second logistic function</span>
+
+<span class="sd">        `p[5]` x02 - Inflection point of second logistic function</span>
+
+<span class="sd">        `p[6]` a   - Offset of double logistic function</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">logistic2_offset_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># a*(x-b)**c - Sequential Elementary Effects fitting function</span>
+<div class="viewcode-block" id="see"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.see">[docs]</a><span class="k">def</span> <span class="nf">see</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit function of Sequential Elementary Effects: a * (x-b)**c</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    a : float</span>
+<span class="sd">        first parameter</span>
+<span class="sd">    b : float</span>
+<span class="sd">        second parameter</span>
+<span class="sd">    c : float</span>
+<span class="sd">        third parameter</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">x</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">&lt;</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="n">c</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="see_p"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.see_p">[docs]</a><span class="k">def</span> <span class="nf">see_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit function of Sequential Elementary Effects: a * (x-b)**c</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=3`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+
+<span class="sd">        `p[2]` c</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        function value(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">x</span><span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span></div>
+
+  
+<div class="viewcode-block" id="cost_see"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost_see">[docs]</a><span class="k">def</span> <span class="nf">cost_see</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of absolute deviations of obs and fit function of Sequential Elementary Effects: a * (x-b)**c</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=3`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+
+<span class="sd">        `p[2]` c</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of absolute deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">see_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="cost2_see"><a class="viewcode-back" href="../../../functions.fit_functions.html#hesseflux.functions.fit_functions.cost2_see">[docs]</a><span class="k">def</span> <span class="nf">cost2_see</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of squared deviations of obs and fit function of Sequential Elementary Effects: a * (x-b)**c</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : iterable of floats</span>
+<span class="sd">        parameters (`len(p)=3`)</span>
+
+<span class="sd">        `p[0]` a</span>
+
+<span class="sd">        `p[1]` b</span>
+
+<span class="sd">        `p[2]` c</span>
+<span class="sd">    x : float or array_like of floats</span>
+<span class="sd">        independent variable</span>
+<span class="sd">    y : float or array_like of floats</span>
+<span class="sd">        dependent variable, observations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        sum of squared deviations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">see_p</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">optionflags</span><span class="o">=</span><span class="n">doctest</span><span class="o">.</span><span class="n">NORMALIZE_WHITESPACE</span><span class="p">)</span>
+
+    <span class="c1"># Rref = 1.0</span>
+    <span class="c1"># E0   = 126.</span>
+    <span class="c1"># T    = 293.15</span>
+    <span class="c1"># resp = 2.0</span>
+    <span class="c1"># print(lloyd_fix(T, Rref, E0))</span>
+    <span class="c1"># #1.40590910521</span>
+    <span class="c1"># print(lloyd_fix_p(T, [Rref, E0]))</span>
+    <span class="c1"># #1.40590910521</span>
+    <span class="c1"># print(cost_lloyd_fix([Rref, E0], T, resp))</span>
+    <span class="c1"># #0.59409089479</span>
+    <span class="c1"># print(cost2_lloyd_fix([Rref, E0], T, resp))</span>
+    <span class="c1"># #0.352943991272</span>
+
+    <span class="c1"># print(poly(T,2,1))</span>
+    <span class="c1"># #295.15</span>
+    <span class="c1"># print(poly_p(T,[2,1]))</span>
+    <span class="c1"># #295.15</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../contents.html">hesseflux</a></h1>
+
+
+
+<p class="blurb">Functions used in the processing and post-processing of Eddy covariance flux data</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../package.html">API</a></li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/mcuntz/hesseflux">hesseflux @ GitHub</a></li>
+    
+    <li class="toctree-l1"><a href="https://doi.org/10.5281/zenodo.3831488">hesseflux @ Zenodo</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/hesseflux/">hesseflux @ PyPI</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../contents.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2009-2022, Matthias Cuntz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
