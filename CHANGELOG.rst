@@ -35,7 +35,7 @@ v2.2 (Aug 2020)
 
 v2.1 (Jul 2020)
     * Refined documentation.
-    * Use python3 for *nix and python for Windows on TravisCI.
+    * Use python3 for Linux/macOS and python for Windows on TravisCI.
     * Use en instead of eng in date routines.
     * Bugfix for Excel dates in date routines.
 

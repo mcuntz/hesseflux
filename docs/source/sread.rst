@@ -1,5 +1,5 @@
-hesseflux.sread
-======================
+sread
+-----
 
 .. automodule:: hesseflux.sread
    :members:

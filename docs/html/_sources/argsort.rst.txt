@@ -1,5 +1,5 @@
-hesseflux.argsort
-======================
+argsort
+-------
 
 .. automodule:: hesseflux.argsort
    :members:

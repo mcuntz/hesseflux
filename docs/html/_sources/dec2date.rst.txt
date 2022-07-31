@@ -1,5 +1,5 @@
-hesseflux.dec2date
-======================
+dec2date
+--------
 
 .. automodule:: hesseflux.dec2date
    :members:

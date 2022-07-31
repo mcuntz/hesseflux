@@ -1,5 +1,5 @@
-hesseflux.division
-======================
+division
+--------
 
 .. automodule:: hesseflux.division
    :members:

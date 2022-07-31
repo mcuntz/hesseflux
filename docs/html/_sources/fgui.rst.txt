@@ -1,5 +1,5 @@
-hesseflux.fgui
-======================
+fgui
+----
 
 .. automodule:: hesseflux.fgui
    :members:

@@ -1,5 +1,5 @@
-hesseflux.fread
-======================
+fread
+-----
 
 .. automodule:: hesseflux.fread
    :members:

@@ -1,5 +1,5 @@
-hesseflux.const.const
-======================
+const.const
+-----------
 
 .. automodule:: hesseflux.const.const
    :members:

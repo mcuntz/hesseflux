@@ -1,5 +1,5 @@
-hesseflux.functions.logistic_function
-=====================================
+functions.logistic_function
+---------------------------
 
 .. automodule:: hesseflux.functions.logistic_function
    :members:

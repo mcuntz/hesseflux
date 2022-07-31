@@ -1,5 +1,5 @@
-hesseflux.functions.fit_functions
-=================================
+functions.fit_functions
+-----------------------
 
 .. automodule:: hesseflux.functions.fit_functions
    :members:

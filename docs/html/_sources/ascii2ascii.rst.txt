@@ -1,5 +1,5 @@
-hesseflux.ascii2ascii
-======================
+ascii2ascii
+-----------
 
 .. automodule:: hesseflux.ascii2ascii
    :members:

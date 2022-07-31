@@ -1,5 +1,5 @@
-hesseflux.fsread
-======================
+fsread
+------
 
 .. automodule:: hesseflux.fsread
    :members:

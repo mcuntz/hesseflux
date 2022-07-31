@@ -1,5 +1,5 @@
-hesseflux.ustarfilter
-======================
+ustarfilter
+-----------
 
 .. automodule:: hesseflux.ustarfilter
    :members:

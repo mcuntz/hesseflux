@@ -1,5 +1,5 @@
-hesseflux.madspikes
-======================
+madspikes
+---------
 
 .. automodule:: hesseflux.madspikes
    :members:

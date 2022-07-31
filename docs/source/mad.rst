@@ -1,5 +1,5 @@
-hesseflux.mad
-======================
+mad
+---
 
 .. automodule:: hesseflux.mad
    :members:

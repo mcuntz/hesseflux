@@ -1,5 +1,5 @@
-hesseflux.functions
-======================
+functions
+---------
 
 .. automodule:: hesseflux.functions
    :members:

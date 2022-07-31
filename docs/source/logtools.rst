@@ -1,5 +1,5 @@
-hesseflux.logtools
-======================
+logtools
+--------
 
 .. automodule:: hesseflux.logtools
    :members:

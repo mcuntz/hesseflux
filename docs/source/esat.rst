@@ -1,5 +1,5 @@
-hesseflux.esat
-======================
+esat
+----
 
 .. automodule:: hesseflux.esat
    :members:

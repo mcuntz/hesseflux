@@ -18,4 +18,5 @@ Contributors
 
 .. _Arndt Piayda: https://github.com/peterchenchenchen
 .. _Juliane Mai: https://github.com/julemai
+.. _Matthias Cuntz: https://github.com/mcuntz
 .. _Sebastian Müller: https://github.com/MuellerSeb

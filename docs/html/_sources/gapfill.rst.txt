@@ -1,5 +1,5 @@
-hesseflux.gapfill
-======================
+gapfill
+-------
 
 .. automodule:: hesseflux.gapfill
    :members:

@@ -1,6 +1,7 @@
----
-API
----
+.. _api:
+
+API Reference
+-------------
 
 .. automodule:: hesseflux
 
@@ -9,6 +10,8 @@ API
     \clearpage
 
 .. toctree::
+   :includehidden:
+   :maxdepth: 2
 
    argsort.rst
    ascii2ascii.rst
@@ -35,3 +38,5 @@ API
    nee2gpp.rst
    sread.rst
    ustarfilter.rst
+
+.. currentmodule:: hesseflux

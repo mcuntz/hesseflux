@@ -4,7 +4,7 @@ Contents
 
 .. toctree::
    :includehidden:
-   :maxdepth: 4
+   :maxdepth: 3
 
    index
    userguide

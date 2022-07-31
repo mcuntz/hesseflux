@@ -1,5 +1,5 @@
-hesseflux.nee2gpp
-======================
+nee2gpp
+-------
 
 .. automodule:: hesseflux.nee2gpp
    :members:

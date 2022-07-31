@@ -1,5 +1,5 @@
-hesseflux.functions.sa_test_functions
-=====================================
+functions.sa_test_functions
+---------------------------
 
 .. automodule:: hesseflux.functions.sa_test_functions
    :members:
