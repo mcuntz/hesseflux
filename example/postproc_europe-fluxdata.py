@@ -41,7 +41,6 @@ History
 Written, Matthias Cuntz, April 2020
 
 """
-from __future__ import division, absolute_import, print_function
 import time as ptime
 import sys
 import configparser
@@ -49,8 +48,8 @@ import os.path
 import datetime as dt
 import numpy as np
 import pandas as pd
-import hesseflux as hf
 import pyjams as pj
+import hesseflux as hf
 
 
 #

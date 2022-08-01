@@ -3,12 +3,12 @@ name: Continuous Integration
 on:
   push:
     branches:
-      - "main"
+      - "master"
     tags:
       - "*"
   pull_request:
     branches:
-      - "main"
+      - "master"
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -87,8 +87,8 @@ jobs:
           path: dist
 
       - name: Publish to Test PyPI
-        # only if working on main
-        if: github.ref == 'refs/heads/main'
+        # only if working on master
+        if: github.ref == 'refs/heads/master'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__

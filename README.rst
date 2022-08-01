@@ -23,7 +23,7 @@ the Eddy covariance flux data of the ICOS_ ecosystem site FR-Hes_.
    :target: https://github.com/mcuntz/hesseflux/blob/master/LICENSE
    :alt: License
 
-.. image:: https://github.com/mcuntz/hesseflux/workflows/Continuous%20Integration/badge.svg?branch=main
+.. image:: https://github.com/mcuntz/hesseflux/workflows/Continuous%20Integration/badge.svg?branch=master
    :target: https://github.com/mcuntz/hesseflux/actions
    :alt: Build Status
 
