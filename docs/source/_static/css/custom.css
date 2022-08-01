@@ -55,6 +55,11 @@ div.body h4 {
     margin-top: 2em;
 }
 
+/* code snippets */
+div.body .highlight {
+    font-size: 85%;
+}
+
 /* sidebar */
 
 div.sphinxsidebar {
@@ -92,8 +97,10 @@ pre, tt, code {
     font-family: Liberation Mono, DejaVu San Mono, Monospace, fixed;
 }
 
+/* comments within code blocks; font-size is relative to above div.body .highlight */
 .highlight .c1 {
     font-style: normal;
+    font-size: 100%;
 }
 
 /* tables */
