@@ -28,10 +28,7 @@ The following functions are provided
 from __future__ import division, absolute_import, print_function
 import numpy as np
 import pandas as pd
-try:    # import package
-    from .mad import mad
-except: # python madspikes.py
-    from mad import mad
+from pyjams import mad
 
 
 __all__ = ['madspikes']

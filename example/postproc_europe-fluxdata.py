@@ -50,6 +50,7 @@ import datetime as dt
 import numpy as np
 import pandas as pd
 import hesseflux as hf
+import pyjams as pj
 
 
 #
@@ -208,7 +209,7 @@ if __name__ == '__main__':
             rh = df[rh_id] / 100.
         else:
             rh = df[rh_id]
-        vpd = (1. - rh) * hf.esat(tk)
+        vpd = (1. - rh) * pj.esat(tk)
         vpd_id = 'VPD_PI_1_1_1'
         df[vpd_id] = vpd
         df[vpd_id].where((df[ta_id] != undef) | (df[rh_id] != undef),

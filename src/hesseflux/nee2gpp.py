@@ -35,17 +35,11 @@ from __future__ import division, absolute_import, print_function
 import warnings
 import numpy as np
 import pandas as pd
-import scipy.optimize as opt # curve_fit, fmin, fmin_tnc
-try:    # import package
-    from .mad import mad
-    from .functions import cost_abs, lloyd_only_rref_p
-    from .functions import cost_lloyd_fix, lloyd_fix, lloyd_fix_p
-    from .functions import cost_lasslop, lasslop
-except: # python nee2gpp.py
-    from mad import mad
-    from functions import cost_abs, lloyd_only_rref_p
-    from functions import cost_lloyd_fix, lloyd_fix, lloyd_fix_p
-    from functions import cost_lasslop, lasslop
+import scipy.optimize as opt  # curve_fit, fmin, fmin_tnc
+from pyjams import mad
+from pyjams.functions import cost_abs, lloyd_only_rref_p
+from pyjams.functions import cost_lloyd_fix, lloyd_fix, lloyd_fix_p
+from pyjams.functions import cost_lasslop, lasslop
 
 
 __all__ = ['nee2gpp']

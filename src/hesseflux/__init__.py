@@ -16,22 +16,10 @@ extensions such as the daytime method of flux partitioning
 Subpackages
 ===========
 .. autosummary::
-   const
-   functions
-   argsort
-   ascii2ascii
-   date2dec
-   dec2date
-   division
-   esat
    fgui
-   fread
-   fsread
    gapfill
-   mad
    madspikes
    nee2gpp
-   sread
    ustarfilter
    logtools
 
@@ -55,7 +43,8 @@ History
     * v3.2.1, code refactoring,
       Feb 2022, Matthias Cuntz
     * v4.0, moved to pyproject.toml structure and github pages for
-      documentation, Aug 2022, Matthias Cuntz
+      documentation, Jul 2022, Matthias Cuntz
+    * v5.0, use pyjams, remove old modules, Aug 2022, Matthias Cuntz
 
 """
 # version, author
@@ -66,24 +55,11 @@ except ImportError:  # pragma: no cover
     __version__ = "0.0.0.dev0"
 __author__  = "Matthias Cuntz"
 
-from . import const
-from . import functions
-
-from .argsort     import argmax, argmin, argsort
-from .ascii2ascii import ascii2ascii, ascii2en, ascii2fr, ascii2us, ascii2eng
-from .ascii2ascii import en2ascii, fr2ascii, us2ascii, eng2ascii
-from .date2dec    import date2dec
-from .dec2date    import dec2date
-from .division    import division, div
-from .esat        import esat
-from .fgui        import directory_from_gui, directories_from_gui, file_from_gui, files_from_gui
-from .fread       import fread
-from .fsread      import fsread
-from .gapfill     import gapfill
-from .mad         import mad
-from .madspikes   import madspikes
-from .nee2gpp     import nee2gpp
-from .sread       import sread
+from .fgui import directory_from_gui, directories_from_gui
+from .fgui import file_from_gui, files_from_gui
+from .gapfill import gapfill
+from .madspikes import madspikes
+from .nee2gpp import nee2gpp
 from .ustarfilter import ustarfilter
 
 from . import logtools
