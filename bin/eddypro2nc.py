@@ -107,7 +107,8 @@ if __name__ == '__main__':
     col_units = _get_columns_units(ifile, delimiter=',')
 
     # Read EddyPro
-    date_parser = lambda str_: dt.datetime.strptime(str_, "%Y-%m-%d %H:%M")
+    def date_parser(str1, str2):
+        return pd.to_datetime(str1 + ' ' + str2, format="%Y-%m-%d %H:%M")
     df = pd.read_csv(ifile,
                      skiprows=3,
                      delimiter=',',

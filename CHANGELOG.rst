@@ -5,6 +5,7 @@ All notable changes after its initial release in May 2020 (v2.0) are documented
 in this file.
 
 v5.0 (??? 2022)
+    * Updated `eddypro2nc.py`.
     * Use all tools from ``pyjams`` rather than local copies.
 
 v4.0 (Jul 2022)
