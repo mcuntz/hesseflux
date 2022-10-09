@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>API Reference &#8212; hesseflux 4.1.dev4 documentation</title>
+    <title>API Reference &#8212; hesseflux 4.6.dev1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
@@ -16,7 +16,7 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="fgui" href="fgui.html" />
+    <link rel="next" title="gapfill" href="gapfill.html" />
     <link rel="prev" title="User Guide" href="userguide.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -60,23 +60,17 @@ extensions such as the daytime method of flux partitioning
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="fgui.html#module-hesseflux.fgui" title="hesseflux.fgui"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fgui</span></code></a></p></td>
-<td><p>fgui : GUI dialogs to choose files and directories using Tkinter.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="gapfill.html#module-hesseflux.gapfill" title="hesseflux.gapfill"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gapfill</span></code></a>(dfin[, flag, date, timeformat, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="gapfill.html#module-hesseflux.gapfill" title="hesseflux.gapfill"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gapfill</span></code></a>(dfin[, flag, date, timeformat, ...])</p></td>
 <td><p>Fills gaps in flux data from Eddy covariance measurements with Marginal Distribution Sampling (MDS) according to Reichstein et al. (Global Change Biology, 2005).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="madspikes.html#module-hesseflux.madspikes" title="hesseflux.madspikes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">madspikes</span></code></a>(dfin[, flag, isday, colhead, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="madspikes.html#module-hesseflux.madspikes" title="hesseflux.madspikes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">madspikes</span></code></a>(dfin[, flag, isday, colhead, ...])</p></td>
 <td><p>Spike detection for using a moving median absolute difference filter.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="nee2gpp.html#module-hesseflux.nee2gpp" title="hesseflux.nee2gpp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nee2gpp</span></code></a>(dfin[, flag, isday, date, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="nee2gpp.html#module-hesseflux.nee2gpp" title="hesseflux.nee2gpp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nee2gpp</span></code></a>(dfin[, flag, isday, date, ...])</p></td>
 <td><p>Calculate photosynthesis (GPP) and ecosystem respiration (RECO) from Eddy covariance CO2 flux data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ustarfilter.html#module-hesseflux.ustarfilter" title="hesseflux.ustarfilter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ustarfilter</span></code></a>(dfin[, flag, isday, date, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ustarfilter.html#module-hesseflux.ustarfilter" title="hesseflux.ustarfilter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ustarfilter</span></code></a>(dfin[, flag, isday, date, ...])</p></td>
 <td><p>Flag Eddy Covariance data using a threshold of friction velocity (u*) below which u* correlates with a reduction in CO2 flux.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="logtools.html#module-hesseflux.logtools" title="hesseflux.logtools"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logtools</span></code></a></p></td>
-<td><p>Purpose</p></td>
 </tr>
 </tbody>
 </table>
@@ -102,21 +96,16 @@ Jun 2021, Matthias Cuntz</p></li>
 Feb 2022, Matthias Cuntz</p></li>
 <li><p>v4.0, moved to pyproject.toml structure and github pages for
 documentation, Jul 2022, Matthias Cuntz</p></li>
-<li><p>v5.0, use pyjams, remove old modules, Aug 2022, Matthias Cuntz</p></li>
+<li><p>v4.5, use pyjams, remove old modules, Aug 2022, Matthias Cuntz</p></li>
+<li><p>v5.0, remove fgui and logtools, numpy docstrings, updated docu,
+Oct 2022, Matthias Cuntz</p></li>
 </ul>
 </dd>
 </dl>
 </div>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="fgui.html">fgui</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gapfill.html">gapfill</a></li>
-<li class="toctree-l1"><a class="reference internal" href="logtools.logtools.html">logtools.logtools</a></li>
-<li class="toctree-l1"><a class="reference internal" href="logtools.html">logtools</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="logtools.html#purpose">Purpose</a></li>
-<li class="toctree-l2"><a class="reference internal" href="logtools.html#subpackages">Subpackages</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="madspikes.html">madspikes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nee2gpp.html">nee2gpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ustarfilter.html">ustarfilter</a></li>
@@ -148,10 +137,7 @@ documentation, Jul 2022, Matthias Cuntz</p></li>
 <li class="toctree-l1"><a class="reference internal" href="userguide.html">User Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="fgui.html">fgui</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gapfill.html">gapfill</a></li>
-<li class="toctree-l2"><a class="reference internal" href="logtools.logtools.html">logtools.logtools</a></li>
-<li class="toctree-l2"><a class="reference internal" href="logtools.html">logtools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="madspikes.html">madspikes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nee2gpp.html">nee2gpp</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ustarfilter.html">ustarfilter</a></li>
@@ -177,7 +163,7 @@ documentation, Jul 2022, Matthias Cuntz</p></li>
 <ul>
   <li><a href="contents.html">Documentation overview</a><ul>
       <li>Previous: <a href="userguide.html" title="previous chapter">User Guide</a></li>
-      <li>Next: <a href="fgui.html" title="next chapter">fgui</a></li>
+      <li>Next: <a href="gapfill.html" title="next chapter">gapfill</a></li>
   </ul></li>
 </ul>
 </div>

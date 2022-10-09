@@ -16,12 +16,10 @@ extensions such as the daytime method of flux partitioning
 Subpackages
 ===========
 .. autosummary::
-   fgui
    gapfill
    madspikes
    nee2gpp
    ustarfilter
-   logtools
 
 History
     * Written 2017 by Matthias Cuntz (mc (at) macu (dot) de)
@@ -44,7 +42,9 @@ History
       Feb 2022, Matthias Cuntz
     * v4.0, moved to pyproject.toml structure and github pages for
       documentation, Jul 2022, Matthias Cuntz
-    * v5.0, use pyjams, remove old modules, Aug 2022, Matthias Cuntz
+    * v4.5, use pyjams, remove old modules, Aug 2022, Matthias Cuntz
+    * v5.0, remove fgui and logtools, numpy docstrings, updated docu,
+      Oct 2022, Matthias Cuntz
 
 """
 # version, author
@@ -55,11 +55,7 @@ except ImportError:  # pragma: no cover
     __version__ = "0.0.0.dev0"
 __author__  = "Matthias Cuntz"
 
-from .fgui import directory_from_gui, directories_from_gui
-from .fgui import file_from_gui, files_from_gui
 from .gapfill import gapfill
 from .madspikes import madspikes
 from .nee2gpp import nee2gpp
 from .ustarfilter import ustarfilter
-
-from . import logtools

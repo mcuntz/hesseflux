@@ -92,9 +92,7 @@ Requirements
     * numpy_
     * scipy_
     * pandas_
-
-    ..
-       * pyjams_
+    * pyjams_
 
 
 License

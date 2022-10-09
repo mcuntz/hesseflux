@@ -45,15 +45,13 @@ import time as ptime
 import sys
 import configparser
 import os.path
-import datetime as dt
 import numpy as np
 import pandas as pd
 import pyjams as pj
 import hesseflux as hf
 
 
-#
-# Find first elements in names that begin with elements of starts
+# Find first elements in *names* that begin with elements of *starts*
 def _findfirststart(starts, names):
     """
     Find first elements in names that begin with elements of starts
@@ -97,7 +95,7 @@ if __name__ == '__main__':
     fill = config['POSTSWITCH'].getboolean('fill',      True)
     fluxerr = config['POSTSWITCH'].getboolean('fluxerr',   True)
     # input file
-    eufluxfile = config['POSTIO'].get('inputfile',  '')
+    inputfile = config['POSTIO'].get('inputfile',  '')
     timeformat = config['POSTIO'].get('timeformat', '%Y%m%d%H%M')
     sep = config['POSTIO'].get('sep',        ',')
     skiprows = config['POSTIO'].get('skiprows',   '')
@@ -129,15 +127,15 @@ if __name__ == '__main__':
     # Check call
 
     # Assert iterable
-    if ',' in eufluxfile:
-        eufluxfile = eufluxfile.split(',')
-        eufluxfile = [ ee.strip() for ee in eufluxfile ]
+    if ',' in inputfile:
+        inputfile = inputfile.split(',')
+        inputfile = [ ee.strip() for ee in inputfile ]
     else:
-        if eufluxfile:
-            eufluxfile = [eufluxfile]
+        if inputfile:
+            inputfile = [inputfile]
         else:
             try:
-                eufluxfile = hf.files_from_gui(
+                inputfile = pj.files_from_gui(
                     initialdir='.', title='europe-fluxdata.eu file(s)')
             except:
                 raise IOError("GUI for europe-fluxdata.eu file(s) failed.")
@@ -151,19 +149,19 @@ if __name__ == '__main__':
     # ----------------------------------------------------------------
     # Read input files into Pandas data frame and check variable availability
 
-    print('Read data ', eufluxfile)
+    print('Read data ', inputfile)
     t01 = ptime.time()
     # TIMESTAMP,TAU_1_1_1,H_1_1_1,LE_1_1_1,FC_1_1_1,...
     # 201901010030,0.0941,-11.0765,-9999.0000,-9999.0000,...
     # use lambda because of global var timeformat
-    parser = lambda date: dt.datetime.strptime(date, timeformat)
+    parser = lambda date: pd.to_datetime(date, format=timeformat)
 
-    infile = eufluxfile[0]
+    infile = inputfile[0]
     df = pd.read_csv(infile, sep=sep, skiprows=skiprows, parse_dates=[0],
                      date_parser=parser, index_col=0, header=0)
 
-    if len(eufluxfile) > 1:
-        for infile in eufluxfile[1:]:
+    if len(inputfile) > 1:
+        for infile in inputfile[1:]:
             df1 = pd.read_csv(infile, sep=sep, skiprows=skiprows,
                               parse_dates=[0], date_parser=parser, index_col=0,
                               header=0)
@@ -200,10 +198,12 @@ if __name__ == '__main__':
             raise ValueError('Cannot calculate VPD.')
         ta_id = hout[0]
         rh_id = hout[1]
+        # TA [K]
         if df[ta_id].max() < 100.:
             tk = df[ta_id] + 273.15
         else:
             tk = df[ta_id]
+        # rh [0-1]
         if df[rh_id].max() > 10.:
             rh = df[rh_id] / 100.
         else:
@@ -247,14 +247,12 @@ if __name__ == '__main__':
         # if available
         houtlier = ['H_', 'LE', 'FC',
                     'H_PI', 'LE_PI', 'NEE']
-        # houtlier = ['FC', 'NEE']
         hout = _findfirststart(houtlier, df.columns)
         print('  Using', hout)
-        # ToDo
-        #   - only one call to mad for all variables
         sflag = hf.madspikes(df[hout], flag=dff[hout], isday=isday,
                              undef=undef, nscan=nscan * ntday,
-                             nfill=nfill * ntday, z=z, deriv=deriv, plot=False)
+                             nfill=nfill * ntday, z=z, deriv=deriv,
+                             plot=False)
         for ii, hh in enumerate(hout):
             dff.loc[sflag[hh] == 2, hh] = 3
 
@@ -272,11 +270,12 @@ if __name__ == '__main__':
         t21 = ptime.time()
         hfilt = ['NEE', 'USTAR', 'TA_']
         hout = _findfirststart(hfilt, df.columns)
-        if len(hout) == 2:  # take FC if NEE not in input file
+        # take FC if NEE not in input file
+        if len(hout) == 2:
             hfilt = ['FC', 'USTAR', 'TA_']
             hout = _findfirststart(hfilt, df.columns)
-        estr = 'Could not find CO2 flux (NEE, FC), USTAR or TA in input file.'
-        assert len(hout) == 3, estr
+        assert len(hout) == 3, ('Could not find CO2 flux (NEE, FC),'
+                                ' USTAR or TA in input file.')
         hout = _findfirststart(hfilt, df.columns)
         print('  Using', hout)
         ffsave = dff[hout[0]].to_numpy()
@@ -291,8 +290,8 @@ if __name__ == '__main__':
         df = df.assign(USTAR_TEST_1_1_1=flag)
         dff = dff.assign(USTAR_TEST_1_1_1=np.zeros(df.shape[0], dtype=int))
         if applyustarflag:
-            # assume *_PI variables after raw variables, e.g. LE before LE_PI
-            # if available
+            # assume *_PI variables after raw variables,
+            # e.g. LE before LE_PI if available
             hustar = ['H_', 'LE', 'FC',
                       'H_PI', 'LE_PI', 'NEE']
             hout = _findfirststart(hustar, df.columns)
@@ -449,7 +448,7 @@ if __name__ == '__main__':
 
     if not outputfile:
         try:
-            outputdir = hf.directory_from_gui(initialdir='.',
+            outputdir = pj.directory_from_gui(initialdir='.',
                                               title='Output directory')
         except:
             raise IOError("GUI for output directory failed.")
