@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 """
-gapfill : Fills gaps of flux data from Eddy covariance measurements according
-          to Reichstein et al. (Global Change Biology, 2005) or estimate flux
-          uncertainties after Lasslop et al. (Biogeosciences, 2008).
+Fill gaps of flux data from Eddy covariance measurements or estimate flux
+uncertainties
 
 This module was written by Matthias Cuntz while at Department of
 Computational Hydrosystems, Helmholtz Centre for Environmental
@@ -10,19 +9,8 @@ Research - UFZ, Leipzig, Germany, and continued while at Institut
 National de Recherche pour l'Agriculture, l'Alimentation et
 l'Environnement (INRAE), Nancy, France.
 
-Copyright (c) 2012-2020 Matthias Cuntz - mc (at) macu (dot) de
-Released under the MIT License; see LICENSE file for details.
-
-* Written Mar 2012 by Matthias Cuntz - mc (at) macu (dot) de
-* Ported to Python 3, Feb 2013, Matthias Cuntz
-* Input data can be ND-array, Apr 2014, Matthias Cuntz
-* Bug in longestmarginalgap: was only working at time series edges, rename it
-  to longgap, Apr 2014, Matthias Cuntz
-* Keyword fullday, Apr 2014, Matthias Cuntz
-* Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz
-* Using numpy docstring format, May 2020, Matthias Cuntz
-* error estimates are undef by default, Jun 2021, Matthias Cuntz
-* mean of values for error estimates, Jun 2021, Matthias Cuntz
+:copyright: Copyright 2012-2022 Matthias Cuntz, see AUTHORS.rst for details.
+:license: MIT License, see LICENSE for details.
 
 .. moduleauthor:: Matthias Cuntz
 
@@ -30,6 +18,20 @@ The following functions are provided
 
 .. autosummary::
    gapfill
+
+History
+    * Written Mar 2012 by Matthias Cuntz - mc (at) macu (dot) de
+    * Ported to Python 3, Feb 2013, Matthias Cuntz
+    * Input data can be ND-array, Apr 2014, Matthias Cuntz
+    * Bug in longestmarginalgap: was only working at time series edges, rename
+      it to longgap, Apr 2014, Matthias Cuntz
+    * Keyword fullday, Apr 2014, Matthias Cuntz
+    * Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz
+    * Using numpy docstring format, May 2020, Matthias Cuntz
+    * Error estimates are undef by default, Jun 2021, Matthias Cuntz
+    * Mean of values for error estimates, Jun 2021, Matthias Cuntz
+    * Improved flake8 and numpy docstring, Oct 2021, Matthias Cuntz
+
 """
 from __future__ import division, absolute_import, print_function
 import numpy as np
@@ -45,6 +47,9 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
             longgap=60, fullday=False, undef=-9999, ddof=1,
             err=False, errmean=False, verbose=0):
     """
+    Fill gaps of flux data from Eddy covariance measurements
+    or estimate flux uncertainties
+
     Fills gaps in flux data from Eddy covariance measurements with
     Marginal Distribution Sampling (MDS) according to Reichstein et al.
     (Global Change Biology, 2005).
@@ -60,70 +65,71 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
     Parameters
     ----------
     dfin : pandas.Dataframe or numpy.array
-        time series of fluxes to fill as well as
-        meteorological variables incoming short-wave radiation,
-        air temperature, air vapour pressure deficit.
+        time series of fluxes to fill as well as meteorological variables:
+        incoming short-wave radiation, air temperature, and air vapour pressure
+        deficit. *dfin* can be a pandas.Dataframe with the columns
 
-        `dfin` can be a pandas.Dataframe with the columns
-        'SW_IN' (or starting with 'SW_IN') for incoming short-wave radiation [W m-2]
-        'TA'    (or starting with 'TA\_') for air temperature [deg C]
-        'VPD'   (or starting with 'VPD') for air vapour deficit [hPa]
-        and columns with ecosystem fluxes with possible missing values (gaps).
+           'SW_IN' (or starting with 'SW_IN') for incoming short-wave
+           radiation [W m-2]
+
+           'TA'    (or starting with `TA_`) for air temperature [deg C]
+
+           'VPD'   (or starting with 'VPD') for air vapour deficit [hPa]
+
+           as well as columns with ecosystem fluxes with missing values
+           (gaps).
+
         The index is taken as date variable.
 
-        `dfin` can also me a numpy array with the same columns. In this case
-        `colhead`, `date`, and possibly `dateformat` must be given.
+        *dfin* can also me a numpy array with the same columns. In this case
+        *colhead*, *date*, and possibly *dateformat* must be given.
     flag : pandas.Dataframe or numpy.array, optional
-        flag Dataframe or array has the same shape as dfin. Non-zero values in
-        `flag` will be treated as missing values in `dfin`.
-
-        `flag` must follow the same rules as `dfin` if pandas.Dataframe.
-
-        If `flag` is numpy array, `df.columns.values` will be used as
-        column heads and the index of `dfin` will be copied to `flag`.
+        Dataframe or array has the same shape as dfin.
+        Non-zero values in *flag* will be treated as missing values in *dfin*.
+        *flag* must follow the same rules as *dfin* if pandas.Dataframe.
+        If *flag* is numpy array, *df.columns.values* will be used as column
+        heads and the index of *dfin* will be copied to *flag*.
     date : array_like of string, optional
-        1D-array_like of calendar dates in format given in `timeformat`.
-
-        `date` must be given if `dfin` is numpy array.
+        1D-array_like of calendar dates in format given in *timeformat*.
+        *date* must be given if *dfin* is numpy array.
     timeformat : str, optional
-        Format of dates in `date`, if given (default: '%Y-%m-%d %H:%M:%S').
+        Format of dates in *date*, if given (default: '%Y-%m-%d %H:%M:%S').
         See strftime documentation of Python's datetime module:
         https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
     colhed : array_like of str, optional
-        column names if `dfin` is numpy array. See `dfin` for mandatory
+        column names if *dfin* is numpy array. See *dfin* for mandatory
         column names.
     sw_dev : float, optional
         threshold for maximum deviation of global radiation (default: 50)
     ta_dev : float, optional
         threshold for maximum deviation of air Temperature (default: 2.5)
     vpd_dev : float, optional
-        threshold for maximum deviation of vpd (default: 5.)
+        threshold for maximum deviation of vpd (default: 5)
     longgap : int, optional
-        avoid extraploation into a gap longer than `longgap` days (default: 60)
+        avoid extrapolation into a gap longer than *longgap* days (default: 60)
     fullday : bool, optional
         True: move beginning of large gap to start of next day and move end of
-              large gap to end of last day (default: False)
+        large gap to end of last day (default: False)
     undef : float, optional
-        values having `undef` value are treated as missing values in `dfin`
-        (default: -9999)
-
-        np.nan is not allowed (not working).
+        values having *undef* value are treated as missing values in *dfin*
+        (default: -9999).
+        np.nan is not allowed as *undef* (not working).
     ddof : int, optional
         Delta Degrees of Freedom. The divisor used in calculation of standard
-        deviation for error estimates (`err=True`) is ``N-ddof``, where ``N``
+        deviation for error estimates (`err=True`) is `N-ddof`, where *N*
         represents the number of elements (default: 1).
     err : bool, optional
         True: fill every data point with standard deviation instead of mean,
         i.e. used for error generation as in Lasslop et al. (Biogeosci 2008)
         (default: False)
     errmean : bool, optional
-        True: also return mean value of values for error estimate
+        True: also return mean value of values for error estimates
         `if err == True` (default: False)
     shape : bool or tuple, optional
-        True: output have the same shape as input data if `dfin` is
+        True: output have the same shape as input data if *dfin* is
         numpy array; if a tuple is given, then this tuple is used to reshape.
 
-        False: outputs are 1D arrays if `dfin` is numpy array (default: False).
+        False: outputs are 1D arrays if *dfin* is numpy array (default: False).
     verbose : int, optional
         Verbosity level 0-3 (default: 0). 0 is no output; 3 is very verbose.
 
@@ -136,13 +142,13 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
 
         `if err and errmean:` err_estimate, mean_estimate
 
-        pandas.Dataframe(s) will be returned if `dfin` was Dataframe.
+        pandas.Dataframe(s) will be returned if *dfin* was Dataframe.
 
-        numpy array(s) will be returned if `dfin` was numpy array.
+        numpy array(s) will be returned if *dfin* was numpy array.
 
     Notes
     -----
-    If `err`, there is no error estimate if there are no meteorological
+    If *err*, there is no error estimate if there are no meteorological
     conditions in the vicinity of the data point (first cycle of
     Reichstein et al. GCB 2005).
 
@@ -164,28 +170,32 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
     >>> from fread import fread
     >>> from date2dec import date2dec
     >>> from dec2date import dec2date
+
+    data
+
     >>> ifile = 'test_gapfill.csv' # Tharandt 1998 = Online tool example file
     >>> undef = -9999.
-    >>> # data
     >>> dat   = fread(ifile, skip=2, transpose=True)
     >>> ndat  = dat.shape[1]
     >>> head  = fread(ifile, skip=2, header=True)
     >>> head1 = head[0]
-    >>> # colhead
     >>> idx   = []
     >>> for i in head1:
     ...     if i in ['NEE', 'LE', 'H', 'Rg', 'Tair', 'VPD']:
     ...         idx.append(head1.index(i))
     >>> colhead = ['FC', 'LE', 'H', 'SW_IN', 'TA', 'VPD']
-    >>> # data
     >>> dfin = dat[idx,:]
-    >>> # flag
+
+    flag
+
     >>> flag = np.where(dfin == undef, 2, 0)
     >>> flag[0, :] = dat[head1.index('qcNEE'), :].astype(int)
     >>> flag[1, :] = dat[head1.index('qcLE'), :].astype(int)
     >>> flag[2, :] = dat[head1.index('qcH'), :].astype(int)
     >>> flag[np.where(flag==1)] = 0
-    >>> # date
+
+    date
+
     >>> day_id  = head1.index('Day')
     >>> hour_id = head1.index('Hour')
     >>> ntime   = dat.shape[1]
@@ -195,7 +205,9 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
     >>> y0    = date2dec(yr=year[0], mo=1, dy=1, hr=hh, mi=mn)
     >>> jdate = y0 + dat[day_id, :]
     >>> adate = dec2date(jdate, eng=True)
-    >>> # fill
+
+    fill missing data
+
     >>> dat_f, flag_f = gapfill(dfin, flag=flag, date=adate, colhead=colhead,
     ...                         undef=undef, verbose=0)
     >>> print('{:d} {:d} {:d} {:d} {:d} {:d}'.format(*flag_f[0, 11006:11012]))
@@ -204,7 +216,8 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
     ...       *dat_f[0, 11006:11012]))
     -18.68 -15.63 -19.61 -15.54 -12.40 -15.33
 
-    >>> # 1D err
+    1D err
+
     >>> dat_std = gapfill(dfin, flag=flag, date=adate, colhead=colhead,
     ...                   undef=undef, verbose=0, err=True)
     >>> print('{:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}'.format(
@@ -217,7 +230,8 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
     >>> print('{:d} {:d} {:d} {:d} {:d} {:d}'.format(*dat_err[11006:11012]))
     28 83 33 -1 -1 -1
 
-    >>> # 1D err + mean
+    1D err + mean
+
     >>> dat_std, dat_mean = gapfill(dfin, flag=flag, date=adate,
     ...                             colhead=colhead, undef=undef, verbose=0,
     ...                             err=True, errmean=True)
@@ -228,22 +242,6 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
     ...       *dat_mean[0, 11006:11012]))
     -18.677 -15.633 -19.610 -9999.000 -9999.000 -9999.000
 
-
-    History
-    -------
-    Written,  Matthias Cuntz, Mar 2012 - modified gap_filling.py
-    Modified, Matthias Cuntz, Feb 2013 - ported to Python 3
-              Matthias Cuntz, Apr 2014 - assert
-                                       - data ND-array
-                                       - longestmarginalgap was only working at
-                                         beginning and end of time series
-                                         renamed to longgap
-                                       - fullday
-              Matthias Cuntz, Apr 2020 - Input can be pandas Dataframe or
-                                         numpy array(s)
-              Matthias Cuntz, May 2020 - numpy docstring format
-              Matthias Cuntz, Jun 2021 - prefill error estimates with undef
-                                       - errmean
     """
     # Check input
     # numpy or panda
@@ -284,7 +282,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
                 fistrans = True
                 ff = pd.DataFrame(flag.T, columns=df.columns.values)
             else:
-                estr  = 'flag must have same shape as data array. data:'
+                estr = 'flag must have same shape as data array. data:'
                 estr += ' ({:d},{:d}); flag: ({:d},{:d})'.format(
                     dfin.shape[0], dfin.shape[1], flag.shape[0], flag.shape[1])
                 raise ValueError(estr)
@@ -299,10 +297,10 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
         fisnumpy = isnumpy
         fistrans = istrans
         # flags: 0: good; 1: input flagged; 2: output flagged
-        ff              = df.copy(deep=True).astype(int)
-        ff[:]           = 0
+        ff = df.copy(deep=True).astype(int)
+        ff[:] = 0
         ff[df == undef] = 1
-        ff[df.isna()]   = 1
+        ff[df.isna()] = 1
 
     # Data and flags
     sw_id = ''
@@ -343,15 +341,15 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
     if err:
         ffill = df.copy(deep=True)
     else:
-        ffill    = ff.copy(deep=True)
+        ffill = ff.copy(deep=True)
         ffill[:] = 0
 
     # Times
     # number of data points per week; basic factor of the time window
     week    = pd.Timedelta('1 W') / (df.index[1] - df.index[0])
     nperday = week // 7
-    hour    = df.index.hour + df.index.minute/60.
-    day     = (df.index.to_julian_date()-0.5).astype(int)
+    hour    = df.index.hour + df.index.minute / 60.
+    day     = (df.index.to_julian_date() - 0.5).astype(int)
 
     # Filling variables
     ndata = len(df)
@@ -359,9 +357,9 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
 
         if hcol.startswith('SW_IN_') or (hcol == 'SW_IN'):
             continue
-        if hcol.startswith('TA_')    or (hcol == 'TA'):
+        if hcol.startswith('TA_') or (hcol == 'TA'):
             continue
-        if hcol.startswith('VPD_')   or (hcol == 'VPD'):
+        if hcol.startswith('VPD_') or (hcol == 'VPD'):
             continue
 
         if verbose > 0:
@@ -386,7 +384,7 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
         largegap   = np.zeros(ndata, dtype=bool)
         firstvalid = np.amin(np.where(dflag == 0)[0])
         lastvalid  = np.amax(np.where(dflag == 0)[0])
-        nn         = int(nperday*longgap)
+        nn         = int(nperday * longgap)
         if firstvalid > nn:
             if verbose > 1:
                 print('    Large margin at beginning: ', firstvalid)

@@ -36,27 +36,21 @@
             
   <div class="section" id="module-hesseflux.ustarfilter">
 <span id="ustarfilter"></span><h1>ustarfilter<a class="headerlink" href="#module-hesseflux.ustarfilter" title="Permalink to this heading">¶</a></h1>
-<dl class="simple">
-<dt>ustarfilter<span class="classifier">Filter Eddy Covariance data with friction velocity</span></dt><dd><p>following Papale et al. (Biogeosciences, 2006).</p>
-</dd>
-</dl>
+<p>Filter Eddy Covariance data with friction velocity</p>
 <p>This module was original written by Tino Rau and Matthias Cuntz, and
 maintained by Arndt Piayda while at Department of Computational
 Hydrosystems, Helmholtz Centre for Environmental Research - UFZ,
 Leipzig, Germany, and continued by Matthias Cuntz while at Institut
 National de Recherche pour l’Agriculture, l’Alimentation et
 l’Environnement (INRAE), Nancy, France.</p>
-<p>Copyright (c) 2008-2020 Matthias Cuntz - mc (at) macu (dot) de
-Released under the MIT License; see LICENSE file for details.</p>
-<ul class="simple">
-<li><p>Written 2008 by Tino Rau and Matthias Cuntz - mc (at) macu (dot) de</p></li>
-<li><p>Maintained by Arndt Piayda since Aug 2014.</p></li>
-<li><p>Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz</p></li>
-<li><p>Using numpy docstring format, May 2020, Matthias Cuntz</p></li>
-<li><p>No bootstrap by default, Jul 2020, Matthias Cuntz</p></li>
-<li><p>Optionally return thresholds and flags for each season, Jul 2020, Matthias Cuntz</p></li>
-<li><p>Bugfix if no threshold found, and for multi-year flags, Jul 2020, Matthias Cuntz</p></li>
-</ul>
+<dl class="field-list simple">
+<dt class="field-odd">copyright</dt>
+<dd class="field-odd"><p>Copyright 2008-2022 Matthias Cuntz, see AUTHORS.rst for details.</p>
+</dd>
+<dt class="field-even">license</dt>
+<dd class="field-even"><p>MIT License, see LICENSE for details.</p>
+</dd>
+</dl>
 <p>The following functions are provided</p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -65,68 +59,91 @@ Released under the MIT License; see LICENSE file for details.</p>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.ustarfilter.ustarfilter" title="hesseflux.ustarfilter.ustarfilter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ustarfilter</span></code></a>(dfin[, flag, isday, date, ...])</p></td>
-<td><p>Flag Eddy Covariance data using a threshold of friction velocity (u*) below which u* correlates with a reduction in CO2 flux.</p></td>
+<td><p>Filter Eddy Covariance data with friction velocity</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="simple">
+<dt>History</dt><dd><ul class="simple">
+<li><p>Written 2008 by Tino Rau and Matthias Cuntz - mc (at) macu (dot) de</p></li>
+<li><p>Maintained by Arndt Piayda since Aug 2014.</p></li>
+<li><p>Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz</p></li>
+<li><p>Using numpy docstring format, May 2020, Matthias Cuntz</p></li>
+<li><p>No bootstrap by default, Jul 2020, Matthias Cuntz</p></li>
+<li><p>Optionally return thresholds and flags for each season,
+Jul 2020, Matthias Cuntz</p></li>
+<li><p>Bugfix if no threshold found, and for multi-year flags,
+Jul 2020, Matthias Cuntz</p></li>
+<li><p>Improved flake8 and numpy docstring, Oct 2021, Matthias Cuntz</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.ustarfilter.ustarfilter">
 <span class="sig-name descname"><span class="pre">ustarfilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isday</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeformat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%Y-%m-%d</span> <span class="pre">%H:%M:%S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colhead</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ustarmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nboot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nmon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntaclasses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrcheck</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nustarclasses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plateaucrit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swthr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/ustarfilter.html#ustarfilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.ustarfilter.ustarfilter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flag Eddy Covariance data using a threshold of friction velocity (u*)
-below which u* correlates with a reduction in CO2 flux. The algorithm
+<dd><p>Filter Eddy Covariance data with friction velocity</p>
+<p>Flag Eddy Covariance data using a threshold of friction velocity (ustar)
+below which ustar correlates with a reduction in CO2 flux. The algorithm
 follows the method presented in Papale et al. (Biogeosciences, 2006).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dfin</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em>) – <p>time series of CO2 fluxes and friction velocity as well as air temperature.</p>
-<p><cite>dfin</cite> can be a pandas.Dataframe with the columns
-‘FC’ or ‘NEE’ (or starting with ‘FC_’ or ‘NEE_’) for observed CO2 flux [umol(CO2) m-2 s-1]
-‘USTAR’ (or starting with ‘USTAR’) for friction velocity [m s-1]
-‘TA’    (or starting with ‘TA_’) for air temperature [deg C]
-The index is taken as date variable.</p>
-<p><cite>dfin</cite> can also me a numpy array with the same columns. In this case
-<cite>colhead</cite>, <cite>date</cite>, and possibly <cite>dateformat</cite> must be given.</p>
+<li><p><strong>dfin</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em>) – <p>time series of CO2 fluxes and friction velocity as well as air
+temperature. <cite>dfin</cite> can be a pandas.Dataframe with the columns</p>
+<blockquote>
+<div><p>’FC’ or ‘NEE’ (or starting with <cite>FC_</cite> or <cite>NEE_</cite>) for observed
+CO2 flux [umol(CO2) m-2 s-1]</p>
+<p>’USTAR’ (or starting with ‘USTAR’) for friction velocity [m s-1]</p>
+<p>’TA’    (or starting with <cite>TA_</cite>) for air temperature [deg C]</p>
+</div></blockquote>
+<p>The index is taken as date variable.</p>
+<p><em>dfin</em> can also me a numpy array with the same columns. In this case
+<em>colhead</em>, <em>date</em>, and possibly <em>dateformat</em> must be given.</p>
 </p></li>
-<li><p><strong>flag</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em><em>, </em><em>optional</em>) – <p>flag Dataframe or array has the same shape as dfin. Non-zero values in
-<cite>flag</cite> will be treated as missing values in <cite>dfin</cite>.</p>
-<p><cite>flag</cite> must follow the same rules as <cite>dfin</cite> if pandas.Dataframe.</p>
-<p>If <cite>flag</cite> is numpy array, <cite>df.columns.values</cite> will be used as column heads
-and the index of <cite>dfin</cite> will be copied to <cite>flag</cite>.</p>
-</p></li>
-<li><p><strong>isday</strong> (<em>array_like of bool</em><em>, </em><em>optional</em>) – <p>True when it is day, False when night. Must have the same length as dfin.shape[0].</p>
-<p>If <cite>isday</cite> is not given, <cite>dfin</cite> must have a column with head ‘SW_IN’ or
-starting with ‘SW_IN’. <cite>isday</cite> will then be <cite>dfin[‘SW_IN’] &gt; swthr</cite>.</p>
-</p></li>
-<li><p><strong>date</strong> (<em>array_like of string</em><em>, </em><em>optional</em>) – <p>1D-array_like of calendar dates in format given in <cite>timeformat</cite>.</p>
-<p><cite>date</cite> must be given if <cite>dfin</cite> is numpy array.</p>
-</p></li>
-<li><p><strong>timeformat</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Format of dates in <cite>date</cite>, if given (default: ‘%Y-%m-%d %H:%M:%S’).
+<li><p><strong>flag</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em><em>, </em><em>optional</em>) – Dataframe or array has the same shape as <em>dfin</em>. Non-zero values in
+<em>flag</em> will be treated as missing values in <em>dfin</em>.
+<em>flag</em> must follow the same rules as <em>dfin</em> if pandas.Dataframe.
+If <em>flag</em> is numpy array, <em>df.columns.values</em> will be used as column
+heads and the index of <em>dfin</em> will be copied to <em>flag</em>.</p></li>
+<li><p><strong>isday</strong> (<em>array_like of bool</em><em>, </em><em>optional</em>) – True when it is day, False when night. Must have the same length as
+<cite>dfin.shape[0]</cite>.
+If <em>isday</em> is not given, <em>dfin</em> must have a column with head ‘SW_IN’ or
+starting with ‘SW_IN’. <em>isday</em> will then be <cite>dfin[‘SW_IN’] &gt; swthr</cite>.</p></li>
+<li><p><strong>date</strong> (<em>array_like of string</em><em>, </em><em>optional</em>) – 1D-array_like of calendar dates in format given in <cite>timeformat</cite>.
+<em>date</em> must be given if <em>dfin</em> is numpy array.</p></li>
+<li><p><strong>timeformat</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Format of dates in <em>date</em>, if given (default: ‘%Y-%m-%d %H:%M:%S’).
 See strftime documentation of Python’s datetime module:
 <a class="reference external" href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior">https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior</a></p></li>
-<li><p><strong>colhead</strong> (<em>array_like of str</em><em>, </em><em>optional</em>) – column names if <cite>dfin</cite> is numpy array. See <cite>dfin</cite> for mandatory column names.</p></li>
-<li><p><strong>ustarmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – <p>minimum ustar threshold (default: 0.01)</p>
-<p>Papale et al. (Biogeosciences, 2006) take 0.1 for forest ant 0.01 otherwise.</p>
-</p></li>
-<li><p><strong>nboot</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – number of boot straps for estimate of confidence interval of u* threshold (default: 1)</p></li>
-<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – values having <cite>undef</cite> value are treated as missing values in <cite>dfin</cite> (default: -9999)</p></li>
-<li><p><strong>plot</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – True: data and u* thresholds are plotted into ustarfilter.pdf (default: False)</p></li>
-<li><p><strong>seasonout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – True: return u* thresholds for each season (default: False)</p></li>
-<li><p><strong>nmon</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Number of month to combine for a season (default: 3).</p></li>
-<li><p><strong>ntaclasses</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Number of temperature classes per <cite>nmon</cite> months (default: 7).</p></li>
-<li><p><strong>corrcheck</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Skip temperature class if absolute of correlation coefficient between air temperature
-and ustar is greater equal <cite>corrcheck</cite> (default: 0.5).</p></li>
-<li><p><strong>nustarclasses</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Number of u* classes per temperature class (default: 20).</p></li>
-<li><p><strong>plateaucrit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – The u* threshold is the smallest u* class that has an average CO2 flux,
-which is higher than <cite>plateaucrit</cite> times the mean CO2 flux of all u* classes
-above this class (default: 0.95).</p></li>
-<li><p><strong>swthr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Threshold to determine daytime from incoming shortwave radiation if <cite>isday</cite> not given (default: 10).</p></li>
+<li><p><strong>colhead</strong> (<em>array_like of str</em><em>, </em><em>optional</em>) – column names if <em>dfin</em> is numpy array. See <em>dfin</em> for mandatory column
+names.</p></li>
+<li><p><strong>ustarmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – minimum ustar threshold (default: 0.01).
+Papale et al. (Biogeosciences, 2006) take 0.1 for forest and 0.01
+otherwise.</p></li>
+<li><p><strong>nboot</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – number of boot straps for estimate of confidence interval of ustar
+threshold (default: 1)</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – values having <em>undef</em> value are treated as missing values in <em>dfin</em>
+(default: -9999)</p></li>
+<li><p><strong>plot</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – True: data and ustar thresholds are plotted into ustarfilter.pdf
+(default: False)</p></li>
+<li><p><strong>seasonout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – True: return ustar thresholds for each season (default: False)</p></li>
+<li><p><strong>nmon</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Number of months to combine for a season (default: 3).</p></li>
+<li><p><strong>ntaclasses</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Number of temperature classes per <em>nmon</em> months (default: 7).</p></li>
+<li><p><strong>corrcheck</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Skip temperature class if absolute of correlation coefficient between
+air temperature and ustar is greater equal <em>corrcheck</em> (default: 0.5).</p></li>
+<li><p><strong>nustarclasses</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Number of ustar classes per temperature class (default: 20).</p></li>
+<li><p><strong>plateaucrit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – The ustar threshold is the smallest ustar class that has an average CO2
+flux, which is higher than <em>plateaucrit</em> times the mean CO2 flux of all
+ustar classes above this class (default: 0.95).</p></li>
+<li><p><strong>swthr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Threshold to determine daytime from incoming shortwave radiation if
+<em>isday</em> not given (default: 10).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><p>numpy array with 5, 50 and 95 percentile of u* thresholds,
-flags: 0 everywhere except set to 2 where u* &lt; u*-threshold.</p>
-<p>Either maximum threshold of all seasons or thresholds for each season, i.e.
-threshold array is <cite>array(3,nseason)</cite> if <cite>seasonout</cite> and <cite>array(3)</cite> otherwise.</p>
+<dd class="field-even"><p><p>numpy array with 5, 50 and 95 percentiles of ustar thresholds,</p>
+<p>flags: 0 everywhere except set to 2 where ustar &lt; ustar-threshold.
+Either maximum threshold of all seasons or thresholds for each season,
+i.e. threshold array is <cite>array(3, nseason)</cite> if <em>seasonout</em> and
+<cite>array(3)</cite> otherwise.</p>
 </p>
 </dd>
 <dt class="field-odd">Return type</dt>

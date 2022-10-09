@@ -36,22 +36,21 @@
             
   <div class="section" id="module-hesseflux.madspikes">
 <span id="madspikes"></span><h1>madspikes<a class="headerlink" href="#module-hesseflux.madspikes" title="Permalink to this heading">¶</a></h1>
-<p>madspikes : Spike detection for using a moving median absolute difference filter.</p>
+<p>Spike detection using a moving median absolute difference filter</p>
 <p>This module was original written by Tino Rau and Matthias Cuntz, and
 maintained by Arndt Piayda while at Department of Computational
 Hydrosystems, Helmholtz Centre for Environmental Research - UFZ,
 Leipzig, Germany, and continued by Matthias Cuntz while at Institut
 National de Recherche pour l’Agriculture, l’Alimentation et
 l’Environnement (INRAE), Nancy, France.</p>
-<p>Copyright (c) 2008-2020 Matthias Cuntz - mc (at) macu (dot) de
-Released under the MIT License; see LICENSE file for details.</p>
-<ul class="simple">
-<li><p>Written 2008 by Tino Rau and Matthias Cuntz - mc (at) macu (dot) de</p></li>
-<li><p>Maintained by Arndt Piayda since Aug 2014.</p></li>
-<li><p>Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz</p></li>
-<li><p>Removed iteration, Apr 2020, Matthias Cuntz</p></li>
-<li><p>Using numpy docstring format, May 2020, Matthias Cuntz</p></li>
-</ul>
+<dl class="field-list simple">
+<dt class="field-odd">copyright</dt>
+<dd class="field-odd"><p>Copyright 2008-2022 Matthias Cuntz, see AUTHORS.rst for details.</p>
+</dd>
+<dt class="field-even">license</dt>
+<dd class="field-even"><p>MIT License, see LICENSE for details.</p>
+</dd>
+</dl>
 <p>The following functions are provided</p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -60,61 +59,66 @@ Released under the MIT License; see LICENSE file for details.</p>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.madspikes.madspikes" title="hesseflux.madspikes.madspikes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">madspikes</span></code></a>(dfin[, flag, isday, colhead, ...])</p></td>
-<td><p>Spike detection for using a moving median absolute difference filter.</p></td>
+<td><p>Spike detection using a moving median absolute difference filter</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="simple">
+<dt>History</dt><dd><ul class="simple">
+<li><p>Written 2008 by Tino Rau and Matthias Cuntz - mc (at) macu (dot) de</p></li>
+<li><p>Maintained by Arndt Piayda since Aug 2014.</p></li>
+<li><p>Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz</p></li>
+<li><p>Removed iteration, Apr 2020, Matthias Cuntz</p></li>
+<li><p>Using numpy docstring format, May 2020, Matthias Cuntz</p></li>
+<li><p>Improved flake8 and numpy docstring, Oct 2021, Matthias Cuntz</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.madspikes.madspikes">
 <span class="sig-name descname"><span class="pre">madspikes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isday</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colhead</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nscan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">720</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">48</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deriv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swthr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/madspikes.html#madspikes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.madspikes.madspikes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Spike detection for using a moving median absolute difference filter.
-Used with Eddy vovariance data in Papale et al. (Biogeosciences, 2006).</p>
+<dd><p>Spike detection using a moving median absolute difference filter</p>
+<p>Used with Eddy vovariance data in Papale et al. (Biogeosciences, 2006).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dfin</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em>) – <p>time series of data where spike detection with MAD should be applied.</p>
-<p><cite>dfin</cite> can be a pandas.Dataframe.</p>
-<p><cite>dfin</cite> can also me a numpy array. In this case <cite>colhead</cite> must be given.
-MAD will be applied along axis=0, i.e. on each column of axis=1.</p>
-</p></li>
-<li><p><strong>flag</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em><em>, </em><em>optional</em>) – <p>flag Dataframe or array has the same shape as dfin. Non-zero values in
-<cite>flag</cite> will be treated as missing values in <cite>dfin</cite>.</p>
-<p>If <cite>flag</cite> is numpy array, <cite>df.columns.values</cite> will be used as column heads.</p>
-</p></li>
-<li><p><strong>isday</strong> (<em>array_like of bool</em><em>, </em><em>optional</em>) – <p>True when it is day, False when night. Must have the same length as dfin.shape[0].</p>
-<p>If <cite>isday</cite> is not given, <cite>dfin</cite> must have a column with head ‘SW_IN’ or
-starting with ‘SW_IN’. <cite>isday</cite> will then be <cite>dfin[‘SW_IN’] &gt; swthr</cite>.</p>
-</p></li>
-<li><p><strong>colhed</strong> (<em>array_like of str</em><em>, </em><em>optional</em>) – column names if <cite>dfin</cite> is numpy array.</p></li>
-<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – <p>values having <cite>undef</cite> value are treated as missing values in <cite>dfin</cite> (default: -9999)</p>
-<p>np.nan is not allowed (working).</p>
-</p></li>
+<li><p><strong>dfin</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em>) – time series of data where spike detection with MAD should be applied.
+<em>dfin</em> can be a pandas.Dataframe.
+<em>dfin</em> can also me a numpy array. In this case <em>colhead</em> must be given.
+MAD will be applied along axis=0, i.e. on each column of axis=1.</p></li>
+<li><p><strong>flag</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em><em>, </em><em>optional</em>) – Dataframe or array has the same shape as <em>dfin</em>. Non-zero values in
+<em>flag</em> will be treated as missing values in <em>dfin</em>.
+If <em>flag</em> is numpy array, <em>df.columns.values</em> will be used as column
+heads.</p></li>
+<li><p><strong>isday</strong> (<em>array_like of bool</em><em>, </em><em>optional</em>) – True when it is day, False when night. Must have the same length as
+<cite>dfin.shape[0]</cite>. If <em>isday</em> is not given, <em>dfin</em> must have a column
+with head ‘SW_IN’ or starting with ‘SW_IN’. <em>isday</em> will then be
+<cite>dfin[‘SW_IN’] &gt; swthr</cite>.</p></li>
+<li><p><strong>colhed</strong> (<em>array_like of str</em><em>, </em><em>optional</em>) – column names if <em>dfin</em> is numpy array.</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – values having <em>undef</em> value are treated as missing values in <em>dfin</em>
+(default: -9999). np.nan as <em>undef</em> is not allowed (not working).</p></li>
 <li><p><strong>nscan</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – size of moving window to calculate mad in time steps (default: 15*48)</p></li>
-<li><p><strong>nfill</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – <p>step size of moving window to calculate mad in time steps (default: 1*48)</p>
-<p>mad will be calculated in <cite>nscan</cite> time window. Resulting mask will be applied
-only in <cite>nfill</cite> window in the middle of the <cite>nscan</cite> window. Then <cite>nscan</cite> window
-will be moved by <cite>nfill</cite> time steps.</p>
-</p></li>
-<li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Input is allowed to deviate maximum <cite>z</cite> standard deviations from the median (default: 7)</p></li>
+<li><p><strong>nfill</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – step size of moving window to calculate mad in time steps
+(default: 1*48). MAD will be calculated in <em>nscan</em> time window.
+Resulting mask will be applied only in <em>nfill</em> window in the middle
+of the <em>nscan</em> window. Then <em>nscan</em> window will be moved by <em>nfill</em>
+time steps.</p></li>
+<li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Input is allowed to deviate maximum <em>z</em> standard deviations from the
+median (default: 7)</p></li>
 <li><p><strong>deriv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – <p>0: Act on raw input.</p>
 <p>1: Use first derivatives.</p>
 <p>2: Use 2nd derivatives (default).</p>
 </p></li>
-<li><p><strong>swthr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Threshold to determine daytime from incoming shortwave radiation if <cite>isday</cite> not given (default: 10).</p></li>
+<li><p><strong>swthr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Threshold to determine daytime from incoming shortwave radiation if
+<em>isday</em> not given (default: 10).</p></li>
 <li><p><strong>plot</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – True: data and spikes are plotted into madspikes.pdf (default: False).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><em>pandas.Dataframe or numpy array</em> – flags, 0 everywhere except detected spikes set to 2.</p></li>
-<li><p><em>History</em></p></li>
-<li><p><em>——-</em></p></li>
-<li><p><em>Written,    Matthias Cuntz &amp; Tino Rau, 2008</em></p></li>
-<li><p><em>Maintained, Arndt Piayda,   Aug 2014</em></p></li>
-<li><p><em>Modified,   Matthias Cuntz, Apr 2020 - input can be pandas Dataframe or numpy array(s)</em> –                          - removed iteration
-Matthias Cuntz, May 2020 - numpy docstring format</p></li>
-</ul>
-</p>
+<dd class="field-even"><p>flags, 0 everywhere except detected spikes set to 2</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.Dataframe or numpy array</p>
 </dd>
 </dl>
 </dd></dl>

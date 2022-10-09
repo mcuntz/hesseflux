@@ -36,30 +36,21 @@
             
   <div class="section" id="module-hesseflux.gapfill">
 <span id="gapfill"></span><h1>gapfill<a class="headerlink" href="#module-hesseflux.gapfill" title="Permalink to this heading">¶</a></h1>
-<dl class="simple">
-<dt>gapfill<span class="classifier">Fills gaps of flux data from Eddy covariance measurements according</span></dt><dd><p>to Reichstein et al. (Global Change Biology, 2005) or estimate flux
-uncertainties after Lasslop et al. (Biogeosciences, 2008).</p>
-</dd>
-</dl>
+<p>Fill gaps of flux data from Eddy covariance measurements or estimate flux
+uncertainties</p>
 <p>This module was written by Matthias Cuntz while at Department of
 Computational Hydrosystems, Helmholtz Centre for Environmental
 Research - UFZ, Leipzig, Germany, and continued while at Institut
 National de Recherche pour l’Agriculture, l’Alimentation et
 l’Environnement (INRAE), Nancy, France.</p>
-<p>Copyright (c) 2012-2020 Matthias Cuntz - mc (at) macu (dot) de
-Released under the MIT License; see LICENSE file for details.</p>
-<ul class="simple">
-<li><p>Written Mar 2012 by Matthias Cuntz - mc (at) macu (dot) de</p></li>
-<li><p>Ported to Python 3, Feb 2013, Matthias Cuntz</p></li>
-<li><p>Input data can be ND-array, Apr 2014, Matthias Cuntz</p></li>
-<li><p>Bug in longestmarginalgap: was only working at time series edges, rename it
-to longgap, Apr 2014, Matthias Cuntz</p></li>
-<li><p>Keyword fullday, Apr 2014, Matthias Cuntz</p></li>
-<li><p>Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz</p></li>
-<li><p>Using numpy docstring format, May 2020, Matthias Cuntz</p></li>
-<li><p>error estimates are undef by default, Jun 2021, Matthias Cuntz</p></li>
-<li><p>mean of values for error estimates, Jun 2021, Matthias Cuntz</p></li>
-</ul>
+<dl class="field-list simple">
+<dt class="field-odd">copyright</dt>
+<dd class="field-odd"><p>Copyright 2012-2022 Matthias Cuntz, see AUTHORS.rst for details.</p>
+</dd>
+<dt class="field-even">license</dt>
+<dd class="field-even"><p>MIT License, see LICENSE for details.</p>
+</dd>
+</dl>
 <p>The following functions are provided</p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -68,14 +59,32 @@ to longgap, Apr 2014, Matthias Cuntz</p></li>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#hesseflux.gapfill.gapfill" title="hesseflux.gapfill.gapfill"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gapfill</span></code></a>(dfin[, flag, date, timeformat, ...])</p></td>
-<td><p>Fills gaps in flux data from Eddy covariance measurements with Marginal Distribution Sampling (MDS) according to Reichstein et al. (Global Change Biology, 2005).</p></td>
+<td><p>Fill gaps of flux data from Eddy covariance measurements or estimate flux uncertainties</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="simple">
+<dt>History</dt><dd><ul class="simple">
+<li><p>Written Mar 2012 by Matthias Cuntz - mc (at) macu (dot) de</p></li>
+<li><p>Ported to Python 3, Feb 2013, Matthias Cuntz</p></li>
+<li><p>Input data can be ND-array, Apr 2014, Matthias Cuntz</p></li>
+<li><p>Bug in longestmarginalgap: was only working at time series edges, rename
+it to longgap, Apr 2014, Matthias Cuntz</p></li>
+<li><p>Keyword fullday, Apr 2014, Matthias Cuntz</p></li>
+<li><p>Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz</p></li>
+<li><p>Using numpy docstring format, May 2020, Matthias Cuntz</p></li>
+<li><p>Error estimates are undef by default, Jun 2021, Matthias Cuntz</p></li>
+<li><p>Mean of values for error estimates, Jun 2021, Matthias Cuntz</p></li>
+<li><p>Improved flake8 and numpy docstring, Oct 2021, Matthias Cuntz</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.gapfill.gapfill">
 <span class="sig-name descname"><span class="pre">gapfill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeformat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%Y-%m-%d</span> <span class="pre">%H:%M:%S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colhead</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sw_dev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ta_dev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vpd_dev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longgap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fullday</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddof</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errmean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/gapfill.html#gapfill"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.gapfill.gapfill" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fills gaps in flux data from Eddy covariance measurements with
+<dd><p>Fill gaps of flux data from Eddy covariance measurements
+or estimate flux uncertainties</p>
+<p>Fills gaps in flux data from Eddy covariance measurements with
 Marginal Distribution Sampling (MDS) according to Reichstein et al.
 (Global Change Biology, 2005).</p>
 <p>This means, if there is a gap in the data, look for similar meteorological
@@ -87,56 +96,53 @@ measure of uncertainty after Lasslop et al. (Biogeosciences, 2008).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dfin</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em>) – <p>time series of fluxes to fill as well as
-meteorological variables incoming short-wave radiation,
-air temperature, air vapour pressure deficit.</p>
-<p><cite>dfin</cite> can be a pandas.Dataframe with the columns
-‘SW_IN’ (or starting with ‘SW_IN’) for incoming short-wave radiation [W m-2]
-‘TA’    (or starting with ‘TA_’) for air temperature [deg C]
-‘VPD’   (or starting with ‘VPD’) for air vapour deficit [hPa]
-and columns with ecosystem fluxes with possible missing values (gaps).
-The index is taken as date variable.</p>
-<p><cite>dfin</cite> can also me a numpy array with the same columns. In this case
-<cite>colhead</cite>, <cite>date</cite>, and possibly <cite>dateformat</cite> must be given.</p>
+<li><p><strong>dfin</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em>) – <p>time series of fluxes to fill as well as meteorological variables:
+incoming short-wave radiation, air temperature, and air vapour pressure
+deficit. <em>dfin</em> can be a pandas.Dataframe with the columns</p>
+<blockquote>
+<div><p>’SW_IN’ (or starting with ‘SW_IN’) for incoming short-wave
+radiation [W m-2]</p>
+<p>’TA’    (or starting with <cite>TA_</cite>) for air temperature [deg C]</p>
+<p>’VPD’   (or starting with ‘VPD’) for air vapour deficit [hPa]</p>
+<p>as well as columns with ecosystem fluxes with missing values
+(gaps).</p>
+</div></blockquote>
+<p>The index is taken as date variable.</p>
+<p><em>dfin</em> can also me a numpy array with the same columns. In this case
+<em>colhead</em>, <em>date</em>, and possibly <em>dateformat</em> must be given.</p>
 </p></li>
-<li><p><strong>flag</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em><em>, </em><em>optional</em>) – <p>flag Dataframe or array has the same shape as dfin. Non-zero values in
-<cite>flag</cite> will be treated as missing values in <cite>dfin</cite>.</p>
-<p><cite>flag</cite> must follow the same rules as <cite>dfin</cite> if pandas.Dataframe.</p>
-<p>If <cite>flag</cite> is numpy array, <cite>df.columns.values</cite> will be used as
-column heads and the index of <cite>dfin</cite> will be copied to <cite>flag</cite>.</p>
-</p></li>
-<li><p><strong>date</strong> (<em>array_like of string</em><em>, </em><em>optional</em>) – <p>1D-array_like of calendar dates in format given in <cite>timeformat</cite>.</p>
-<p><cite>date</cite> must be given if <cite>dfin</cite> is numpy array.</p>
-</p></li>
-<li><p><strong>timeformat</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Format of dates in <cite>date</cite>, if given (default: ‘%Y-%m-%d %H:%M:%S’).
+<li><p><strong>flag</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em><em>, </em><em>optional</em>) – Dataframe or array has the same shape as dfin.
+Non-zero values in <em>flag</em> will be treated as missing values in <em>dfin</em>.
+<em>flag</em> must follow the same rules as <em>dfin</em> if pandas.Dataframe.
+If <em>flag</em> is numpy array, <em>df.columns.values</em> will be used as column
+heads and the index of <em>dfin</em> will be copied to <em>flag</em>.</p></li>
+<li><p><strong>date</strong> (<em>array_like of string</em><em>, </em><em>optional</em>) – 1D-array_like of calendar dates in format given in <em>timeformat</em>.
+<em>date</em> must be given if <em>dfin</em> is numpy array.</p></li>
+<li><p><strong>timeformat</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Format of dates in <em>date</em>, if given (default: ‘%Y-%m-%d %H:%M:%S’).
 See strftime documentation of Python’s datetime module:
 <a class="reference external" href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior">https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior</a></p></li>
-<li><p><strong>colhed</strong> (<em>array_like of str</em><em>, </em><em>optional</em>) – column names if <cite>dfin</cite> is numpy array. See <cite>dfin</cite> for mandatory
+<li><p><strong>colhed</strong> (<em>array_like of str</em><em>, </em><em>optional</em>) – column names if <em>dfin</em> is numpy array. See <em>dfin</em> for mandatory
 column names.</p></li>
 <li><p><strong>sw_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – threshold for maximum deviation of global radiation (default: 50)</p></li>
 <li><p><strong>ta_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – threshold for maximum deviation of air Temperature (default: 2.5)</p></li>
-<li><p><strong>vpd_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – threshold for maximum deviation of vpd (default: 5.)</p></li>
-<li><p><strong>longgap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – avoid extraploation into a gap longer than <cite>longgap</cite> days (default: 60)</p></li>
-<li><p><strong>fullday</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – <dl class="simple">
-<dt>True: move beginning of large gap to start of next day and move end of</dt><dd><p>large gap to end of last day (default: False)</p>
-</dd>
-</dl>
-</p></li>
-<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – <p>values having <cite>undef</cite> value are treated as missing values in <cite>dfin</cite>
-(default: -9999)</p>
-<p>np.nan is not allowed (not working).</p>
-</p></li>
+<li><p><strong>vpd_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – threshold for maximum deviation of vpd (default: 5)</p></li>
+<li><p><strong>longgap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – avoid extrapolation into a gap longer than <em>longgap</em> days (default: 60)</p></li>
+<li><p><strong>fullday</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – True: move beginning of large gap to start of next day and move end of
+large gap to end of last day (default: False)</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – values having <em>undef</em> value are treated as missing values in <em>dfin</em>
+(default: -9999).
+np.nan is not allowed as <em>undef</em> (not working).</p></li>
 <li><p><strong>ddof</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Delta Degrees of Freedom. The divisor used in calculation of standard
-deviation for error estimates (<cite>err=True</cite>) is <code class="docutils literal notranslate"><span class="pre">N-ddof</span></code>, where <code class="docutils literal notranslate"><span class="pre">N</span></code>
+deviation for error estimates (<cite>err=True</cite>) is <cite>N-ddof</cite>, where <em>N</em>
 represents the number of elements (default: 1).</p></li>
 <li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – True: fill every data point with standard deviation instead of mean,
 i.e. used for error generation as in Lasslop et al. (Biogeosci 2008)
 (default: False)</p></li>
-<li><p><strong>errmean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – True: also return mean value of values for error estimate
+<li><p><strong>errmean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – True: also return mean value of values for error estimates
 <cite>if err == True</cite> (default: False)</p></li>
-<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a><em>, </em><em>optional</em>) – <p>True: output have the same shape as input data if <cite>dfin</cite> is
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a><em>, </em><em>optional</em>) – <p>True: output have the same shape as input data if <em>dfin</em> is
 numpy array; if a tuple is given, then this tuple is used to reshape.</p>
-<p>False: outputs are 1D arrays if <cite>dfin</cite> is numpy array (default: False).</p>
+<p>False: outputs are 1D arrays if <em>dfin</em> is numpy array (default: False).</p>
 </p></li>
 <li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Verbosity level 0-3 (default: 0). 0 is no output; 3 is very verbose.</p></li>
 </ul>
@@ -145,8 +151,8 @@ numpy array; if a tuple is given, then this tuple is used to reshape.</p>
 <dd class="field-even"><p><p><cite>if not err:</cite> filled_data, quality_class</p>
 <p><cite>if err and not errmean:</cite> err_estimate</p>
 <p><cite>if err and errmean:</cite> err_estimate, mean_estimate</p>
-<p>pandas.Dataframe(s) will be returned if <cite>dfin</cite> was Dataframe.</p>
-<p>numpy array(s) will be returned if <cite>dfin</cite> was numpy array.</p>
+<p>pandas.Dataframe(s) will be returned if <em>dfin</em> was Dataframe.</p>
+<p>numpy array(s) will be returned if <em>dfin</em> was numpy array.</p>
 </p>
 </dd>
 <dt class="field-odd">Return type</dt>
@@ -155,7 +161,7 @@ numpy array; if a tuple is given, then this tuple is used to reshape.</p>
 </dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>If <cite>err</cite>, there is no error estimate if there are no meteorological
+<p>If <em>err</em>, there is no error estimate if there are no meteorological
 conditions in the vicinity of the data point (first cycle of
 Reichstein et al. GCB 2005).</p>
 <p>Routine does not work with <cite>undef=np.nan</cite>.</p>
@@ -175,29 +181,33 @@ Biogeosciences, 5, 1311–1324</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fread</span> <span class="kn">import</span> <span class="n">fread</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">date2dec</span> <span class="kn">import</span> <span class="n">date2dec</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dec2date</span> <span class="kn">import</span> <span class="n">dec2date</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ifile</span> <span class="o">=</span> <span class="s1">&#39;test_gapfill.csv&#39;</span> <span class="c1"># Tharandt 1998 = Online tool example file</span>
+</pre></div>
+</div>
+<p>data</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ifile</span> <span class="o">=</span> <span class="s1">&#39;test_gapfill.csv&#39;</span> <span class="c1"># Tharandt 1998 = Online tool example file</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">undef</span> <span class="o">=</span> <span class="o">-</span><span class="mf">9999.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># data</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dat</span>   <span class="o">=</span> <span class="n">fread</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ndat</span>  <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">head</span>  <span class="o">=</span> <span class="n">fread</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">head1</span> <span class="o">=</span> <span class="n">head</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># colhead</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">idx</span>   <span class="o">=</span> <span class="p">[]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">head1</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;NEE&#39;</span><span class="p">,</span> <span class="s1">&#39;LE&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;Rg&#39;</span><span class="p">,</span> <span class="s1">&#39;Tair&#39;</span><span class="p">,</span> <span class="s1">&#39;VPD&#39;</span><span class="p">]:</span>
 <span class="gp">... </span>        <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">colhead</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FC&#39;</span><span class="p">,</span> <span class="s1">&#39;LE&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;SW_IN&#39;</span><span class="p">,</span> <span class="s1">&#39;TA&#39;</span><span class="p">,</span> <span class="s1">&#39;VPD&#39;</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># data</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dfin</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">idx</span><span class="p">,:]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># flag</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dfin</span> <span class="o">==</span> <span class="n">undef</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>flag</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dfin</span> <span class="o">==</span> <span class="n">undef</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;qcNEE&#39;</span><span class="p">),</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;qcLE&#39;</span><span class="p">),</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;qcH&#39;</span><span class="p">),</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">flag</span><span class="o">==</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># date</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">day_id</span>  <span class="o">=</span> <span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;Day&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>date</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">day_id</span>  <span class="o">=</span> <span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;Day&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">hour_id</span> <span class="o">=</span> <span class="n">head1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;Hour&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ntime</span>   <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">year</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ntime</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1998</span>
@@ -206,8 +216,10 @@ Biogeosciences, 5, 1311–1324</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y0</span>    <span class="o">=</span> <span class="n">date2dec</span><span class="p">(</span><span class="n">yr</span><span class="o">=</span><span class="n">year</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mo</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">hr</span><span class="o">=</span><span class="n">hh</span><span class="p">,</span> <span class="n">mi</span><span class="o">=</span><span class="n">mn</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">jdate</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">+</span> <span class="n">dat</span><span class="p">[</span><span class="n">day_id</span><span class="p">,</span> <span class="p">:]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">adate</span> <span class="o">=</span> <span class="n">dec2date</span><span class="p">(</span><span class="n">jdate</span><span class="p">,</span> <span class="n">eng</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># fill</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dat_f</span><span class="p">,</span> <span class="n">flag_f</span> <span class="o">=</span> <span class="n">gapfill</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span>
+</pre></div>
+</div>
+<p>fill missing data</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dat_f</span><span class="p">,</span> <span class="n">flag_f</span> <span class="o">=</span> <span class="n">gapfill</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span>
 <span class="gp">... </span>                        <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1"> </span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">flag_f</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11006</span><span class="p">:</span><span class="mi">11012</span><span class="p">]))</span>
 <span class="go">1 1 1 2 2 2</span>
@@ -216,8 +228,8 @@ Biogeosciences, 5, 1311–1324</p>
 <span class="go">-18.68 -15.63 -19.61 -15.54 -12.40 -15.33</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># 1D err</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dat_std</span> <span class="o">=</span> <span class="n">gapfill</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span>
+<p>1D err</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dat_std</span> <span class="o">=</span> <span class="n">gapfill</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
 <span class="gp">... </span>      <span class="o">*</span><span class="n">dat_std</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11006</span><span class="p">:</span><span class="mi">11012</span><span class="p">]))</span>
@@ -231,8 +243,8 @@ Biogeosciences, 5, 1311–1324</p>
 <span class="go">28 83 33 -1 -1 -1</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># 1D err + mean</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dat_std</span><span class="p">,</span> <span class="n">dat_mean</span> <span class="o">=</span> <span class="n">gapfill</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span>
+<p>1D err + mean</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dat_std</span><span class="p">,</span> <span class="n">dat_mean</span> <span class="o">=</span> <span class="n">gapfill</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span>
 <span class="gp">... </span>                            <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
 <span class="gp">... </span>                            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errmean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1"> </span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>

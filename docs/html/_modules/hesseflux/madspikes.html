@@ -35,7 +35,7 @@
   <h1>Source code for hesseflux.madspikes</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">madspikes : Spike detection for using a moving median absolute difference filter.</span>
+<span class="sd">Spike detection using a moving median absolute difference filter</span>
 
 <span class="sd">This module was original written by Tino Rau and Matthias Cuntz, and</span>
 <span class="sd">maintained by Arndt Piayda while at Department of Computational</span>
@@ -44,14 +44,8 @@
 <span class="sd">National de Recherche pour l&#39;Agriculture, l&#39;Alimentation et</span>
 <span class="sd">l&#39;Environnement (INRAE), Nancy, France.</span>
 
-<span class="sd">Copyright (c) 2008-2020 Matthias Cuntz - mc (at) macu (dot) de</span>
-<span class="sd">Released under the MIT License; see LICENSE file for details.</span>
-
-<span class="sd">* Written 2008 by Tino Rau and Matthias Cuntz - mc (at) macu (dot) de</span>
-<span class="sd">* Maintained by Arndt Piayda since Aug 2014.</span>
-<span class="sd">* Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz</span>
-<span class="sd">* Removed iteration, Apr 2020, Matthias Cuntz</span>
-<span class="sd">* Using numpy docstring format, May 2020, Matthias Cuntz</span>
+<span class="sd">:copyright: Copyright 2008-2022 Matthias Cuntz, see AUTHORS.rst for details.</span>
+<span class="sd">:license: MIT License, see LICENSE for details.</span>
 
 <span class="sd">.. moduleauthor:: Matthias Cuntz, Arndt Piayda, Tino Rau</span>
 
@@ -59,6 +53,15 @@
 
 <span class="sd">.. autosummary::</span>
 <span class="sd">   madspikes</span>
+
+<span class="sd">History</span>
+<span class="sd">    * Written 2008 by Tino Rau and Matthias Cuntz - mc (at) macu (dot) de</span>
+<span class="sd">    * Maintained by Arndt Piayda since Aug 2014.</span>
+<span class="sd">    * Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz</span>
+<span class="sd">    * Removed iteration, Apr 2020, Matthias Cuntz</span>
+<span class="sd">    * Using numpy docstring format, May 2020, Matthias Cuntz</span>
+<span class="sd">    * Improved flake8 and numpy docstring, Oct 2021, Matthias Cuntz</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -75,44 +78,43 @@
               <span class="n">z</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">deriv</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">swthr</span><span class="o">=</span><span class="mf">10.</span><span class="p">,</span>
               <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Spike detection for using a moving median absolute difference filter.</span>
+<span class="sd">    Spike detection using a moving median absolute difference filter</span>
+
 <span class="sd">    Used with Eddy vovariance data in Papale et al. (Biogeosciences, 2006).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    dfin : pandas.Dataframe or numpy.array</span>
 <span class="sd">        time series of data where spike detection with MAD should be applied.</span>
-
-<span class="sd">        `dfin` can be a pandas.Dataframe.</span>
-
-<span class="sd">        `dfin` can also me a numpy array. In this case `colhead` must be given.</span>
+<span class="sd">        *dfin* can be a pandas.Dataframe.</span>
+<span class="sd">        *dfin* can also me a numpy array. In this case *colhead* must be given.</span>
 <span class="sd">        MAD will be applied along axis=0, i.e. on each column of axis=1.</span>
 <span class="sd">    flag : pandas.Dataframe or numpy.array, optional</span>
-<span class="sd">        flag Dataframe or array has the same shape as dfin. Non-zero values in</span>
-<span class="sd">        `flag` will be treated as missing values in `dfin`.</span>
-
-<span class="sd">        If `flag` is numpy array, `df.columns.values` will be used as column heads.</span>
+<span class="sd">        Dataframe or array has the same shape as *dfin*. Non-zero values in</span>
+<span class="sd">        *flag* will be treated as missing values in *dfin*.</span>
+<span class="sd">        If *flag* is numpy array, *df.columns.values* will be used as column</span>
+<span class="sd">        heads.</span>
 <span class="sd">    isday : array_like of bool, optional</span>
-<span class="sd">        True when it is day, False when night. Must have the same length as dfin.shape[0].</span>
-
-<span class="sd">        If `isday` is not given, `dfin` must have a column with head &#39;SW_IN&#39; or</span>
-<span class="sd">        starting with &#39;SW_IN&#39;. `isday` will then be `dfin[&#39;SW_IN&#39;] &gt; swthr`.</span>
+<span class="sd">        True when it is day, False when night. Must have the same length as</span>
+<span class="sd">        `dfin.shape[0]`. If *isday* is not given, *dfin* must have a column</span>
+<span class="sd">        with head &#39;SW_IN&#39; or starting with &#39;SW_IN&#39;. *isday* will then be</span>
+<span class="sd">        `dfin[&#39;SW_IN&#39;] &gt; swthr`.</span>
 <span class="sd">    colhed : array_like of str, optional</span>
-<span class="sd">        column names if `dfin` is numpy array.</span>
+<span class="sd">        column names if *dfin* is numpy array.</span>
 <span class="sd">    undef : float, optional</span>
-<span class="sd">        values having `undef` value are treated as missing values in `dfin` (default: -9999)</span>
-
-<span class="sd">        np.nan is not allowed (working).</span>
+<span class="sd">        values having *undef* value are treated as missing values in *dfin*</span>
+<span class="sd">        (default: -9999). np.nan as *undef* is not allowed (not working).</span>
 <span class="sd">    nscan : int, optional</span>
 <span class="sd">        size of moving window to calculate mad in time steps (default: 15*48)</span>
 <span class="sd">    nfill : int, optional</span>
-<span class="sd">        step size of moving window to calculate mad in time steps (default: 1*48)</span>
-
-<span class="sd">        mad will be calculated in `nscan` time window. Resulting mask will be applied</span>
-<span class="sd">        only in `nfill` window in the middle of the `nscan` window. Then `nscan` window</span>
-<span class="sd">        will be moved by `nfill` time steps.</span>
+<span class="sd">        step size of moving window to calculate mad in time steps</span>
+<span class="sd">        (default: 1*48). MAD will be calculated in *nscan* time window.</span>
+<span class="sd">        Resulting mask will be applied only in *nfill* window in the middle</span>
+<span class="sd">        of the *nscan* window. Then *nscan* window will be moved by *nfill*</span>
+<span class="sd">        time steps.</span>
 <span class="sd">    z : float, optional</span>
-<span class="sd">        Input is allowed to deviate maximum `z` standard deviations from the median (default: 7)</span>
+<span class="sd">        Input is allowed to deviate maximum *z* standard deviations from the</span>
+<span class="sd">        median (default: 7)</span>
 <span class="sd">    deriv : int, optional</span>
 <span class="sd">        0: Act on raw input.</span>
 
@@ -120,39 +122,39 @@
 
 <span class="sd">        2: Use 2nd derivatives (default).</span>
 <span class="sd">    swthr : float, optional</span>
-<span class="sd">        Threshold to determine daytime from incoming shortwave radiation if `isday` not given (default: 10).</span>
+<span class="sd">        Threshold to determine daytime from incoming shortwave radiation if</span>
+<span class="sd">        *isday* not given (default: 10).</span>
 <span class="sd">    plot : bool, optional</span>
 <span class="sd">        True: data and spikes are plotted into madspikes.pdf (default: False).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    pandas.Dataframe or numpy array</span>
-<span class="sd">        flags, 0 everywhere except detected spikes set to 2.</span>
+<span class="sd">        flags, 0 everywhere except detected spikes set to 2</span>
 
-<span class="sd">    History</span>
-<span class="sd">    -------</span>
-<span class="sd">    Written,    Matthias Cuntz &amp; Tino Rau, 2008</span>
-<span class="sd">    Maintained, Arndt Piayda,   Aug 2014</span>
-<span class="sd">    Modified,   Matthias Cuntz, Apr 2020 - input can be pandas Dataframe or numpy array(s)</span>
-<span class="sd">                                         - removed iteration</span>
-<span class="sd">                Matthias Cuntz, May 2020 - numpy docstring format</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># numpy or panda</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">)):</span>
         <span class="n">isnumpy</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">istrans</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">assert</span> <span class="n">colhead</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;colhead must be given if input is numpy.ndarray.&#39;</span>
+        <span class="n">astr</span> <span class="o">=</span> <span class="s1">&#39;colhead must be given if input is numpy.ndarray.&#39;</span>
+        <span class="k">assert</span> <span class="n">colhead</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">astr</span>
         <span class="k">if</span> <span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">colhead</span><span class="p">):</span>
             <span class="n">istrans</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">colhead</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">colhead</span><span class="p">):</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">colhead</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Length of colhead must be number of columns in input array. len(colhead)=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">colhead</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39; shape(input)=(&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;,&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;).&#39;</span><span class="p">)</span>
+            <span class="n">estr</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Length of colhead must be number of columns in input&#39;</span>
+                    <span class="s1">&#39;array. len(colhead)=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">colhead</span><span class="p">))</span> <span class="o">+</span>
+                    <span class="s1">&#39; shape(input)=(&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;).&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">estr</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">isnumpy</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">istrans</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">),</span> <span class="s1">&#39;Input must be either numpy.ndarray or pandas.DataFrame.&#39;</span>
+        <span class="n">astr</span> <span class="o">=</span> <span class="s1">&#39;Input must be either numpy.ndarray or pandas.DataFrame.&#39;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">),</span> <span class="n">astr</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">dfin</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Incoming flags</span>
@@ -166,18 +168,23 @@
                 <span class="n">fistrans</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">ff</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">flag</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;flag must have same shape as data array. data: (</span><span class="si">{:d}</span><span class="s1">,</span><span class="si">{:d}</span><span class="s1">); flag: (</span><span class="si">{:d}</span><span class="s1">,</span><span class="si">{:d}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">estr</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;flag must have same shape as data array. data:&#39;</span>
+                        <span class="s1">&#39; (</span><span class="si">{:d}</span><span class="s1">,</span><span class="si">{:d}</span><span class="s1">); flag: (</span><span class="si">{:d}</span><span class="s1">,</span><span class="si">{:d}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                            <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">estr</span><span class="p">)</span>
             <span class="n">ff</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">fisnumpy</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">fistrans</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">),</span> <span class="s1">&#39;Flag must be either numpy.ndarray or pandas.DataFrame.&#39;</span>
+            <span class="n">astr</span> <span class="o">=</span> <span class="s1">&#39;Flag must be either numpy.ndarray or pandas.DataFrame.&#39;</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">),</span> <span class="n">astr</span>
             <span class="n">ff</span> <span class="o">=</span> <span class="n">flag</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">fisnumpy</span> <span class="o">=</span> <span class="n">isnumpy</span>
         <span class="n">fistrans</span> <span class="o">=</span> <span class="n">istrans</span>
         <span class="c1"># flags: 0: good; 1: input flagged; 2: output flagged</span>
-        <span class="n">ff</span>              <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">ff</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="n">ff</span><span class="p">[:]</span>           <span class="o">=</span> <span class="mi">0</span>
         <span class="n">ff</span><span class="p">[</span><span class="n">df</span> <span class="o">==</span> <span class="n">undef</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">ff</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span>   <span class="o">=</span> <span class="mi">1</span>
@@ -189,12 +196,15 @@
             <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;SW_IN&#39;</span><span class="p">):</span>
                 <span class="n">sw_id</span> <span class="o">=</span> <span class="n">cc</span>
                 <span class="k">break</span>
-        <span class="k">assert</span> <span class="n">sw_id</span><span class="p">,</span> <span class="s1">&#39;Global radiation with name SW or starting with SW_ must be in input if isday not given.&#39;</span>
-        <span class="n">isday</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">sw_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">swthr</span> <span class="c1"># Papale et al. (Biogeosciences, 2006): 20; REddyProc: 10</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">isday</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span><span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)):</span>
+        <span class="n">astr</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Global radiation with name SW or starting with SW_ must be&#39;</span>
+                <span class="s1">&#39; in input if isday not given.&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">sw_id</span><span class="p">,</span> <span class="n">astr</span>
+        <span class="c1"># Papale et al. (Biogeosciences, 2006): 20; REddyProc: 10</span>
+        <span class="n">isday</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">sw_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">swthr</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">isday</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)):</span>
         <span class="n">isday</span> <span class="o">=</span> <span class="n">isday</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">isday</span><span class="p">[</span><span class="n">isday</span> <span class="o">==</span> <span class="n">undef</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-    <span class="n">ff</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">isday</span><span class="p">)]</span>   <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ff</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">isday</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="c1"># parameters</span>
     <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span>
@@ -202,29 +212,30 @@
     <span class="n">half_fill_win</span> <span class="o">=</span> <span class="n">nfill</span><span class="o">//</span><span class="mi">2</span>
 
     <span class="c1"># calculate dusk and dawn times and separate in day and night</span>
-    <span class="n">isdawn</span>         <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nrow</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
-    <span class="n">isdusk</span>         <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nrow</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
-    <span class="n">dis</span>            <span class="o">=</span> <span class="n">isday</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">isday</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="c1"># .astype(bool)</span>
+    <span class="n">isdawn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nrow</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="n">isdusk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nrow</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="n">dis</span>    <span class="o">=</span> <span class="n">isday</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">isday</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">isdawn</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dis</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
     <span class="n">isdusk</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dis</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span>  <span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
     <span class="n">isddday</span>        <span class="o">=</span> <span class="n">isdawn</span>
-    <span class="n">tmp</span>            <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">isdusk</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">isddday</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>   <span class="o">+=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="c1"># start and end of day</span>
+    <span class="n">tmp</span>            <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">isdusk</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">isddday</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>   <span class="o">+=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1"># start and end of day</span>
     <span class="n">isddnight</span>      <span class="o">=</span> <span class="n">isdusk</span>
-    <span class="n">tmp</span>            <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">isdawn</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">isddnight</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="c1"># start and end of night</span>
+    <span class="n">tmp</span>            <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">isdawn</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">isddnight</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1"># start and end of night</span>
 
     <span class="c1"># iterate over each column of data</span>
     <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
         <span class="kn">import</span> <span class="nn">matplotlib.backends.backend_pdf</span> <span class="k">as</span> <span class="nn">pdf</span>
         <span class="n">pd</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">register_matplotlib_converters</span><span class="p">()</span>
-        <span class="n">pp</span>  <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">PdfPages</span><span class="p">(</span><span class="s1">&#39;madspikes.pdf&#39;</span><span class="p">)</span>
+        <span class="n">pp</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">PdfPages</span><span class="p">(</span><span class="s1">&#39;madspikes.pdf&#39;</span><span class="p">)</span>
 
     <span class="n">cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">hcol</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
 
-        <span class="k">if</span> <span class="n">hcol</span><span class="o">.</span><span class="n">startswith</span> <span class="o">==</span> <span class="s1">&#39;SW_IN&#39;</span><span class="p">:</span> <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">hcol</span><span class="o">.</span><span class="n">startswith</span> <span class="o">==</span> <span class="s1">&#39;SW_IN&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
 
         <span class="n">data</span>  <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span>
         <span class="n">dflag</span> <span class="o">=</span> <span class="n">ff</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span>
@@ -233,7 +244,8 @@
         <span class="n">data_day</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">data_day</span><span class="p">[</span><span class="o">~</span><span class="p">(</span><span class="n">isday</span> <span class="o">|</span> <span class="n">isddday</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">dflag</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">data</span> <span class="o">==</span> <span class="n">undef</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
         <span class="n">data_night</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">data_night</span><span class="p">[</span><span class="o">~</span><span class="p">(</span><span class="o">~</span><span class="n">isday</span> <span class="o">|</span> <span class="n">isddnight</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">dflag</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">data</span> <span class="o">==</span> <span class="n">undef</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">data_night</span><span class="p">[</span><span class="o">~</span><span class="p">(</span><span class="o">~</span><span class="n">isday</span> <span class="o">|</span> <span class="n">isddnight</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">dflag</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">data</span> <span class="o">==</span> <span class="n">undef</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
 
         <span class="c1"># iterate over fill window</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">half_fill_win</span><span class="p">,</span> <span class="n">nrow</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">half_fill_win</span><span class="p">):</span>
@@ -243,19 +255,23 @@
             <span class="n">fill_end</span>   <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="n">half_fill_win</span><span class="p">,</span> <span class="n">nrow</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="n">dd</span> <span class="o">=</span> <span class="n">data_day</span><span class="p">[</span><span class="n">j1</span><span class="p">:</span><span class="n">j2</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-            <span class="n">day_flag</span> <span class="o">=</span> <span class="n">mad</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">dd</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">dd</span><span class="p">)),</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">deriv</span><span class="o">=</span><span class="n">deriv</span><span class="p">)</span>
-            <span class="n">ff</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">fill_start</span><span class="p">:</span><span class="n">fill_end</span><span class="p">,</span> <span class="n">cols</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">hcol</span><span class="p">)]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">day_flag</span><span class="p">[</span><span class="n">fill_start</span><span class="o">-</span><span class="n">j1</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">fill_end</span><span class="o">-</span><span class="n">j1</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">day_flag</span> <span class="o">=</span> <span class="n">mad</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">dd</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">dd</span><span class="p">)),</span>
+                           <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">deriv</span><span class="o">=</span><span class="n">deriv</span><span class="p">)</span>
+            <span class="n">ff</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">fill_start</span><span class="p">:</span><span class="n">fill_end</span><span class="p">,</span> <span class="n">cols</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">hcol</span><span class="p">)]</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">day_flag</span><span class="p">[</span><span class="n">fill_start</span><span class="o">-</span><span class="n">j1</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">fill_end</span><span class="o">-</span><span class="n">j1</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
             <span class="n">nn</span> <span class="o">=</span> <span class="n">data_night</span><span class="p">[</span><span class="n">j1</span><span class="p">:</span><span class="n">j2</span><span class="p">]</span>
-            <span class="n">night_flag</span> <span class="o">=</span> <span class="n">mad</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">nn</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nn</span><span class="p">)),</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">deriv</span><span class="o">=</span><span class="n">deriv</span><span class="p">)</span>
-            <span class="n">ff</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">fill_start</span><span class="p">:</span><span class="n">fill_end</span><span class="p">,</span> <span class="n">cols</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">hcol</span><span class="p">)]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">night_flag</span><span class="p">[</span><span class="n">fill_start</span><span class="o">-</span><span class="n">j1</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">fill_end</span><span class="o">-</span><span class="n">j1</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">night_flag</span> <span class="o">=</span> <span class="n">mad</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">nn</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nn</span><span class="p">)),</span>
+                             <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">deriv</span><span class="o">=</span><span class="n">deriv</span><span class="p">)</span>
+            <span class="n">ff</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">fill_start</span><span class="p">:</span><span class="n">fill_end</span><span class="p">,</span> <span class="n">cols</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">hcol</span><span class="p">)]</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">night_flag</span><span class="p">[</span><span class="n">fill_start</span><span class="o">-</span><span class="n">j1</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">fill_end</span><span class="o">-</span><span class="n">j1</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
             <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">sub</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
-            <span class="n">valid</span> <span class="o">=</span> <span class="n">ff</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span>
+            <span class="n">valid</span> <span class="o">=</span> <span class="n">ff</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
             <span class="n">l1</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">valid</span><span class="p">],</span> <span class="s1">&#39;ob&#39;</span><span class="p">)</span>
-            <span class="n">l3</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">ff</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span><span class="o">==</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;or&#39;</span><span class="p">)</span>
+            <span class="n">l3</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">ff</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;or&#39;</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">hcol</span><span class="p">)</span>
             <span class="n">pp</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
