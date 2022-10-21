@@ -89,37 +89,37 @@ if __name__ == '__main__':
     # file path
     outdir = config['GENERAL'].get('outdir', ".")
     # program switches
-    outlier = config['POSTSWITCH'].getboolean('outlier',   True)
-    ustar = config['POSTSWITCH'].getboolean('ustar',     True)
+    outlier = config['POSTSWITCH'].getboolean('outlier', True)
+    ustar = config['POSTSWITCH'].getboolean('ustar', True)
     partition = config['POSTSWITCH'].getboolean('partition', True)
-    fill = config['POSTSWITCH'].getboolean('fill',      True)
-    fluxerr = config['POSTSWITCH'].getboolean('fluxerr',   True)
+    fill = config['POSTSWITCH'].getboolean('fill', True)
+    fluxerr = config['POSTSWITCH'].getboolean('fluxerr', True)
     # input file
-    inputfile = config['POSTIO'].get('inputfile',  '')
+    inputfile = config['POSTIO'].get('inputfile', '')
     timeformat = config['POSTIO'].get('timeformat', '%Y%m%d%H%M')
-    sep = config['POSTIO'].get('sep',        ',')
-    skiprows = config['POSTIO'].get('skiprows',   '')
+    sep = config['POSTIO'].get('sep', ',')
+    skiprows = config['POSTIO'].get('skiprows', '')
     undef = config['POSTIO'].getfloat('undef', -9999.)
     swthr = config['POSTIO'].getfloat('swthr', 10.)
-    outputfile = config['POSTIO'].get('outputfile'  '')
-    outundef = config['POSTSWITCH'].getboolean('outundef',    True)
+    outputfile = config['POSTIO'].get('outputfile', '')
+    outundef = config['POSTSWITCH'].getboolean('outundef', True)
     outflagcols = config['POSTSWITCH'].getboolean('outflagcols', False)
     # mad
     nscan = config['POSTMAD'].getint('nscan', 15)
-    nfill = config['POSTMAD'].getint('nfill',  1)
-    z = config['POSTMAD'].getfloat('z',    7)
-    deriv = config['POSTMAD'].getint('deriv',  2)
+    nfill = config['POSTMAD'].getint('nfill', 1)
+    z = config['POSTMAD'].getfloat('z', 7)
+    deriv = config['POSTMAD'].getint('deriv', 2)
     # ustar
-    ustarmin = config['POSTUSTAR'].getfloat('ustarmin',    0.1)
-    nboot = config['POSTUSTAR'].getint('nboot',         1)
+    ustarmin = config['POSTUSTAR'].getfloat('ustarmin', 0.1)
+    nboot = config['POSTUSTAR'].getint('nboot', 1)
     plateaucrit = config['POSTUSTAR'].getfloat('plateaucrit', 0.95)
     seasonout = config['POSTUSTAR'].getboolean('seasonout', False)
     applyustarflag = config['POSTUSTAR'].getboolean('applyflag', False)
     # gap-filling
-    sw_dev = config['POSTGAP'].getfloat('sw_dev',  50.)
-    ta_dev = config['POSTGAP'].getfloat('ta_dev',  2.5)
+    sw_dev = config['POSTGAP'].getfloat('sw_dev', 50.)
+    ta_dev = config['POSTGAP'].getfloat('ta_dev', 2.5)
     vpd_dev = config['POSTGAP'].getfloat('vpd_dev', 5.0)
-    longgap = config['POSTGAP'].getint('longgap',   60)
+    longgap = config['POSTGAP'].getint('longgap', 60)
     # partitioning
     nogppnight = config['POSTPARTITION'].getboolean('nogppnight', False)
 
@@ -336,7 +336,7 @@ if __name__ == '__main__':
                              undef=undef, method='lasslop',
                              nogppnight=nogppnight)
         dfpartd.rename(columns=lambda c: c + suff + '2', inplace=True)
-        df = pd.concat([df, dfpartn, dfpartd],  axis=1)
+        df = pd.concat([df, dfpartn, dfpartd], axis=1)
         # take flags from NEE
         for dn in ['1', '2']:
             for gg in ['GPP', 'RECO']:
@@ -344,7 +344,7 @@ if __name__ == '__main__':
         # flag if partitioning was not possible
         for dn in ['1', '2']:
             for gg in ['GPP', 'RECO']:
-                dff[df[gg + suff + dn] == undef] = 2
+                dff.loc[df[gg + suff + dn] == undef, gg + suff + dn] = 2
 
         t42 = ptime.time()
         strin = ('[m]: {:.1f}'.format((t42 - t41) / 60.)
@@ -379,14 +379,14 @@ if __name__ == '__main__':
                                  verbose=1)
         hdrop = ['SW_IN', 'TA_', 'VPD']
         hout = _findfirststart(hdrop, df.columns)
-        df_f.drop(columns=hout,  inplace=True)
+        df_f.drop(columns=hout, inplace=True)
         dff_f.drop(columns=hout, inplace=True)
 
         def _add_f(c):
             return '_'.join(c.split('_')[:-3] + ['f'] + c.split('_')[-3:])
-        df_f.rename(columns=_add_f,  inplace=True)
+        df_f.rename(columns=_add_f, inplace=True)
         dff_f.rename(columns=_add_f, inplace=True)
-        df = pd.concat([df,  df_f],  axis=1)
+        df = pd.concat([df, df_f], axis=1)
         dff = pd.concat([dff, dff_f], axis=1)
 
         t32 = ptime.time()
@@ -430,7 +430,7 @@ if __name__ == '__main__':
         df_f.drop(columns=hout, inplace=True)
         colin = list(df_f.columns)
         # names such as: NEE_PI_err_1_1_1
-        df_f.rename(columns=_add_f,  inplace=True)
+        df_f.rename(columns=_add_f, inplace=True)
         colout = list(df_f.columns)
         df = pd.concat([df, df_f], axis=1)
         # take flags of non-error columns
