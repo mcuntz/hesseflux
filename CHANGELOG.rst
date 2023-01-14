@@ -4,7 +4,8 @@ Changelog
 All notable changes after its initial release in May 2020 (v2.0) are documented
 in this file.
 
-v5.0 (??? 2023)
+v4.5 (Jan 2023)
+    * Dropped support for Python 3.6 vbecause cannot test it anymore.
     * Add timecolumns and ftimeformat to config and post-processing file in
       examples.
     * Use 90% of ustar if no threshold found also for seasonout.
