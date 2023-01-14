@@ -30,9 +30,12 @@ History
     * Bugfix if no threshold found, and for multi-year flags,
       Jul 2020, Matthias Cuntz
     * Improved flake8 and numpy docstring, Oct 2021, Matthias Cuntz
+    * Use all ustar data for 90% quantile if no threshold found, instead of
+      only ustar data when NEE and Ta are valid, Jan 2023, Matthias Cuntz
+    * Use 90% of ustar if no threshold found also for seasonout,
+      Jan 2023, Matthias Cuntz
 
 """
-from __future__ import division, absolute_import, print_function
 import numpy as np
 import pandas as pd
 
@@ -321,6 +324,8 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
 
                 # temperature classes
                 custars = []
+                if len(ta_p) < (ntaclasses + 1):
+                    continue
                 ta_q = np.quantile(
                     ta_p,
                     np.arange(ntaclasses + 1, dtype=np.float) /
@@ -342,7 +347,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                         ustar_t,
                         np.arange(nustarclasses + 1, dtype=np.float) /
                         np.float(nustarclasses))
-                    ustar_q[0] -= 0.01 # 1st include min
+                    ustar_q[0] -= 0.01  # 1st include min
                     for u in range(nustarclasses-1):
                         iiustar = ((ustar_t > ustar_q[u]) &
                                    (ustar_t <= ustar_q[u+1]))
@@ -353,8 +358,8 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                             custars.append(ustar_q[u+1])
                             break
 
-                # median of thresholds of all temperature classes = threshold
-                # of period
+                # median of thresholds of all temperature classes =
+                # threshold of period
                 if len(custars) > 0:
                     pustars[p] = np.median(custars)
                 elif seasonout:
@@ -371,11 +376,21 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                     bustars[b, y] = pustars[ii].max()
             else:
                 if seasonout:
-                    raise ValueError('Should not be here.')
-                flag_b = ( (~isday_b) &
-                           (ff_b[fc_id] == 0) & (ff_b[ustar_id] == 0) &
-                           (ff_b[ta_id] == 0) )
-                bustars[b, y] = np.quantile(df_b.loc[flag_b, ustar_id], 0.9)
+                    # raise ValueError('Should not be here.')
+                    for p in range(nperiod):
+                        # Set threshold to 90% of data per season
+                        # if not enough data
+                        flag_b = ( (~isday_b) &
+                                   (ff_b[ustar_id] == 0) &
+                                   (df_b.index.month > p * nmon) &
+                                   (df_b.index.month <= (p + 1) * nmon) )
+                        ustar_b = df_b.loc[flag_b, ustar_id]
+                        if len(ustar_b) > 0:
+                            bustars[b, y, p] = np.quantile(ustar_b, 0.9)
+                else:
+                    flag_b = ( (~isday_b) &
+                               (ff_b[ustar_id] == 0) )
+                    bustars[b, y] = np.quantile(df_b.loc[flag_b, ustar_id], 0.9)
 
     # set minimum ustar threshold
     bustars = np.maximum(bustars, ustarmin)
@@ -429,11 +444,11 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
 
                     fig  = plt.figure(1)
                     sub  = fig.add_subplot(111)
-                    sub.plot(ustar_p, fc_p, 'bo')
-                    sub.axvline(x=oustars[1, y, p], linewidth=0.75, color='r')
+                    sub.plot(ustar_p, fc_p, 'bo', markersize=1., alpha=0.2)
+                    sub.axvline(x=oustars[1, y, p], linewidth=1.5, color='r')
                     plt.ylabel('F CO2')
-                    plt.xlabel('u_star')
-                    plt.title('u_star thresh for season'
+                    plt.xlabel('ustar')
+                    plt.title('ustar thresh for season'
                               ' {:d} of year {:d}: {:5.3f}'.format(
                                   p, yy, oustars[1, y, p]))
 
@@ -453,11 +468,12 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                 fig  = plt.figure(1)
                 sub  = fig.add_subplot(111)
                 flag_p = (ffu_y == 0) & (ffc_y == 0)
-                sub.plot(ustar_y[flag_p], fc_y[flag_p], 'bo')
-                sub.axvline(x=oustars[1, y], linewidth=0.75, color='r')
+                sub.plot(ustar_y[flag_p], fc_y[flag_p], 'bo',
+                         markersize=1., alpha=0.2)
+                sub.axvline(x=oustars[1, y], linewidth=1.5, color='r')
                 plt.ylabel('F CO2')
-                plt.xlabel('u_star')
-                plt.title('u_star thresh of year ${:d}: {:5.3f}'.format(
+                plt.xlabel('ustar')
+                plt.title('ustar thresh of year ${:d}: {:5.3f}'.format(
                     yy, oustars[1, y]))
 
                 pp.savefig(fig)

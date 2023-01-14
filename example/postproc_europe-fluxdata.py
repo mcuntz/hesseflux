@@ -96,7 +96,10 @@ if __name__ == '__main__':
     fluxerr = config['POSTSWITCH'].getboolean('fluxerr', True)
     # input file
     inputfile = config['POSTIO'].get('inputfile', '')
+    timecolumns = config['POSTIO'].get('timecolumns', '')
+    timecolumns = [ int(vv) if vv else 0 for vv in timecolumns.split(',') ]
     timeformat = config['POSTIO'].get('timeformat', '%Y%m%d%H%M')
+    ftimestep = config['POSTIO'].getfloat('ftimestep', 1.)
     sep = config['POSTIO'].get('sep', ',')
     skiprows = config['POSTIO'].get('skiprows', '')
     undef = config['POSTIO'].getfloat('undef', -9999.)
@@ -157,14 +160,28 @@ if __name__ == '__main__':
     parser = lambda date: pd.to_datetime(date, format=timeformat)
 
     infile = inputfile[0]
-    df = pd.read_csv(infile, sep=sep, skiprows=skiprows, parse_dates=[0],
+    df = pd.read_csv(infile, sep=sep, skiprows=skiprows, parse_dates=timecolumns,
                      date_parser=parser, index_col=0, header=0)
+    # set date index to mid of timestep
+    tindex = df.index.to_numpy()
+    dtstep = (0.5 - ftimestep) * (tindex[1] - tindex[0])
+    tindex += dtstep
+    df.set_index(tindex, inplace=True)
+    # get name of time column
+    with open(infile, 'r') as fi:
+        line1s = fi.readline().split(sep)
+    timecolumn_names = [ line1s[ii] for ii in timecolumns ]
+    index_name = ' '.join(timecolumn_names)
 
     if len(inputfile) > 1:
         for infile in inputfile[1:]:
             df1 = pd.read_csv(infile, sep=sep, skiprows=skiprows,
                               parse_dates=[0], date_parser=parser, index_col=0,
                               header=0)
+            tindex = df1.index.to_numpy()
+            dtstep = (0.5 - ftimestep) * (tindex[1] - tindex[0])
+            tindex += dtstep
+            df1.set_index(tindex, inplace=True)
             df = df.append(df1, sort=False)
     df.fillna(undef, inplace=True)
     # df.replace(-9999., np.nan, inplace=True)
@@ -466,7 +483,12 @@ if __name__ == '__main__':
     if outundef:
         print('   Set flags to undef.')
         for cc in df.columns:
-            if cc.split('_')[-4] != 'f':  # exclude gap-filled columns
+            ccs = cc.split('_')
+            if len(ccs) >= 4:
+                icc = -4
+            else:
+                icc = -1
+            if ccs[icc] != 'f':  # exclude gap-filled columns
                 df[cc].where(dff[cc] == 0, other=undef, inplace=True)
     if outflagcols:
         print('   Add flag columns.')
@@ -486,14 +508,24 @@ if __name__ == '__main__':
         print('   Add flag columns for gap-filled variables.')
         occ = []
         for cc in df.columns:
-            if cc.split('_')[-4] == 'f':
+            ccs = cc.split('_')
+            if len(ccs) >= 4:
+                icc = -4
+            else:
+                icc = -1
+            if ccs[icc] == 'f':
                 occ.append(cc)
         dff1 = dff[occ].copy(deep=True)
         dff1.rename(columns=lambda c: 'flag_' + c, inplace=True)
         df = pd.concat([df, dff1], axis=1)
     print('   Write.')
+    # remove initial time shift
+    tindex = df.index.to_numpy()
+    dtstep = (0.5 - ftimestep) * (tindex[1] - tindex[0])
+    tindex -= dtstep
+    df.set_index(tindex, inplace=True)
     df.to_csv(outputfile, sep=sep, na_rep=str(undef), index=True,
-              date_format=timeformat)
+              index_label=index_name, date_format=timeformat)
 
     t62 = ptime.time()
     strin = ('[m]: {:.1f}'.format((t62 - t61) / 60.)

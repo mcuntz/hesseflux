@@ -4,7 +4,12 @@ Changelog
 All notable changes after its initial release in May 2020 (v2.0) are documented
 in this file.
 
-v5.0 (??? 2022)
+v5.0 (??? 2023)
+    * Add timecolumns and ftimeformat to config and post-processing file in
+      examples.
+    * Use 90% of ustar if no threshold found also for seasonout.
+    * Use all ustar data for 90% quantile if no threshold found in
+      `ustarfilter`, instead of only ustar data when NEE and Ta are valid.
     * Updated `eddypro2nc.py`.
     * Use all tools from ``pyjams`` rather than local copies.
 
