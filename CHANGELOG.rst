@@ -4,7 +4,7 @@ Changelog
 All notable changes after its initial release in May 2020 (v2.0) are documented
 in this file.
 
-v4.5 (Jan 2023)
+v5.0 (Jan 2023)
     * Dropped support for Python 3.6 vbecause cannot test it anymore.
     * Add timecolumns and ftimeformat to config and post-processing file in
       examples.
@@ -12,6 +12,10 @@ v4.5 (Jan 2023)
     * Use all ustar data for 90% quantile if no threshold found in
       `ustarfilter`, instead of only ustar data when NEE and Ta are valid.
     * Updated `eddypro2nc.py`.
+    * Remove `fgui` and `logtools`. The latter has its own repository now:
+      https://github.com/mcuntz/loggertools
+
+v4.5 (Jan 2023)
     * Use all tools from ``pyjams`` rather than local copies.
 
 v4.0 (Jul 2022)

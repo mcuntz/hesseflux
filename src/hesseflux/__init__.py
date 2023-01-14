@@ -44,7 +44,7 @@ History
       documentation, Jul 2022, Matthias Cuntz
     * v4.5, use pyjams, remove old modules, Aug 2022, Matthias Cuntz
     * v5.0, remove fgui and logtools, numpy docstrings, updated docu,
-      Oct 2022, Matthias Cuntz
+      Jan 2023, Matthias Cuntz
 
 """
 # version, author
