@@ -111,7 +111,7 @@ by `Sebastian Müller`_.
 .. _REddyProc: https://cran.r-project.org/web/packages/REddyProc/index.html
 .. _Papale et al. (Biogeosciences, 2006): https://doi.org/10.5194/bg-3-571-2006
 .. _Lasslop et al., Global Change Biology 2010: https://doi.org/10.1111/j.1365-2486.2009.02041.x
-.. _User Guide: https://mcuntz.github.io/pyjams/html/userguide.html
+.. _User Guide: https://mcuntz.github.io/hesseflux/html/userguide.html
 .. _numpy: https://numpy.org/
 .. _scipy: https://scipy.org/
 .. _pandas: https://pandas.pydata.org/
