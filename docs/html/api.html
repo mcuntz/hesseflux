@@ -4,16 +4,15 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>API Reference &#8212; hesseflux 4.6.dev1 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>API Reference &#8212; hesseflux 5.1.dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="gapfill" href="gapfill.html" />
@@ -34,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="module-hesseflux">
+  <section id="module-hesseflux">
 <span id="api-reference"></span><span id="api"></span><h1>API Reference<a class="headerlink" href="#module-hesseflux" title="Permalink to this heading">¶</a></h1>
 <p>hesseflux provides functions used in the processing and
 post-processing of the Eddy covariance flux data</p>
@@ -45,20 +44,16 @@ described in Papale et al. (Biogeosciences, 2006) plus some
 extensions such as the daytime method of flux partitioning
 (Lasslop et al., Global Change Biology 2010).</p>
 <dl class="field-list simple">
-<dt class="field-odd">copyright</dt>
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Copyright 2009-2022 Matthias Cuntz, see AUTHORS.rst for details.</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>MIT License, see LICENSE for details.</p>
 </dd>
 </dl>
-<div class="section" id="subpackages">
+<section id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading">¶</a></h2>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="gapfill.html#module-hesseflux.gapfill" title="hesseflux.gapfill"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gapfill</span></code></a>(dfin[, flag, date, timeformat, ...])</p></td>
 <td><p>Fill gaps of flux data from Eddy covariance measurements or estimate flux uncertainties</p></td>
@@ -98,20 +93,32 @@ Feb 2022, Matthias Cuntz</p></li>
 documentation, Jul 2022, Matthias Cuntz</p></li>
 <li><p>v4.5, use pyjams, remove old modules, Aug 2022, Matthias Cuntz</p></li>
 <li><p>v5.0, remove fgui and logtools, numpy docstrings, updated docu,
-Oct 2022, Matthias Cuntz</p></li>
+Jan 2023, Matthias Cuntz</p></li>
 </ul>
 </dd>
 </dl>
-</div>
+</section>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="gapfill.html">gapfill</a></li>
-<li class="toctree-l1"><a class="reference internal" href="madspikes.html">madspikes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nee2gpp.html">nee2gpp</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ustarfilter.html">ustarfilter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gapfill.html">gapfill</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gapfill.html#hesseflux.gapfill.gapfill"><code class="docutils literal notranslate"><span class="pre">gapfill()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="madspikes.html">madspikes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="madspikes.html#hesseflux.madspikes.madspikes"><code class="docutils literal notranslate"><span class="pre">madspikes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nee2gpp.html">nee2gpp</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nee2gpp.html#hesseflux.nee2gpp.nee2gpp"><code class="docutils literal notranslate"><span class="pre">nee2gpp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ustarfilter.html">ustarfilter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ustarfilter.html#hesseflux.ustarfilter.ustarfilter"><code class="docutils literal notranslate"><span class="pre">ustarfilter()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
-</div>
+</section>
 
 
           </div>
@@ -182,11 +189,11 @@ Oct 2022, Matthias Cuntz</p></li>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2009-2022, Matthias Cuntz.
+      &copy;2009-2023, Matthias Cuntz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |
       <a href="_sources/api.rst.txt"

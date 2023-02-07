@@ -4,16 +4,15 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Guide &#8212; hesseflux 4.6.dev1 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>User Guide &#8212; hesseflux 5.1.dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="API Reference" href="api.html" />
@@ -34,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="user-guide">
+  <section id="user-guide">
 <h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this heading">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">hesseflux</span></code> collects functions used for processing Eddy covariance data of the
 <a class="reference external" href="https://www.icos-cp.eu/">ICOS</a> ecosystem site <a class="reference external" href="https://www.icos-france.fr/en/static3/the-network">FR-Hes</a>.</p>
@@ -45,7 +44,7 @@ partitioning (<a class="reference external" href="https://doi.org/10.1111/j.1365
 of uncertainties on the fluxes as in <a class="reference external" href="https://doi.org/10.5194/bg-5-1311-2008">Lasslop et al. (Biogeosci, 2008)</a>.</p>
 <p>Only the post-processing steps are described here. We are happy to discuss any
 processing or post-processing directly. Contact us at mc (at) macu (dot) de.</p>
-<div class="section" id="europe-fluxdata-eu-file-format">
+<section id="europe-fluxdata-eu-file-format">
 <h2>europe-fluxdata.eu file format<a class="headerlink" href="#europe-fluxdata-eu-file-format" title="Permalink to this heading">¶</a></h2>
 <p>The first processing steps at the ICOS ecosystem site FR-Hes (not shown) brings
 the data in a format that can be submitted to the database
@@ -58,26 +57,26 @@ file format has notably one header line with variable names. There are no units
 in the file. <code class="docutils literal notranslate"><span class="pre">hesseflux</span></code> provides a little helper script
 <cite>europe-fluxdata_units.py</cite> in the <cite>bin</cite> directory that adds a second header line
 with units. The script can be run on the output as:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python europe-fluxdata_units.py output_file_of_postproc_europe-fluxdata.csv
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>europe-fluxdata_units.py<span class="w"> </span>output_file_of_postproc_europe-fluxdata.csv
 </pre></div>
 </div>
-</div>
-<div class="section" id="post-processing-eddy-covariance-data">
+</section>
+<section id="post-processing-eddy-covariance-data">
 <h2>Post-processing Eddy covariance data<a class="headerlink" href="#post-processing-eddy-covariance-data" title="Permalink to this heading">¶</a></h2>
 <p>The script <cite>postproc_europe-fluxdata.py</cite> in the <cite>example</cite> directory provides a
 template for post-processing data that is in the <a class="reference external" href="https://www.europe-fluxdata.eu">europe-fluxdata.eu</a> file
 format. It basically makes all steps described in <a class="reference external" href="https://doi.org/10.5194/bg-3-571-2006">Papale et al.
 (Biogeosciences, 2006)</a>. The script is governed by a configuration file in
-Python’s standard <a class="reference external" href="https://docs.python.org/3/library/configparser.html#module-configparser" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">configparser</span></code></a> format. The example configuration file
+Python’s standard <a class="reference external" href="https://docs.python.org/3/library/configparser.html#module-configparser" title="(in Python v3.11)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">configparser</span></code></a> format. The example configuration file
 <cite>hesseflux_example.cfg</cite> in the <cite>example</cite> directory is highly commented and
 should be (almost) self-explanatory. The script is called like:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python postproc_europe-fluxdata.py hesseflux_example.cfg
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>postproc_europe-fluxdata.py<span class="w"> </span>hesseflux_example.cfg
 </pre></div>
 </div>
 <p>This script should be taken as a template for one’s own post-processing but
 includes most standard post-processing steps.</p>
 <p>Here we describe the main parts of the post-processing script.</p>
-<div class="section" id="reading-the-configuration-file">
+<section id="reading-the-configuration-file">
 <h3>Reading the configuration file<a class="headerlink" href="#reading-the-configuration-file" title="Permalink to this heading">¶</a></h3>
 <p>The script <cite>postproc_europe-fluxdata.py</cite> starts by reading the configuration
 file <cite>hesseflux_example.cfg</cite>:</p>
@@ -123,8 +122,8 @@ the script. The section in the <cite>hesseflux_example.cfg</cite> looks like:</p
 <p>All options are boolean and set to <cite>True</cite> by default if they are not given in
 the configuration file. All post-processing steps except uncertainty estimation
 of flux data would be performed in the given example.</p>
-</div>
-<div class="section" id="read-the-data">
+</section>
+<section id="read-the-data">
 <h3>Read the data<a class="headerlink" href="#read-the-data" title="Permalink to this heading">¶</a></h3>
 <p>The script would then read in the data. The section in the configuration file is:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">POSTIO</span><span class="p">]</span>
@@ -177,7 +176,7 @@ input files. The data will be appended if several input files are given.</p>
                      <span class="n">date_parser</span><span class="o">=</span><span class="n">parser</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><a class="reference external" href="https://pandas.pydata.org/docs/index.html#module-pandas" title="(in pandas v1.5.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pandas</span></code></a> will use the first column as index (<cite>index_col=0</cite>), assuming that
+<p><a class="reference external" href="https://pandas.pydata.org/docs/index.html#module-pandas" title="(in pandas v1.5.3)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pandas</span></code></a> will use the first column as index (<cite>index_col=0</cite>), assuming that
 these are dates (<cite>parse_dates=[0]</cite>) in the format <cite>timeformat</cite>, where columns
 are separated by <cite>sep</cite>. The defaults follow the <a class="reference external" href="https://www.europe-fluxdata.eu">europe-fluxdata.eu</a> format but
 similar formats may be used, and script and/or configuration file can be adapted
@@ -187,9 +186,9 @@ header line with units, one can skip it giving <cite>skiprows=[1]</cite> (not
 <cite>skiprows=1</cite>).</p>
 <p>All input files are supposed to be in the same format if <cite>inputfile</cite> is a
 comma-separated list of filenames, and they will be read with the same command
-above. The <a class="reference external" href="https://pandas.pydata.org/docs/index.html#module-pandas" title="(in pandas v1.5.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pandas</span></code></a> dataframes (<cite>df</cite>) will simply be appended.</p>
-</div>
-<div class="section" id="the-flag-dataframe">
+above. The <a class="reference external" href="https://pandas.pydata.org/docs/index.html#module-pandas" title="(in pandas v1.5.3)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pandas</span></code></a> dataframes (<cite>df</cite>) will simply be appended.</p>
+</section>
+<section id="the-flag-dataframe">
 <h3>The flag dataframe<a class="headerlink" href="#the-flag-dataframe" title="Permalink to this heading">¶</a></h3>
 <p>All Not-a-Number (NaN) values will be set to <cite>undef</cite> and will be ignored in the
 following.</p>
@@ -207,8 +206,8 @@ dataframe <cite>df</cite>. This means all cells of <cite>df</cite> with <cite>un
 <span class="n">dff</span><span class="p">[</span><span class="n">df</span> <span class="o">==</span> <span class="n">undef</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="day-night">
+</section>
+<section id="day-night">
 <h3>Day / night<a class="headerlink" href="#day-night" title="Permalink to this heading">¶</a></h3>
 <p>Most post-processing routines differentiate between daytime and nighttime data.
 <a class="reference external" href="https://doi.org/10.5194/bg-3-571-2006">Papale et al. (Biogeosciences, 2006)</a> use a threshold of 20 W m<sup>-2</sup> of
@@ -221,8 +220,8 @@ define the appropriate threshold. The default is 10 W m<sup>2</sup>. The column
 <span class="n">isday</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;SW_IN_1_1_1&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">swthr</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="data-check">
+</section>
+<section id="data-check">
 <h3>Data check<a class="headerlink" href="#data-check" title="Permalink to this heading">¶</a></h3>
 <p><cite>postproc_europe-fluxdata.py</cite> checks the units of air temperature (i.e. the
 first column starting with <cite>TA_</cite>).</p>
@@ -296,8 +295,8 @@ number of time steps per day <cite>ntday</cite>.</p>
 <span class="n">ntday</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">(</span><span class="mi">86400</span> <span class="o">/</span> <span class="n">dsec</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="spike-outlier-flagging">
+</section>
+<section id="spike-outlier-flagging">
 <h3>Spike / outlier flagging<a class="headerlink" href="#spike-outlier-flagging" title="Permalink to this heading">¶</a></h3>
 <p>If <cite>outlier=True</cite> is set in the configuration file, spikes will be detected with
 the method given in <a class="reference external" href="https://doi.org/10.5194/bg-3-571-2006">Papale et al. (Biogeosciences, 2006)</a>. A median absolute
@@ -357,8 +356,8 @@ uncertainty strategy of <a class="reference external" href="https://doi.org/10.1
 where spiked data is flagged as 2. The scripts sets the corresponding columns in
 the flag dataframe <cite>dff</cite> to 3 (3 is used just to keep track where the flag was
 set).</p>
-</div>
-<div class="section" id="u-filtering">
+</section>
+<section id="u-filtering">
 <h3>u* filtering<a class="headerlink" href="#u-filtering" title="Permalink to this heading">¶</a></h3>
 <p>If <cite>ustar=True</cite> is set in the configuration file, a u*-filter will be applied
 following <a class="reference external" href="https://doi.org/10.5194/bg-3-571-2006">Papale et al. (Biogeosciences, 2006)</a>.</p>
@@ -448,8 +447,8 @@ data into the dataframe <cite>df</cite> and producing the flag dataframe <cite>d
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dff</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;FC_SSITC_TEST_1_1_1&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;FC_1_1_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="partitioning-of-net-ecosystem-exchange">
+</section>
+<section id="partitioning-of-net-ecosystem-exchange">
 <h3>Partitioning of Net Ecosystem Exchange<a class="headerlink" href="#partitioning-of-net-ecosystem-exchange" title="Permalink to this heading">¶</a></h3>
 <p>If <cite>partition=True</cite> is set in the configuration file, two estimates of Gross
 Primary Productivity (GPP) and Ecosystem Respiration (RECO) are calculated:
@@ -504,8 +503,8 @@ net fluxes.</p>
         <span class="n">dff</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">gg</span> <span class="o">+</span> <span class="n">suff</span> <span class="o">+</span> <span class="n">dn</span><span class="p">]</span> <span class="o">==</span> <span class="n">undef</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="gap-filling-imputation">
+</section>
+<section id="gap-filling-imputation">
 <h3>Gap-filling / Imputation<a class="headerlink" href="#gap-filling-imputation" title="Permalink to this heading">¶</a></h3>
 <p>Marginal Distribution Sampling (MDS) of <a class="reference external" href="https://doi.org/10.1111/j.1365-2486.2005.001002.x">Reichstein et al. (Glob Change Biolo,
 2005)</a> is implemented as imputation or so-called gap-filling algorithm. The
@@ -568,8 +567,8 @@ good summary is given in Fig. A1 of <a class="reference external" href="https://
 <p>The function <code class="xref py py-func docutils literal notranslate"><span class="pre">gapfill()</span></code> returns the filled columns <cite>df_f</cite> as well as flag
 columns <cite>dff_f</cite> indicating fill quality. Fill quality A-C of <a class="reference external" href="https://doi.org/10.1111/j.1365-2486.2005.001002.x">Reichstein et al.
 (Glob Change Biolo, 2005)</a> are translated to quality flags 1-3.</p>
-</div>
-<div class="section" id="uncertainty-estimates-of-flux-data">
+</section>
+<section id="uncertainty-estimates-of-flux-data">
 <h3>Uncertainty estimates of flux data<a class="headerlink" href="#uncertainty-estimates-of-flux-data" title="Permalink to this heading">¶</a></h3>
 <p><a class="reference external" href="https://doi.org/10.5194/bg-5-1311-2008">Lasslop et al. (Biogeosci, 2008)</a> presented an algorithm to estimate
 uncertainties of Eddy covariance fluxes using Marginal Distribution Sampling
@@ -618,10 +617,10 @@ calculate flux uncertainties like:</p>
 raw data as described in <a class="reference external" href="https://doi.org/10.1016/j.agrformet.2012.09.006">Mauder et al. (Agric Forest Meteo, 2013)</a>. This is
 for example implemented in the processing softwares <a class="reference external" href="https://www.licor.com/env/products/eddy_covariance/eddypro">EddyPro</a><sup>(R)</sup> or
 <a class="reference external" href="https://zenodo.org/record/20349">TK3</a>.</p>
-</div>
-<div class="section" id="writing-the-output-file">
+</section>
+<section id="writing-the-output-file">
 <h3>Writing the output file<a class="headerlink" href="#writing-the-output-file" title="Permalink to this heading">¶</a></h3>
-<p>The dataframe is written to the output file with <a class="reference external" href="https://pandas.pydata.org/docs/index.html#module-pandas" title="(in pandas v1.5.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pandas</span></code></a>
+<p>The dataframe is written to the output file with <a class="reference external" href="https://pandas.pydata.org/docs/index.html#module-pandas" title="(in pandas v1.5.3)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pandas</span></code></a>
 <code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.Dataframe.to_csv()</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">,</span> <span class="n">na_rep</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">undef</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
           <span class="n">date_format</span><span class="o">=</span><span class="n">timeformat</span><span class="p">)</span>
@@ -686,9 +685,9 @@ flags for fill quality if gap-filling was performed: option <cite>fill=True</cit
 </pre></div>
 </div>
 <p>That’s all Folks!</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
           </div>
@@ -769,11 +768,11 @@ flags for fill quality if gap-filling was performed: option <cite>fill=True</cit
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2009-2022, Matthias Cuntz.
+      &copy;2009-2023, Matthias Cuntz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |
       <a href="_sources/userguide.rst.txt"
