@@ -11,3 +11,5 @@ Contents
    api
    changelog
    authors
+..
+   reddyproc

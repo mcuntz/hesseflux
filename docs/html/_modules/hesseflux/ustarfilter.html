@@ -1,24 +1,24 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>hesseflux.ustarfilter &#8212; hesseflux 5.1.dev0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <title>hesseflux.ustarfilter &#8212; hesseflux 5.1.dev2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=740c0674" />
+    <script src="../../_static/documentation_options.js?v=09999224"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -67,6 +67,8 @@
 <span class="sd">      only ustar data when NEE and Ta are valid, Jan 2023, Matthias Cuntz</span>
 <span class="sd">    * Use 90% of ustar if no threshold found also for seasonout,</span>
 <span class="sd">      Jan 2023, Matthias Cuntz</span>
+<span class="sd">    * Removed np.float and np.bool, Jun 2024, Matthias Cuntz</span>
+<span class="sd">    * do not register pandas platting backend, Jun 2024, Matthias Cuntz</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -76,7 +78,9 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ustarfilter&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="ustarfilter"><a class="viewcode-back" href="../../ustarfilter.html#hesseflux.ustarfilter.ustarfilter">[docs]</a><span class="k">def</span> <span class="nf">ustarfilter</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isday</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="ustarfilter">
+<a class="viewcode-back" href="../../ustarfilter.html#hesseflux.ustarfilter.ustarfilter">[docs]</a>
+<span class="k">def</span> <span class="nf">ustarfilter</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isday</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">timeformat</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ustarmin</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
                 <span class="n">nboot</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">undef</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seasonout</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nmon</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                 <span class="n">ntaclasses</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">corrcheck</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">nustarclasses</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
@@ -189,7 +193,7 @@
             <span class="n">estr</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Length of colhead must be number of columns in input&#39;</span>
                     <span class="s1">&#39; array. len(colhead)=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">colhead</span><span class="p">))</span> <span class="o">+</span>
                     <span class="s1">&#39; shape(input)=(&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;).&#39;</span><span class="p">)</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">dfin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;).&#39;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">estr</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;Date must be given if input is numpy arrary.&#39;</span>
         <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">timeformat</span><span class="p">)</span>
@@ -313,10 +317,10 @@
     <span class="n">yrmin</span>  <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">year</span>
     <span class="n">nyears</span> <span class="o">=</span> <span class="n">yrmax</span> <span class="o">-</span> <span class="n">yrmin</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="n">ndays</span>  <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">.</span><span class="n">days</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="k">assert</span> <span class="n">ndays</span><span class="o">//</span><span class="n">nyears</span> <span class="o">&gt;</span> <span class="mi">360</span><span class="p">,</span> <span class="s1">&#39;Full years must be given.&#39;</span>
+    <span class="k">assert</span> <span class="n">ndays</span> <span class="o">//</span> <span class="n">nyears</span> <span class="o">&gt;</span> <span class="mi">360</span><span class="p">,</span> <span class="s1">&#39;Full years must be given.&#39;</span>
 
     <span class="c1"># calculate thresholds</span>
-    <span class="n">nperiod</span> <span class="o">=</span> <span class="mi">12</span><span class="o">//</span><span class="n">nmon</span>  <span class="c1"># number of nmon periods per year</span>
+    <span class="n">nperiod</span> <span class="o">=</span> <span class="mi">12</span> <span class="o">//</span> <span class="n">nmon</span>  <span class="c1"># number of nmon periods per year</span>
     <span class="k">if</span> <span class="n">seasonout</span><span class="p">:</span>
         <span class="n">bustars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">nboot</span><span class="p">,</span> <span class="n">nyears</span><span class="p">,</span> <span class="n">nperiod</span><span class="p">))</span> <span class="o">*</span> <span class="n">undef</span>
     <span class="k">else</span><span class="p">:</span>
@@ -349,8 +353,8 @@
                 <span class="n">flag_p</span>   <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="o">~</span><span class="n">isday_b</span><span class="p">)</span> <span class="o">&amp;</span>
                              <span class="p">(</span><span class="n">ff_b</span><span class="p">[</span><span class="n">fc_id</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ff_b</span><span class="p">[</span><span class="n">ustar_id</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span>
                              <span class="p">(</span><span class="n">ff_b</span><span class="p">[</span><span class="n">ta_id</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span>
-                             <span class="p">(</span><span class="n">df_b</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">&gt;</span> <span class="n">p</span><span class="o">*</span><span class="n">nmon</span><span class="p">)</span> <span class="o">&amp;</span>
-                             <span class="p">(</span><span class="n">df_b</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nmon</span><span class="p">)</span> <span class="p">)</span>
+                             <span class="p">(</span><span class="n">df_b</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">&gt;</span> <span class="n">p</span> <span class="o">*</span> <span class="n">nmon</span><span class="p">)</span> <span class="o">&amp;</span>
+                             <span class="p">(</span><span class="n">df_b</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nmon</span><span class="p">)</span> <span class="p">)</span>
                 <span class="n">fc_p</span>    <span class="o">=</span> <span class="n">df_b</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">flag_p</span><span class="p">,</span> <span class="n">fc_id</span><span class="p">]</span>
                 <span class="n">ustar_p</span> <span class="o">=</span> <span class="n">df_b</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">flag_p</span><span class="p">,</span> <span class="n">ustar_id</span><span class="p">]</span>
                 <span class="n">ta_p</span>    <span class="o">=</span> <span class="n">df_b</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">flag_p</span><span class="p">,</span> <span class="n">ta_id</span><span class="p">]</span>
@@ -361,11 +365,11 @@
                     <span class="k">continue</span>
                 <span class="n">ta_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span>
                     <span class="n">ta_p</span><span class="p">,</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ntaclasses</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span> <span class="o">/</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">ntaclasses</span><span class="p">))</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ntaclasses</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span>
+                    <span class="nb">float</span><span class="p">(</span><span class="n">ntaclasses</span><span class="p">))</span>
                 <span class="n">ta_q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">0.1</span>  <span class="c1"># 1st include min</span>
                 <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ntaclasses</span><span class="p">):</span>
-                    <span class="n">iita</span>    <span class="o">=</span> <span class="p">(</span><span class="n">ta_p</span> <span class="o">&gt;</span> <span class="n">ta_q</span><span class="p">[</span><span class="n">t</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ta_p</span> <span class="o">&lt;=</span> <span class="n">ta_q</span><span class="p">[</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">iita</span>    <span class="o">=</span> <span class="p">(</span><span class="n">ta_p</span> <span class="o">&gt;</span> <span class="n">ta_q</span><span class="p">[</span><span class="n">t</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ta_p</span> <span class="o">&lt;=</span> <span class="n">ta_q</span><span class="p">[</span><span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
                     <span class="n">fc_t</span>    <span class="o">=</span> <span class="n">fc_p</span><span class="p">[</span><span class="n">iita</span><span class="p">]</span>
                     <span class="n">ustar_t</span> <span class="o">=</span> <span class="n">ustar_p</span><span class="p">[</span><span class="n">iita</span><span class="p">]</span>
                     <span class="n">ta_t</span>    <span class="o">=</span> <span class="n">ta_p</span><span class="p">[</span><span class="n">iita</span><span class="p">]</span>
@@ -378,17 +382,17 @@
                     <span class="c1"># ustar classes</span>
                     <span class="n">ustar_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span>
                         <span class="n">ustar_t</span><span class="p">,</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nustarclasses</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span> <span class="o">/</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">nustarclasses</span><span class="p">))</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nustarclasses</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">nustarclasses</span><span class="p">))</span>
                     <span class="n">ustar_q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">0.01</span>  <span class="c1"># 1st include min</span>
-                    <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nustarclasses</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nustarclasses</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
                         <span class="n">iiustar</span> <span class="o">=</span> <span class="p">((</span><span class="n">ustar_t</span> <span class="o">&gt;</span> <span class="n">ustar_q</span><span class="p">[</span><span class="n">u</span><span class="p">])</span> <span class="o">&amp;</span>
-                                   <span class="p">(</span><span class="n">ustar_t</span> <span class="o">&lt;=</span> <span class="n">ustar_q</span><span class="p">[</span><span class="n">u</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+                                   <span class="p">(</span><span class="n">ustar_t</span> <span class="o">&lt;=</span> <span class="n">ustar_q</span><span class="p">[</span><span class="n">u</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]))</span>
                         <span class="n">fc_u</span>    <span class="o">=</span> <span class="n">fc_t</span><span class="p">[</span><span class="n">iiustar</span><span class="p">]</span>
-                        <span class="n">fc_a</span>    <span class="o">=</span> <span class="n">fc_t</span><span class="p">[</span><span class="n">ustar_t</span> <span class="o">&gt;</span> <span class="n">ustar_q</span><span class="p">[</span><span class="n">u</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+                        <span class="n">fc_a</span>    <span class="o">=</span> <span class="n">fc_t</span><span class="p">[</span><span class="n">ustar_t</span> <span class="o">&gt;</span> <span class="n">ustar_q</span><span class="p">[</span><span class="n">u</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]]</span>
 
-                        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">fc_u</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">&gt;=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">plateaucrit</span><span class="o">*</span><span class="n">fc_a</span><span class="o">.</span><span class="n">mean</span><span class="p">()):</span>
-                            <span class="n">custars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ustar_q</span><span class="p">[</span><span class="n">u</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">fc_u</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">&gt;=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">plateaucrit</span> <span class="o">*</span> <span class="n">fc_a</span><span class="o">.</span><span class="n">mean</span><span class="p">()):</span>
+                            <span class="n">custars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ustar_q</span><span class="p">[</span><span class="n">u</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
                             <span class="k">break</span>
 
                 <span class="c1"># median of thresholds of all temperature classes =</span>
@@ -423,7 +427,8 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">flag_b</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="o">~</span><span class="n">isday_b</span><span class="p">)</span> <span class="o">&amp;</span>
                                <span class="p">(</span><span class="n">ff_b</span><span class="p">[</span><span class="n">ustar_id</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
-                    <span class="n">bustars</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">df_b</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">flag_b</span><span class="p">,</span> <span class="n">ustar_id</span><span class="p">],</span> <span class="mf">0.9</span><span class="p">)</span>
+                    <span class="n">bustars</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">df_b</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">flag_b</span><span class="p">,</span> <span class="n">ustar_id</span><span class="p">],</span>
+                                                <span class="mf">0.9</span><span class="p">)</span>
 
     <span class="c1"># set minimum ustar threshold</span>
     <span class="n">bustars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">bustars</span><span class="p">,</span> <span class="n">ustarmin</span><span class="p">)</span>
@@ -434,14 +439,14 @@
     <span class="c1"># flag out with original DatetimeIndex</span>
     <span class="n">off</span>    <span class="o">=</span> <span class="n">ustar_in</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">off</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">ii</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">off</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="n">ii</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">off</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">seasonout</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nyears</span><span class="p">):</span>
             <span class="n">yy</span> <span class="o">=</span> <span class="n">yrmin</span> <span class="o">+</span> <span class="n">y</span>
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nperiod</span><span class="p">):</span>
                 <span class="n">iiyr</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="n">yy</span><span class="p">)</span> <span class="o">&amp;</span>   <span class="c1"># df DatetimeIndex</span>
-                         <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">&gt;</span> <span class="n">p</span><span class="o">*</span><span class="n">nmon</span><span class="p">)</span> <span class="o">&amp;</span>
-                         <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nmon</span><span class="p">)</span> <span class="p">)</span>
+                         <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">&gt;</span> <span class="n">p</span> <span class="o">*</span> <span class="n">nmon</span><span class="p">)</span> <span class="o">&amp;</span>
+                         <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nmon</span><span class="p">)</span> <span class="p">)</span>
                 <span class="n">ii</span><span class="p">[</span><span class="n">iiyr</span><span class="p">]</span> <span class="o">=</span> <span class="n">ustar_in</span><span class="p">[</span><span class="n">iiyr</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">oustars</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">p</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nyears</span><span class="p">):</span>
@@ -451,11 +456,14 @@
     <span class="n">off</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># original DatetimeIndex</span>
 
     <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+        <span class="n">mpl</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;PDF&#39;</span><span class="p">)</span>  <span class="c1"># set directly after import matplotlib</span>
+        <span class="kn">from</span> <span class="nn">matplotlib.backends.backend_pdf</span> <span class="kn">import</span> <span class="n">PdfPages</span>
         <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-        <span class="kn">import</span> <span class="nn">matplotlib.backends.backend_pdf</span> <span class="k">as</span> <span class="nn">pdf</span>
-        <span class="n">pd</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">register_matplotlib_converters</span><span class="p">()</span>
+        <span class="c1"># import matplotlib.backends.backend_pdf as PdfPages</span>
+        <span class="c1"># pd.plotting.register_matplotlib_converters()</span>
 
-        <span class="n">pp</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">PdfPages</span><span class="p">(</span><span class="s1">&#39;ustarfilter.pdf&#39;</span><span class="p">)</span>
+        <span class="n">pp</span> <span class="o">=</span> <span class="n">PdfPages</span><span class="p">(</span><span class="s1">&#39;ustarfilter.pdf&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">seasonout</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nyears</span><span class="p">):</span>
                 <span class="n">yy</span> <span class="o">=</span> <span class="n">yrmin</span> <span class="o">+</span> <span class="n">y</span>
@@ -470,8 +478,8 @@
                     <span class="n">flag_p</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="o">~</span><span class="n">isday_f</span><span class="p">)</span> <span class="o">&amp;</span>
                                <span class="p">(</span><span class="n">ff_f</span><span class="p">[</span><span class="n">fc_id</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ff_f</span><span class="p">[</span><span class="n">ustar_id</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span>
                                <span class="p">(</span><span class="n">ff_f</span><span class="p">[</span><span class="n">ta_id</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span>
-                               <span class="p">(</span><span class="n">df_f</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">&gt;</span> <span class="n">p</span><span class="o">*</span><span class="n">nmon</span><span class="p">)</span> <span class="o">&amp;</span>
-                               <span class="p">(</span><span class="n">df_f</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nmon</span><span class="p">)</span> <span class="p">)</span>
+                               <span class="p">(</span><span class="n">df_f</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">&gt;</span> <span class="n">p</span> <span class="o">*</span> <span class="n">nmon</span><span class="p">)</span> <span class="o">&amp;</span>
+                               <span class="p">(</span><span class="n">df_f</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nmon</span><span class="p">)</span> <span class="p">)</span>
                     <span class="n">fc_p</span>    <span class="o">=</span> <span class="n">df_f</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">flag_p</span><span class="p">,</span> <span class="n">fc_id</span><span class="p">]</span>
                     <span class="n">ustar_p</span> <span class="o">=</span> <span class="n">df_f</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">flag_p</span><span class="p">,</span> <span class="n">ustar_id</span><span class="p">]</span>
 
@@ -520,6 +528,7 @@
         <span class="k">return</span> <span class="n">oustars</span><span class="p">,</span> <span class="n">off</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">oustars</span><span class="p">,</span> <span class="n">off</span></div>
+
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
@@ -573,7 +582,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
@@ -581,18 +590,18 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2009-2023, Matthias Cuntz.
+      &#169;2009-2024, Matthias Cuntz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.3.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
     </div>
 

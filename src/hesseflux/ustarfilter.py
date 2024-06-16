@@ -34,6 +34,8 @@ History
       only ustar data when NEE and Ta are valid, Jan 2023, Matthias Cuntz
     * Use 90% of ustar if no threshold found also for seasonout,
       Jan 2023, Matthias Cuntz
+    * Removed np.float and np.bool, Jun 2024, Matthias Cuntz
+    * do not register pandas platting backend, Jun 2024, Matthias Cuntz
 
 """
 import numpy as np
@@ -156,7 +158,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
             estr = ('Length of colhead must be number of columns in input'
                     ' array. len(colhead)=' + str(len(colhead)) +
                     ' shape(input)=(' + str(dfin.shape[0]) + ',' +
-                    str(dfin.shape[1])+').')
+                    str(dfin.shape[1]) + ').')
             raise ValueError(estr)
         assert date is not None, 'Date must be given if input is numpy arrary.'
         df['Datetime'] = pd.to_datetime(date, format=timeformat)
@@ -280,10 +282,10 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
     yrmin  = df.index.min().year
     nyears = yrmax - yrmin + 1
     ndays  = (df.index.max() - df.index.min()).days + 1
-    assert ndays//nyears > 360, 'Full years must be given.'
+    assert ndays // nyears > 360, 'Full years must be given.'
 
     # calculate thresholds
-    nperiod = 12//nmon  # number of nmon periods per year
+    nperiod = 12 // nmon  # number of nmon periods per year
     if seasonout:
         bustars = np.ones((nboot, nyears, nperiod)) * undef
     else:
@@ -316,8 +318,8 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                 flag_p   = ( (~isday_b) &
                              (ff_b[fc_id] == 0) & (ff_b[ustar_id] == 0) &
                              (ff_b[ta_id] == 0) &
-                             (df_b.index.month > p*nmon) &
-                             (df_b.index.month <= (p+1)*nmon) )
+                             (df_b.index.month > p * nmon) &
+                             (df_b.index.month <= (p + 1) * nmon) )
                 fc_p    = df_b.loc[flag_p, fc_id]
                 ustar_p = df_b.loc[flag_p, ustar_id]
                 ta_p    = df_b.loc[flag_p, ta_id]
@@ -328,11 +330,11 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                     continue
                 ta_q = np.quantile(
                     ta_p,
-                    np.arange(ntaclasses + 1, dtype=np.float) /
-                    np.float(ntaclasses))
+                    np.arange(ntaclasses + 1, dtype=float) /
+                    float(ntaclasses))
                 ta_q[0] -= 0.1  # 1st include min
                 for t in range(ntaclasses):
-                    iita    = (ta_p > ta_q[t]) & (ta_p <= ta_q[t+1])
+                    iita    = (ta_p > ta_q[t]) & (ta_p <= ta_q[t + 1])
                     fc_t    = fc_p[iita]
                     ustar_t = ustar_p[iita]
                     ta_t    = ta_p[iita]
@@ -345,17 +347,17 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                     # ustar classes
                     ustar_q = np.quantile(
                         ustar_t,
-                        np.arange(nustarclasses + 1, dtype=np.float) /
-                        np.float(nustarclasses))
+                        np.arange(nustarclasses + 1, dtype=float) /
+                        float(nustarclasses))
                     ustar_q[0] -= 0.01  # 1st include min
-                    for u in range(nustarclasses-1):
+                    for u in range(nustarclasses - 1):
                         iiustar = ((ustar_t > ustar_q[u]) &
-                                   (ustar_t <= ustar_q[u+1]))
+                                   (ustar_t <= ustar_q[u + 1]))
                         fc_u    = fc_t[iiustar]
-                        fc_a    = fc_t[ustar_t > ustar_q[u+1]]
+                        fc_a    = fc_t[ustar_t > ustar_q[u + 1]]
 
-                        if abs(fc_u.mean()) >= abs(plateaucrit*fc_a.mean()):
-                            custars.append(ustar_q[u+1])
+                        if abs(fc_u.mean()) >= abs(plateaucrit * fc_a.mean()):
+                            custars.append(ustar_q[u + 1])
                             break
 
                 # median of thresholds of all temperature classes =
@@ -390,7 +392,8 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                 else:
                     flag_b = ( (~isday_b) &
                                (ff_b[ustar_id] == 0) )
-                    bustars[b, y] = np.quantile(df_b.loc[flag_b, ustar_id], 0.9)
+                    bustars[b, y] = np.quantile(df_b.loc[flag_b, ustar_id],
+                                                0.9)
 
     # set minimum ustar threshold
     bustars = np.maximum(bustars, ustarmin)
@@ -401,14 +404,14 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
     # flag out with original DatetimeIndex
     off    = ustar_in.astype(int)
     off[:] = 0
-    ii     = np.zeros(len(off), dtype=np.bool)
+    ii     = np.zeros(len(off), dtype=bool)
     if seasonout:
         for y in range(nyears):
             yy = yrmin + y
             for p in range(nperiod):
                 iiyr = ( (df.index.year == yy) &   # df DatetimeIndex
-                         (df.index.month > p*nmon) &
-                         (df.index.month <= (p+1)*nmon) )
+                         (df.index.month > p * nmon) &
+                         (df.index.month <= (p + 1) * nmon) )
                 ii[iiyr] = ustar_in[iiyr] < oustars[1, y, p]
     else:
         for y in range(nyears):
@@ -418,11 +421,14 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
     off[ii] = 2  # original DatetimeIndex
 
     if plot:
+        import matplotlib as mpl
+        mpl.use('PDF')  # set directly after import matplotlib
+        from matplotlib.backends.backend_pdf import PdfPages
         import matplotlib.pyplot as plt
-        import matplotlib.backends.backend_pdf as pdf
-        pd.plotting.register_matplotlib_converters()
+        # import matplotlib.backends.backend_pdf as PdfPages
+        # pd.plotting.register_matplotlib_converters()
 
-        pp = pdf.PdfPages('ustarfilter.pdf')
+        pp = PdfPages('ustarfilter.pdf')
         if seasonout:
             for y in range(nyears):
                 yy = yrmin + y
@@ -437,8 +443,8 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                     flag_p = ( (~isday_f) &
                                (ff_f[fc_id] == 0) & (ff_f[ustar_id] == 0) &
                                (ff_f[ta_id] == 0) &
-                               (df_f.index.month > p*nmon) &
-                               (df_f.index.month <= (p+1)*nmon) )
+                               (df_f.index.month > p * nmon) &
+                               (df_f.index.month <= (p + 1) * nmon) )
                     fc_p    = df_f.loc[flag_p, fc_id]
                     ustar_p = df_f.loc[flag_p, ustar_id]
 

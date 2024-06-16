@@ -1,18 +1,17 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>nee2gpp &#8212; hesseflux 5.1.dev0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
-    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <title>nee2gpp &#8212; hesseflux 5.1.dev2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=740c0674" />
+    <script src="_static/documentation_options.js?v=09999224"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="ustarfilter" href="ustarfilter.html" />
@@ -20,8 +19,9 @@
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -34,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="module-hesseflux.nee2gpp">
-<span id="nee2gpp"></span><h1>nee2gpp<a class="headerlink" href="#module-hesseflux.nee2gpp" title="Permalink to this heading">¶</a></h1>
+<span id="nee2gpp"></span><h1>nee2gpp<a class="headerlink" href="#module-hesseflux.nee2gpp" title="Link to this heading">¶</a></h1>
 <dl class="simple">
 <dt>nee2gpp<span class="classifier">Estimates photosynthesis (GPP) and ecosystem respiration (RECO)</span></dt><dd><p>from Eddy covariance CO2 flux data.</p>
 </dd>
@@ -51,13 +51,15 @@ Released under the MIT License; see LICENSE file for details.</p>
 <li><p>Set default undef to NaN, Mar 2012, Arndt Piayda</p></li>
 <li><p>Add wrapper nee2gpp for individual routines, Nov 2012, Matthias Cuntz</p></li>
 <li><p>Ported to Python 3, Feb 2013, Matthias Cuntz</p></li>
-<li><p>Use generel cost function cost_abs from functions module, May 2013, Matthias Cuntz</p></li>
+<li><p>Use generel cost function cost_abs from functions module,
+May 2013, Matthias Cuntz</p></li>
 <li><p>Use fmin_tnc to allow params &lt; 0, Aug 2014, Arndt Piayda</p></li>
 <li><p>Keyword nogppnight, Aug 2014, Arndt Piayda</p></li>
 <li><p>Add wrapper nee2gpp for individual routines, Nov 2012, Matthias Cuntz</p></li>
 <li><p>Add wrapper nee2gpp for individual routines, Nov 2012, Matthias Cuntz</p></li>
 <li><p>Input can be pandas Dataframe or numpy array(s), Apr 2020, Matthias Cuntz</p></li>
 <li><p>Using numpy docstring format, May 2020, Matthias Cuntz</p></li>
+<li><p>Removed np.float and np.int, Jun 2024, Matthias Cuntz</p></li>
 </ul>
 <p>The following functions are provided</p>
 <table class="autosummary longtable docutils align-default">
@@ -69,7 +71,7 @@ Released under the MIT License; see LICENSE file for details.</p>
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="hesseflux.nee2gpp.nee2gpp">
-<span class="sig-name descname"><span class="pre">nee2gpp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isday</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeformat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%Y-%m-%d</span> <span class="pre">%H:%M:%S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colhead</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'reichstein'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nogppnight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swthr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/nee2gpp.html#nee2gpp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.nee2gpp.nee2gpp" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">nee2gpp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isday</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeformat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%Y-%m-%d</span> <span class="pre">%H:%M:%S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colhead</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'reichstein'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nogppnight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swthr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hesseflux/nee2gpp.html#nee2gpp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hesseflux.nee2gpp.nee2gpp" title="Link to this definition">¶</a></dt>
 <dd><p>Calculate photosynthesis (GPP) and ecosystem respiration (RECO)
 from Eddy covariance CO2 flux data.</p>
 <p>It uses either</p>
@@ -89,43 +91,53 @@ et al. (2005) <a class="reference internal" href="#r96ce4f7eeaf9-2" id="id2">[2]
 <li><p><strong>dfin</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em>) – <p>time series of CO2 fluxes and air temperature, and possibly
 incoming shortwave radiation and air vapour pressure deficit.</p>
 <p><cite>dfin</cite> can be a pandas.Dataframe with the columns
-‘FC’ or ‘NEE’ (or starting with ‘FC_’ or ‘NEE_’) for observed CO2 flux [umol(CO2) m-2 s-1]
+‘FC’ or ‘NEE’ (or starting with ‘FC_’ or ‘NEE_’) for observed
+CO2 flux [umol(CO2) m-2 s-1]
 ‘TA’    (or starting with ‘TA_’) for air temperature [K]</p>
 <p><cite>method=’lasslop’</cite> or <cite>method=’day’</cite> needs also
-‘SW_IN’ (or starting with ‘SW_IN’) for incoming short-wave radiation [W m-2]
+‘SW_IN’ (or starting with ‘SW_IN’) for incoming short-wave
+radiation [W m-2]
 ‘VPD’   (or starting with ‘VPD’) for air vapour deficit [Pa]
 The index is taken as date variable.</p>
 <p><cite>dfin</cite> can also me a numpy array with the same columns. In this case
 <cite>colhead</cite>, <cite>date</cite>, and possibly <cite>dateformat</cite> must be given.</p>
 </p></li>
-<li><p><strong>flag</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em><em>, </em><em>optional</em>) – <p>flag Dataframe or array has the same shape as <cite>dfin</cite>. Non-zero values in
-<cite>flag</cite> will be treated as missing values in <cite>dfin</cite>.</p>
+<li><p><strong>flag</strong> (<em>pandas.Dataframe</em><em> or </em><em>numpy.array</em><em>, </em><em>optional</em>) – <p>flag Dataframe or array has the same shape as <cite>dfin</cite>.
+Non-zero values in <cite>flag</cite> will be treated as missing values in <cite>dfin</cite>.</p>
 <p><cite>flag</cite> must follow the same rules as <cite>dfin</cite> if pandas.Dataframe.</p>
-<p>If <cite>flag</cite> is numpy array, <cite>df.columns.values</cite> will be used as column heads
-and the index of <cite>dfin</cite> will be copied to <cite>flag</cite>.</p>
+<p>If <cite>flag</cite> is numpy array, <cite>df.columns.values</cite> will be used as column
+heads and the index of <cite>dfin</cite> will be copied to <cite>flag</cite>.</p>
 </p></li>
-<li><p><strong>isday</strong> (<em>array_like</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – <p>True when it is day, False when night. Must have the same length as <cite>dfin.shape[0]</cite>.</p>
+<li><p><strong>isday</strong> (<em>array_like</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – <p>True when it is day, False when night. Must have the same length
+as <cite>dfin.shape[0]</cite>.</p>
 <p>If <cite>isday</cite> is not given, <cite>dfin</cite> must have a column with head ‘SW_IN’ or
 starting with ‘SW_IN’. <cite>isday</cite> will then be <cite>dfin[‘SW_IN’] &gt; swthr</cite>.</p>
 </p></li>
 <li><p><strong>date</strong> (<em>array_like</em><em> of </em><em>string</em><em>, </em><em>optional</em>) – <p>1D-array_like of calendar dates in format given in <cite>timeformat</cite>.</p>
 <p><cite>date</cite> must be given if <cite>dfin</cite> is numpy array.</p>
 </p></li>
-<li><p><strong>timeformat</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – Format of dates in <cite>date</cite>, if given (default: ‘%Y-%m-%d %H:%M:%S’).
+<li><p><strong>timeformat</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – Format of dates in <cite>date</cite>, if given (default: ‘%Y-%m-%d %H:%M:%S’).
 See strftime documentation of Python’s datetime module:
 <a class="reference external" href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior">https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior</a></p></li>
-<li><p><strong>colhed</strong> (<em>array_like</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – column names if <cite>dfin</cite> is numpy array. See <cite>dfin</cite> for mandatory column names.</p></li>
-<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – values having <cite>undef</cite> value are treated as missing values in <cite>dfin</cite> (default: -9999)</p></li>
-<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – <p>method to use for partitioning. Possible values are:</p>
-<p>’global’ or ‘falge’:     fit of Reco vs. temperature to all nighttime data</p>
+<li><p><strong>colhed</strong> (<em>array_like</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – column names if <cite>dfin</cite> is numpy array. See <cite>dfin</cite> for mandatory
+column names.</p></li>
+<li><p><strong>undef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – values having <cite>undef</cite> value are treated as missing values in <cite>dfin</cite>
+(default: -9999)</p></li>
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – <p>method to use for partitioning. Possible values are:</p>
 <dl class="simple">
-<dt>’local’ of ‘reichstein’: several fits over the season of Reco vs. temperature</dt><dd><p>as in Reichstein et al. (2005) (default)</p>
+<dt>’global’ or ‘falge’:     fit of Reco vs. temperature to all nighttime</dt><dd><p>data</p>
+</dd>
+<dt>’local’ of ‘reichstein’: several fits over the season of Reco vs.</dt><dd><p>temperature as in Reichstein et al. (2005)
+(default)</p>
+</dd>
+<dt>’day’ or ‘lasslop’:      method of Lasslop et al. (2010) fitting a</dt><dd><p>light-response curve</p>
 </dd>
 </dl>
-<p>’day’ or ‘lasslop’:      method of Lasslop et al. (2010) fitting a light-response curve</p>
 </p></li>
-<li><p><strong>nogppnight</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – GPP will be set to zero at night. RECO will then equal NEE at night (default: False)</p></li>
-<li><p><strong>swthr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – Threshold to determine daytime from incoming shortwave radiation if <cite>isday</cite> not given (default: 10).</p></li>
+<li><p><strong>nogppnight</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – GPP will be set to zero at night. RECO will then equal NEE at night
+(default: False)</p></li>
+<li><p><strong>swthr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – Threshold to determine daytime from incoming shortwave radiation
+if <cite>isday</cite> not given (default: 10).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -139,28 +151,31 @@ photosynthesis and ecosystem respiration, or two numpy arrays
 </dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>Negative respiration possible at night if GPP is forced to 0 with <cite>nogppnight=True</cite>.</p>
+<p>Negative respiration possible at night if GPP is forced to 0 with
+<cite>nogppnight=True</cite>.</p>
 </div>
 <p class="rubric">References</p>
 <div role="list" class="citation-list">
 <div class="citation" id="r96ce4f7eeaf9-1" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
 <p>Falge et al. (2001)
-Gap filling strategies for defensible annual sums of net ecosystem exchange,
+Gap filling strategies for defensible annual sums of
+net ecosystem exchange,
 Acricultural and Forest Meteorology 107, 43-69</p>
 </div>
 <div class="citation" id="r96ce4f7eeaf9-2" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
 <p>Reichstein et al. (2005)
-On the separation of net ecosystem exchange into assimilation and ecosystem
-respiration: review and improved algorithm,
+On the separation of net ecosystem exchange into assimilation
+and ecosystem respiration: review and improved algorithm,
 Global Change Biology 11, 1424-1439</p>
 </div>
 <div class="citation" id="r96ce4f7eeaf9-3" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
 <p>Lasslop et al. (2010)
-Separation of net ecosystem exchange into assimilation and respiration using
-a light response curve approach: critical issues and global evaluation,
+Separation of net ecosystem exchange into assimilation and respiration
+using a light response curve approach: critical issues and global
+evaluation,
 Global Change Biology 16, 187-208</p>
 </div>
 </div>
@@ -189,7 +204,8 @@ Global Change Biology 16, 187-208</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># flag</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dfin</span> <span class="o">==</span> <span class="n">undef</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># partition</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GPP</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
 <span class="go">[-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
 <span class="go">  8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
@@ -198,31 +214,36 @@ Global Change Biology 16, 187-208</p>
 <span class="go"> 2.90076664 3.18592735]</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GPP</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
 <span class="go">[-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
 <span class="go">  8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;global&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;global&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GPP</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
 <span class="go">[-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.33166157e+00</span>
 <span class="go">  8.18228013e+00  1.04092252e+01  8.19395317e+00  1.08427448e+01]</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Reichstein&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Reichstein&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GPP</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
 <span class="go">[-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
 <span class="go">  8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;reichstein&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;reichstein&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GPP</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
 <span class="go">[-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  4.40606871e+00</span>
 <span class="go">  8.31942152e+00  1.06242542e+01  8.49245664e+00  1.12381973e+01]</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span> <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;day&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GPP</span><span class="p">,</span> <span class="n">Reco</span> <span class="o">=</span> <span class="n">nee2gpp</span><span class="p">(</span><span class="n">dfin</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">adate</span><span class="p">,</span> <span class="n">colhead</span><span class="o">=</span><span class="n">colhead</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="n">undef</span><span class="o">=</span><span class="n">undef</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;day&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GPP</span><span class="p">[</span><span class="mi">1120</span><span class="p">:</span><span class="mi">1128</span><span class="p">])</span>
 <span class="go">[-9.99900000e+03 -9.99900000e+03 -9.99900000e+03  2.78457540e+00</span>
 <span class="go">  6.63212545e+00  8.88902165e+00  6.74243873e+00  9.51364527e+00]</span>
@@ -294,7 +315,7 @@ Global Change Biology 16, 187-208</p>
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
@@ -302,18 +323,18 @@ Global Change Biology 16, 187-208</p>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2009-2023, Matthias Cuntz.
+      &#169;2009-2024, Matthias Cuntz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.3.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="_sources/nee2gpp.rst.txt"

@@ -320,10 +320,10 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
             break
     astr = 'Global radiation with name SW or starting with SW_'
     astr = astr + ' must be in input.'
-    assert sw_id,  astr
+    assert sw_id, astr
     astr = 'Air temperature with name TA or starting with TA_'
     astr = astr + ' must be in input.'
-    assert ta_id,  astr
+    assert ta_id, astr
     astr = 'Vapour pressure deficit with name VPD or starting'
     astr = astr + ' with VPD_ must be in input.'
     assert vpd_id, astr
@@ -388,11 +388,11 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
         if firstvalid > nn:
             if verbose > 1:
                 print('    Large margin at beginning: ', firstvalid)
-            largegap[0:(firstvalid-nn)] = True
-        if lastvalid < (ndata-nn):
+            largegap[0:(firstvalid - nn)] = True
+        if lastvalid < (ndata - nn):
             if verbose > 1:
-                print('    Large margin at end: ', lastvalid-nn)
-            largegap[(lastvalid+nn):] = True
+                print('    Large margin at end: ', lastvalid - nn)
+            largegap[(lastvalid + nn):] = True
 
         # Large gaps
 
@@ -406,12 +406,12 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
                     index += [i]
                     count  = 1
             if i > 0:
-                if (dflag[i] != 0) and (dflag[i-1] == 0):
+                if (dflag[i] != 0) and (dflag[i - 1] == 0):
                     index += [i]
                     count  = 1
                 elif dflag[i] != 0:
                     count += 1
-                elif (dflag[i] == 0) and (dflag[i-1] != 0):
+                elif (dflag[i] == 0) and (dflag[i - 1] != 0):
                     length += [count]
                     count = 0
                 else:
@@ -423,17 +423,18 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
         for i in range(len(index)):
             if length[i] > nn:
                 if verbose > 1:
-                    print('    Large gap: ', index[i], ':', index[i]+length[i])
-                largegap[index[i]:index[i]+length[i]] = True
+                    print('    Large gap: ', index[i], ':',
+                          index[i] + length[i])
+                largegap[index[i]:index[i] + length[i]] = True
 
         # set or unset rest of days in large gaps
         if fullday:
-            for i in range(ndata-1):
+            for i in range(ndata - 1):
                 # end of large margin
-                if largegap[i] and not largegap[i+1]:
+                if largegap[i] and not largegap[i + 1]:
                     largegap[np.where(day == day[i])[0]] = False
                 # beginning of large margin
-                elif not largegap[i] and largegap[i+1]:
+                elif not largegap[i] and largegap[i + 1]:
                     largegap[np.where(day == day[i])[0]] = False
                 else:
                     continue
@@ -466,14 +467,14 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
                 # search for values around the met-conditions
                 # in a window of time
                 # (one week in the first iteration and odd weeks in the next)
-                j1  = j - np.arange(1, week+1, dtype=int) + 1
+                j1  = j - np.arange(1, week + 1, dtype=int) + 1
                 j2  = j + np.arange(1, week, dtype=int)
                 jj  = np.append(j1, j2)
-                win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
+                win = np.unique(np.sort(np.clip(jj, 0, ndata - 1)))
                 # get boolean array where meteo-conditions are in a given width
-                conditions = ( (np.abs(sw[win]-sw[j])   < sw_devmax) &
-                               (np.abs(ta[win]-ta[j])   < ta_dev) &
-                               (np.abs(vpd[win]-vpd[j]) < vpd_dev) &
+                conditions = ( (np.abs(sw[win] - sw[j])   < sw_devmax) &
+                               (np.abs(ta[win] - ta[j])   < ta_dev) &
+                               (np.abs(vpd[win] - vpd[j]) < vpd_dev) &
                                total_flg[win] )
                 num4avg = np.sum(conditions)
                 # we need at least two samples with similar conditions
@@ -490,10 +491,10 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
                         dflag_f[j] = 1
                     continue
                 else:  # --> extend time window to two weeks
-                    j1  = j - np.arange(1, 2*week+1, dtype=int) + 1
-                    j2  = j + np.arange(1, 2*week, dtype=int)
+                    j1  = j - np.arange(1, 2 * week + 1, dtype=int) + 1
+                    j2  = j + np.arange(1, 2 * week, dtype=int)
                     jj  = np.append(j1, j2)
-                    win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
+                    win = np.unique(np.sort(np.clip(jj, 0, ndata - 1)))
                     conditions = ( (np.abs(sw[win]  - sw[j])  < sw_devmax) &
                                    (np.abs(ta[win]  - ta[j])  < ta_dev) &
                                    (np.abs(vpd[win] - vpd[j]) < vpd_dev) &
@@ -521,12 +522,12 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
 
             # Method 2: just global radiation available
             if sw_flg[j] == 0:
-                j1  = j - np.arange(1, week+1, dtype=int) + 1
+                j1  = j - np.arange(1, week + 1, dtype=int) + 1
                 j2  = j + np.arange(1, week, dtype=int)
                 jj  = np.append(j1, j2)
-                win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
+                win = np.unique(np.sort(np.clip(jj, 0, ndata - 1)))
                 # get boolean array where meteo-conditions are in a given width
-                conditions = ( (np.abs(sw[win]-sw[j]) < sw_devmax) &
+                conditions = ( (np.abs(sw[win] - sw[j]) < sw_devmax) &
                                total_flg[win] )
                 num4avg = np.sum(conditions)
                 # we need at least two samples with similar conditions
@@ -545,12 +546,12 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
             # Method 3: same hour
             enough = False
             for i in range(2):
-                t_win = (nperday * (2*i+1))//2
-                j1  = j - np.arange(1, t_win+1, dtype=int) + 1
+                t_win = (nperday * (2 * i + 1)) // 2
+                j1  = j - np.arange(1, t_win + 1, dtype=int) + 1
                 j2  = j + np.arange(1, t_win, dtype=int)
                 jj  = np.append(j1, j2)
-                win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
-                conditions = ( (np.abs(hour[win]-hour[j]) < 1.1)
+                win = np.unique(np.sort(np.clip(jj, 0, ndata - 1)))
+                conditions = ( (np.abs(hour[win] - hour[j]) < 1.1)
                                & (dflag[win] == 0) )
                 num4avg = np.sum(conditions)
                 if num4avg >= 2:
@@ -574,10 +575,10 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
             # Method 4: same as 1 but for 3-12 weeks
             if meteo_flg[j]:
                 for multi in range(3, 12):
-                    j1  = j - np.arange(1, multi*week+1, dtype=int) + 1
-                    j2  = j + np.arange(1, multi*week, dtype=int)
+                    j1  = j - np.arange(1, multi * week + 1, dtype=int) + 1
+                    j2  = j + np.arange(1, multi * week, dtype=int)
                     jj  = np.append(j1, j2)
-                    win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
+                    win = np.unique(np.sort(np.clip(jj, 0, ndata - 1)))
                     conditions = ( (np.abs(sw[win]  - sw[j])  < sw_devmax) &
                                    (np.abs(ta[win]  - ta[j])  < ta_dev) &
                                    (np.abs(vpd[win] - vpd[j]) < vpd_dev) &
@@ -607,10 +608,10 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
             # Method 5: same as 2 but for 2-12 weeks
             if sw_flg[j] == 0:
                 for multi in range(2, 12):
-                    j1  = j - np.arange(1, multi*week+1, dtype=int) + 1
-                    j2  = j + np.arange(1, multi*week, dtype=int)
+                    j1  = j - np.arange(1, multi * week + 1, dtype=int) + 1
+                    j2  = j + np.arange(1, multi * week, dtype=int)
                     jj  = np.append(j1, j2)
-                    win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
+                    win = np.unique(np.sort(np.clip(jj, 0, ndata - 1)))
                     # get boolean array where meteo-conditions are
                     # in a given width
                     conditions = ( (np.abs(sw[win] - sw[j]) < sw_devmax) &
@@ -636,12 +637,12 @@ def gapfill(dfin, flag=None, date=None, timeformat='%Y-%m-%d %H:%M:%S',
 
             # Method 6: same as 3 but for 3-120 days
             for i in range(3, 120):
-                t_win = nperday * (2*i+1)/2
-                j1  = j - np.arange(1, t_win+1, dtype=int) + 1
+                t_win = nperday * (2 * i + 1) / 2
+                j1  = j - np.arange(1, t_win + 1, dtype=int) + 1
                 j2  = j + np.arange(1, t_win, dtype=int)
                 jj  = np.append(j1, j2)
-                win = np.unique(np.sort(np.clip(jj, 0, ndata-1)))
-                conditions = ( (np.abs(hour[win]-hour[j]) < 1.1)
+                win = np.unique(np.sort(np.clip(jj, 0, ndata - 1)))
+                conditions = ( (np.abs(hour[win] - hour[j]) < 1.1)
                                & (dflag[win] == 0) )
                 num4avg = np.sum(conditions)
                 if num4avg >= 2:

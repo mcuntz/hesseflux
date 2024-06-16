@@ -26,6 +26,7 @@ History
     * Removed iteration, Apr 2020, Matthias Cuntz
     * Using numpy docstring format, May 2020, Matthias Cuntz
     * Improved flake8 and numpy docstring, Oct 2021, Matthias Cuntz
+    * Removed np.float and np.bool, Jun 2024, Matthias Cuntz
 
 """
 from __future__ import division, absolute_import, print_function
@@ -39,7 +40,7 @@ __all__ = ['madspikes']
 
 def madspikes(dfin, flag=None, isday=None,
               colhead=None, undef=-9999,
-              nscan=15*48, nfill=1*48,
+              nscan=15 * 48, nfill=1 * 48,
               z=7, deriv=2, swthr=10.,
               plot=False):
     """
@@ -113,7 +114,7 @@ def madspikes(dfin, flag=None, isday=None,
             estr = ('Length of colhead must be number of columns in input'
                     'array. len(colhead)=' + str(len(colhead)) +
                     ' shape(input)=(' + str(dfin.shape[0]) + ',' +
-                    str(dfin.shape[1])+').')
+                    str(dfin.shape[1]) + ').')
             raise ValueError(estr)
     else:
         isnumpy = False
@@ -173,15 +174,15 @@ def madspikes(dfin, flag=None, isday=None,
 
     # parameters
     nrow, ncol = df.shape
-    half_scan_win = nscan//2
-    half_fill_win = nfill//2
+    half_scan_win = nscan // 2
+    half_fill_win = nfill // 2
 
     # calculate dusk and dawn times and separate in day and night
-    isdawn = np.zeros(nrow, dtype=np.bool)
-    isdusk = np.zeros(nrow, dtype=np.bool)
-    dis    = isday.astype(int) - np.roll(isday,-1).astype(int)
+    isdawn = np.zeros(nrow, dtype=bool)
+    isdusk = np.zeros(nrow, dtype=bool)
+    dis    = isday.astype(int) - np.roll(isday, -1).astype(int)
     isdawn[:-1]    = np.where(dis[:-1] == -1, True, False)
-    isdusk[:-1]    = np.where(dis[:-1] ==  1, True, False)
+    isdusk[:-1]    = np.where(dis[:-1] == 1, True, False)
     isddday        = isdawn
     tmp            = np.roll(isdusk, 1)
     isddday[1:]   += tmp[1:]  # start and end of day
@@ -213,23 +214,25 @@ def madspikes(dfin, flag=None, isday=None,
             np.nan)
 
         # iterate over fill window
-        for j in range(half_fill_win, nrow-1, 2*half_fill_win):
+        for j in range(half_fill_win, nrow - 1, 2 * half_fill_win):
             j1 = max(j - half_scan_win - 1, 0)
             j2 = min(j + half_scan_win + 1, nrow)
             fill_start = max(j - half_fill_win, 1)
-            fill_end   = min(j + half_fill_win, nrow-1)
+            fill_end   = min(j + half_fill_win, nrow - 1)
 
             dd = data_day[j1:j2].to_numpy()
             day_flag = mad(np.ma.masked_array(data=dd, mask=np.isnan(dd)),
                            z=z, deriv=deriv)
             ff.iloc[fill_start:fill_end, cols.index(hcol)] += (
-                np.where(day_flag[fill_start-j1-1:fill_end-j1-1], 2, 0))
+                np.where(day_flag[fill_start - j1 - 1:fill_end - j1 - 1],
+                         2, 0))
 
             nn = data_night[j1:j2]
             night_flag = mad(np.ma.masked_array(data=nn, mask=np.isnan(nn)),
                              z=z, deriv=deriv)
             ff.iloc[fill_start:fill_end, cols.index(hcol)] += (
-                np.where(night_flag[fill_start-j1-1:fill_end-j1-1], 2, 0))
+                np.where(night_flag[fill_start - j1 - 1:fill_end - j1 - 1],
+                         2, 0))
 
         if plot:
             fig = plt.figure(1)

@@ -4,6 +4,9 @@ Changelog
 All notable changes after its initial release in May 2020 (v2.0) are documented
 in this file.
 
+v5.1 (??? 2024)
+    * Removed all warning with new pandas and numpy versions.
+
 v5.0 (Jan 2023)
     * Dropped support for Python 3.6 because cannot test it anymore.
     * Add timecolumns and ftimeformat to config and post-processing file in

@@ -154,19 +154,20 @@ if __name__ == '__main__':
 
     print('Read data ', inputfile)
     t01 = ptime.time()
+
     # TIMESTAMP,TAU_1_1_1,H_1_1_1,LE_1_1_1,FC_1_1_1,...
     # 201901010030,0.0941,-11.0765,-9999.0000,-9999.0000,...
-    # use lambda because of global var timeformat
-    parser = lambda date: pd.to_datetime(date, format=timeformat)
-
     infile = inputfile[0]
-    df = pd.read_csv(infile, sep=sep, skiprows=skiprows, parse_dates=timecolumns,
-                     date_parser=parser, index_col=0, header=0)
+    df = pd.read_csv(infile, sep=sep, skiprows=skiprows,
+                     parse_dates=timecolumns, date_format=timeformat,
+                     index_col=0, header=0)
+
     # set date index to mid of timestep
     tindex = df.index.to_numpy()
     dtstep = (0.5 - ftimestep) * (tindex[1] - tindex[0])
     tindex += dtstep
     df.set_index(tindex, inplace=True)
+
     # get name of time column
     with open(infile, 'r') as fi:
         line1s = fi.readline().split(sep)
@@ -176,8 +177,8 @@ if __name__ == '__main__':
     if len(inputfile) > 1:
         for infile in inputfile[1:]:
             df1 = pd.read_csv(infile, sep=sep, skiprows=skiprows,
-                              parse_dates=[0], date_parser=parser, index_col=0,
-                              header=0)
+                              parse_dates=[0], date_format=timeformat,
+                              index_col=0, header=0)
             tindex = df1.index.to_numpy()
             dtstep = (0.5 - ftimestep) * (tindex[1] - tindex[0])
             tindex += dtstep
@@ -489,7 +490,7 @@ if __name__ == '__main__':
             else:
                 icc = -1
             if ccs[icc] != 'f':  # exclude gap-filled columns
-                df[cc].where(dff[cc] == 0, other=undef, inplace=True)
+                df[cc] = df[cc].where(dff[cc] == 0, other=undef)
     if outflagcols:
         print('   Add flag columns.')
 
