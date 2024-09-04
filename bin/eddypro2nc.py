@@ -15,16 +15,18 @@ optional arguments:
 
 Example
 -------
-python eddypro2nc.py -o eddypro_2020.nc data/2020/eddypro_full_output_2020.csv
+python eddypro2nc.py -o eddypro_2020.nc data/eddypro_full_output_2020.csv
+
 
 History
 -------
-Written,  Matthias Cuntz, Feb 2021 - read EddyPro with pandas from
-    https://git.icare.univ-lille1.fr/demo/eddypro_nc
+   * Written, Feb 2021, Matthias Cuntz - adapted from
+     https://git.icare.univ-lille1.fr/demo/eddypro_nc
+   * Updated date parsing of read_csv, Sep 2024, Matthias Cuntz
+
 """
-from __future__ import division, absolute_import, print_function
-import datetime as dt
 import os
+import numpy as np
 import pandas as pd
 
 
@@ -107,17 +109,17 @@ if __name__ == '__main__':
     col_units = _get_columns_units(ifile, delimiter=',')
 
     # Read EddyPro
-    def date_parser(str1, str2):
-        return pd.to_datetime(str1 + ' ' + str2, format="%Y-%m-%d %H:%M")
-    df = pd.read_csv(ifile,
-                     skiprows=3,
-                     delimiter=',',
-                     na_values='-9999',
-                     names=col_names,
-                     parse_dates=[[1, 2]],
-                     date_parser=date_parser,
-                     index_col='date_time')
-    df.drop(columns='filename', inplace=True)
+    cols = list(range(len(col_names)))
+    df = pd.read_csv(ifile, sep=',', skiprows=3, names=col_names,
+                     usecols=cols, na_values='-9999')
+    # EddyPro dates are end-of-timestep
+    # shift by 15 min so that all dates of a year
+    # the same year in timestamp,
+    # i.e 2019-12-31 23:45 instead of 2020-01-01 00:00)
+    df['date_time'] = pd.to_datetime(df['date'] + ' ' + df['time'])
+    df['date_time'] -= np.timedelta64(15, 'm')
+    df.set_index('date_time', drop=True, inplace=True)
+    df.drop(columns=['filename', 'date', 'time'], inplace=True)
     col_names = col_names[3:]
     col_units = col_units[3:]
 
