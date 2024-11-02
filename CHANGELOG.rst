@@ -5,6 +5,7 @@ All notable changes after its initial release in May 2020 (v2.0) are documented
 in this file.
 
 v5.1 (??? 2024)
+    * Changed build status.
     * Removed all warning with new pandas and numpy versions.
 
 v5.0 (Jan 2023)
