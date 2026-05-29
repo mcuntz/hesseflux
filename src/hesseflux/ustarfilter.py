@@ -51,7 +51,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                 timeformat='%Y-%m-%d %H:%M:%S', colhead=None, ustarmin=0.01,
                 nboot=1, undef=-9999, plot=False, seasonout=False, nmon=3,
                 ntaclasses=7, corrcheck=0.5, nustarclasses=20,
-                plateaucrit=0.95, swthr=10., minperioddata=100):
+                plateaucrit=0.95, swthr=10., minperioddata=100, ustar_default=None):
     """
     Filter Eddy Covariance data with friction velocity
 
@@ -131,9 +131,10 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
     minperioddata : int, optional
         Minimum number of valid nighttime records required per season to
         attempt ustar threshold estimation (default: 100). Seasons with fewer
-        records are skipped; the annual threshold is then the maximum of any
-        qualifying seasons, or the 90th percentile of all nighttime ustar
-        values if no season has sufficient data.
+        records are skipped. The ustar threshold for skipped seasons is set either to ustar_default
+        or to the maximum ustar threshold of the other seasons (if ustar_default is None).
+    ustar_default : float, optional
+        Default ustar threshold to use for seasons with insufficient data (default: None). If None, the maximum ustar threshold of the other seasons is used.
 
     Returns
     -------
@@ -342,7 +343,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                 custars = []
                 if len(ta_p) < max(ntaclasses + 1, minperioddata):
                     if not minperioddata_warned:
-                        msg = f'Not enough data for year {yy}, season {p} to estimate ustar'
+                        msg = f'Not enough data for year {yy}, season {p} to estimate ustar. Ustar threshold for this season will be set to ustar_default, or the maximum of other seasons if ustar_default is None.'
                         warnings.warn(msg)
                         minperioddata_warned = True
                     continue
@@ -414,10 +415,14 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                                                 0.9)
 
     # set minimum ustar threshold
-    bustars = np.where((bustars <  ustarmin) | (np.isnan(bustars)), ustarmin, bustars)
+    if np.isnan(np.nanmax(bustars)):
+        raise ValueError('No ustar threshold could be estimated for any season. Please check your data and parameters.')
+    ustar_default = np.nanmax(bustars) if ustar_default is None else ustar_default
+    bustars = np.where(np.isnan(bustars), ustar_default, bustars)
+    bustars = np.where(bustars <  ustarmin, ustarmin, bustars)
 
     # report 5, 50 and 95 percentile
-    oustars = np.quantile(bustars, (0.05, 0.5, 0.95), axis=0)
+    oustars = np.nanquantile(bustars, (0.05, 0.5, 0.95), axis=0)
 
     # flag out with original DatetimeIndex
     off    = ustar_in.astype(int)
