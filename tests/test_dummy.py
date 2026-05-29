@@ -17,11 +17,6 @@ import hesseflux as hf
 def load_data():
     fullout_file = Path(__file__).parent / "data" / "full_output.csv"
     fullout = pd.read_csv(fullout_file, skiprows=[0, 2], na_values=["-9999.00", "-9999"])
-    # with open(fullout_file, "r") as f:
-    #     f.readline()
-    #     f.readline()
-    #     units = f.readline().strip().split(",")
-    #     units = {c:u.strip('[]') for c, u in zip(fullout.columns, units)}
     fullout["TIMESTAMP"] = pd.to_datetime(fullout["date"] + " " + fullout["time"])
     fullout = fullout.set_index("TIMESTAMP").sort_index()
 
@@ -47,16 +42,13 @@ class TestDummy(unittest.TestCase):
     def test_ustarfilter(self):
         
         df, df_flag, df_isday = load_data()
-        hf.ustarfilter(
-            df, 
-            flag=df_flag,
-            isday=df_isday
-        )
+        out = hf.ustarfilter(df, flag=df_flag, isday=df_isday)
 
 
 
 
 if __name__ == "__main__":
     df, df_flag, df_isday = load_data()
-    hf.ustarfilter(df, flag=df_flag, isday=df_isday)
-    # unittest.main()
+    out = hf.ustarfilter(df, flag=df_flag, isday=df_isday)
+    print(out)
+    unittest.main()

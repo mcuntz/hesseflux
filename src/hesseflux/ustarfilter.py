@@ -38,6 +38,8 @@ History
     * do not register pandas platting backend, Jun 2024, Matthias Cuntz
 
 """
+import warnings
+
 import numpy as np
 import pandas as pd
 
@@ -225,7 +227,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
         # otherwise time indexes could not match anymore after shifting times
         isday = np.atleast_1d(isday).astype(np.float32)
     
-    isday[isday == undef] = np.nan
+    isday[(isday == undef) | (np.isnan(isday))] = np.nan
     isday = isday.flatten()
     ff.loc[np.isnan(isday), :] = 1
 
@@ -290,13 +292,18 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
     yrmax  = df.index.max().year
     yrmin  = df.index.min().year
     nyears = yrmax - yrmin + 1
+    ndays = (df.index.max() - df.index.min()).days + 1
+    if ndays // nyears < 360:
+        msg = f'Dataset averages < 360 days of data per year (got {ndays // nyears}). ustarfilter is designed for datasets with at least one full year of data. Results may be unreliable.'
+        warnings.warn(msg)
 
     # calculate thresholds
     nperiod = 12 // nmon  # number of nmon periods per year
+    minperioddata_warned = False
     if seasonout:
-        bustars = np.ones((nboot, nyears, nperiod)) * undef
+        bustars = np.full((nboot, nyears, nperiod), np.nan)
     else:
-        bustars = np.ones((nboot, nyears)) * undef
+        bustars = np.full((nboot, nyears), np.nan)
     for y in range(nyears):
         yy = yrmin + y
         iiyr    = df.index.year == yy
@@ -320,7 +327,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                 isday_b = isday_f[iiboot]
 
             # periods / seasons
-            pustars = np.ones(nperiod) * undef
+            pustars = np.full(nperiod, np.nan)
             for p in range(nperiod):
                 flag_p   = ( (~isday_b.astype(bool)) &
                              (ff_b[fc_id] == 0) & (ff_b[ustar_id] == 0) &
@@ -334,6 +341,10 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                 # temperature classes
                 custars = []
                 if len(ta_p) < max(ntaclasses + 1, minperioddata):
+                    if not minperioddata_warned:
+                        msg = f'Not enough data for year {yy}, season {p} to estimate ustar'
+                        warnings.warn(msg)
+                        minperioddata_warned = True
                     continue
                 ta_q = np.quantile(
                     ta_p,
@@ -377,7 +388,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                     pustars[p] = np.quantile(ustar_p, 0.9)
             # Take maximum of periods if any thresholds found,
             # otherwise set threshold to 90% of data
-            ii = np.where(pustars != undef)[0]
+            ii = np.where(~np.isnan(pustars))[0]
             if ii.size > 0:
                 if seasonout:
                     bustars[b, y, :] = pustars
@@ -403,7 +414,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                                                 0.9)
 
     # set minimum ustar threshold
-    bustars = np.maximum(bustars, ustarmin)
+    bustars = np.where((bustars <  ustarmin) | (np.isnan(bustars)), ustarmin, bustars)
 
     # report 5, 50 and 95 percentile
     oustars = np.quantile(bustars, (0.05, 0.5, 0.95), axis=0)
