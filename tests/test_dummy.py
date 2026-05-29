@@ -3,7 +3,6 @@
 This is a dummy unittest.
 
 python -m unittest -v test_dummy.py
-
 """
 from pathlib import Path
 import unittest
@@ -61,8 +60,6 @@ class TestDummy(unittest.TestCase):
             "ustarfilter did not return expected ustar threshold values with seasonout=True"
         )
         self.assertEqual(out[1].sum(), 1304, "ustarfilter did properly filter the data with seasonout=True")
-        
-
 
 
 if __name__ == "__main__":
