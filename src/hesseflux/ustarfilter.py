@@ -226,8 +226,8 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
         isday = np.atleast_1d(isday).astype(np.float32)
     
     isday[isday == undef] = np.nan
-    ff.loc[np.isnan(isday).flatten(), :] = 1
-    # ff[np.isnan(isday)] = 1
+    isday = isday.flatten()
+    ff.loc[np.isnan(isday), :] = 1
 
     # data and flags
     fc_id = ''
