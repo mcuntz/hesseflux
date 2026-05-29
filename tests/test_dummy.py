@@ -57,4 +57,6 @@ class TestDummy(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    df = load_data()
+    hf.ustarfilter(df[["USTAR", "NEE", "TA"]], flag=df[["flag"]],isday=df[["isday"]])
+    # unittest.main()

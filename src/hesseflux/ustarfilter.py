@@ -319,7 +319,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
             # periods / seasons
             pustars = np.ones(nperiod) * undef
             for p in range(nperiod):
-                flag_p   = ( (~isday_b) &
+                flag_p   = ( (~isday_b.astype(bool)) &
                              (ff_b[fc_id] == 0) & (ff_b[ustar_id] == 0) &
                              (ff_b[ta_id] == 0) &
                              (df_b.index.month > p * nmon) &
