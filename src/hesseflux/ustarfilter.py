@@ -185,9 +185,9 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
         if isinstance(flag, (np.ndarray, np.ma.MaskedArray)):
             fisnumpy = True
             fistrans = False
-            if flag.shape[0] == len(df):
+            if flag.shape[0] == df.shape[0]:
                 ff = pd.DataFrame(flag, columns=df.columns.values)
-            elif flag.shape[1] == len(df):
+            elif flag.shape[1] == df.shape[0]:
                 fistrans = True
                 ff = pd.DataFrame(flag.T, columns=df.columns.values)
             else:
@@ -314,7 +314,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
         isday_f = isday[iiyr]
 
         # bootstrap per year
-        nstepsyear = len(df_f)
+        nstepsyear = df_f.shape[0]
         for b in range(nboot):
             if b == 0:
                 df_b    = df_f
@@ -330,10 +330,11 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
             # periods / seasons
             pustars = np.full(nperiod, np.nan)
             for p in range(nperiod):
-                flag_p   = ( (~isday_b.astype(bool)) &
-                             (ff_b[fc_id] == 0) & (ff_b[ustar_id] == 0) &
+                flag_p   = ( (~isday_b.astype(bool)) &  # nighttime
+                             (ff_b[fc_id] == 0) &   # no flags
+                             (ff_b[ustar_id] == 0) &
                              (ff_b[ta_id] == 0) &
-                             (df_b.index.month > p * nmon) &
+                             (df_b.index.month > p * nmon) &  # in season
                              (df_b.index.month <= (p + 1) * nmon) )
                 fc_p    = df_b.loc[flag_p, fc_id]
                 ustar_p = df_b.loc[flag_p, ustar_id]
@@ -341,9 +342,9 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
 
                 # temperature classes
                 custars = []
-                if len(ta_p) < max(ntaclasses + 1, minperioddata):
+                if ta_p.shape[0] < max(ntaclasses + 1, minperioddata):
                     if not minperioddata_warned:
-                        msg = f'Not enough data for year {yy}, season {p} to estimate ustar. Ustar threshold for this season will be set to ustar_default, or the maximum of other seasons if ustar_default is None.'
+                        msg = f'Not enough data for year {yy}, season {p} to estimate ustar (got {ta_p.shape[0]}, need {max(ntaclasses + 1, minperioddata)}). Ustar threshold for this season will be set to ustar_default, or the maximum of other seasons if ustar_default is None.'
                         warnings.warn(msg)
                         minperioddata_warned = True
                     continue
@@ -427,7 +428,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
     # flag out with original DatetimeIndex
     off    = ustar_in.astype(int)
     off[:] = 0
-    ii     = np.zeros(len(off), dtype=bool)
+    ii     = np.zeros(off.shape[0], dtype=bool)
     if seasonout:
         for y in range(nyears):
             yy = yrmin + y
