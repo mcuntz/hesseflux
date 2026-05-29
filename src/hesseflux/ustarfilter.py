@@ -488,12 +488,12 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
             for y in range(nyears):
                 yy = yrmin + y
 
-                iiyr    = (df.index.year == yy) & (~isday)
+                iiyr    = (df.index.year == yy) & (~isday.astype(bool))
                 fc_y    = df.loc[iiyr, fc_id]
                 ffc_y   = ff.loc[iiyr, fc_id]
                 ustar_y = df.loc[iiyr, ustar_id]
                 ffu_y   = ff.loc[iiyr, ustar_id]
-                # off_y   = off[iiyr & (isday == False)]
+                # off_y   = off[iiyr & (~isday.astype(bool))]
 
                 fig  = plt.figure(1)
                 sub  = fig.add_subplot(111)
