@@ -36,6 +36,10 @@ History
       Jan 2023, Matthias Cuntz
     * Removed np.float and np.bool, Jun 2024, Matthias Cuntz
     * do not register pandas platting backend, Jun 2024, Matthias Cuntz
+    * bugfixes to improve handling of NaNs, boolean and integer values, array broadcasting, 
+      and array size computation. Replaced hard crashes when below minimum data threshold 
+      with warnings and a default behavior.
+      May 2026, Alex Fox
 
 """
 import warnings
