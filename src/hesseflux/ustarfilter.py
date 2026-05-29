@@ -49,7 +49,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                 timeformat='%Y-%m-%d %H:%M:%S', colhead=None, ustarmin=0.01,
                 nboot=1, undef=-9999, plot=False, seasonout=False, nmon=3,
                 ntaclasses=7, corrcheck=0.5, nustarclasses=20,
-                plateaucrit=0.95, swthr=10.):
+                plateaucrit=0.95, swthr=10., minperioddata=100):
     """
     Filter Eddy Covariance data with friction velocity
 
@@ -126,6 +126,12 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
     swthr : float, optional
         Threshold to determine daytime from incoming shortwave radiation if
         *isday* not given (default: 10).
+    minperioddata : int, optional
+        Minimum number of valid nighttime records required per season to
+        attempt ustar threshold estimation (default: 100). Seasons with fewer
+        records are skipped; the annual threshold is then the maximum of any
+        qualifying seasons, or the 90th percentile of all nighttime ustar
+        values if no season has sufficient data.
 
     Returns
     -------
@@ -281,8 +287,6 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
     yrmax  = df.index.max().year
     yrmin  = df.index.min().year
     nyears = yrmax - yrmin + 1
-    ndays  = (df.index.max() - df.index.min()).days + 1
-    assert ndays // nyears > 360, 'Full years must be given.'
 
     # calculate thresholds
     nperiod = 12 // nmon  # number of nmon periods per year
@@ -326,7 +330,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
 
                 # temperature classes
                 custars = []
-                if len(ta_p) < (ntaclasses + 1):
+                if len(ta_p) < max(ntaclasses + 1, minperioddata):
                     continue
                 ta_q = np.quantile(
                     ta_p,
