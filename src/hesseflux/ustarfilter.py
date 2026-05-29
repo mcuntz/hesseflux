@@ -38,9 +38,8 @@ History
     * do not register pandas platting backend, Jun 2024, Matthias Cuntz
     * bugfixes to improve handling of NaNs, boolean and integer values, array broadcasting, 
       and array size computation. Replaced hard crashes when below minimum data threshold 
-      with warnings and a default behavior.
+      with warnings and a default behavior. Added random seed for bootstrapping.
       May 2026, Alex Fox
-
 """
 import warnings
 
@@ -55,7 +54,8 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                 timeformat='%Y-%m-%d %H:%M:%S', colhead=None, ustarmin=0.01,
                 nboot=1, undef=-9999, plot=False, seasonout=False, nmon=3,
                 ntaclasses=7, corrcheck=0.5, nustarclasses=20,
-                plateaucrit=0.95, swthr=10., minperioddata=100, ustar_default=None):
+                plateaucrit=0.95, swthr=10., minseasondata=100, mindaysperyear=360, 
+                ustardefault=None, randomstate=None):
     """
     Filter Eddy Covariance data with friction velocity
 
@@ -132,13 +132,17 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
     swthr : float, optional
         Threshold to determine daytime from incoming shortwave radiation if
         *isday* not given (default: 10).
-    minperioddata : int, optional
+    minseasondata : int, optional
         Minimum number of valid nighttime records required per season to
         attempt ustar threshold estimation (default: 100). Seasons with fewer
-        records are skipped. The ustar threshold for skipped seasons is set either to ustar_default
-        or to the maximum ustar threshold of the other seasons (if ustar_default is None).
-    ustar_default : float, optional
+        records are skipped. The ustar threshold for skipped seasons is set either to ustardefault
+        or to the maximum ustar threshold of the other seasons (if ustardefault is None).
+    mindaysperyear : int, optional
+        Minimum number of days of data per year to avoid warning (default: 360). Datasets with fewer days per year may give unreliable results.
+    ustardefault : float, optional
         Default ustar threshold to use for seasons with insufficient data (default: None). If None, the maximum ustar threshold of the other seasons is used.
+    randomstate : int, optional
+        Random seed for bootstrapping (default: None). Only used if nboot > 1.
 
     Returns
     -------
@@ -152,7 +156,9 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
 
     Notes
     -----
-    Works ONLY for a data set of at least one full year.
+    Intended to be run with a full year of data, otherwise results may be unreliable.
+    Raises a warning if the dataset averages less than *mindaysperyear* days of data per year, or if the number
+    of datapoints per season is below the *minseasondata* threshold.
 
     """
     # Check input
@@ -298,13 +304,13 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
     yrmin  = df.index.min().year
     nyears = yrmax - yrmin + 1
     ndays = (df.index.max() - df.index.min()).days + 1
-    if ndays // nyears < 360:
-        msg = f'Dataset averages < 360 days of data per year (got {ndays // nyears}). ustarfilter is designed for datasets with at least one full year of data. Results may be unreliable.'
+    if ndays // nyears < mindaysperyear:
+        msg = f'Dataset averages < {mindaysperyear} days of data per year (got {ndays // nyears}). ustarfilter is designed for datasets with at least one full year of data. Results may be unreliable.'
         warnings.warn(msg)
 
     # calculate thresholds
     nperiod = 12 // nmon  # number of nmon periods per year
-    minperioddata_warned = False
+    minseasondata_warned = False
     if seasonout:
         bustars = np.full((nboot, nyears, nperiod), np.nan)
     else:
@@ -325,7 +331,10 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                 ff_b    = ff_f
                 isday_b = isday_f
             else:
-                iiboot  = np.random.randint(0, nstepsyear, size=nstepsyear)
+                if randomstate is not None:
+                    randomstate = int(randomstate) + b
+                rng = np.random.default_rng(randomstate)
+                iiboot  = rng.integers(0, nstepsyear, size=nstepsyear)
                 iidf    = df_f.index[iiboot]
                 df_b    = df_f.loc[iidf]
                 ff_b    = ff_f.loc[iidf]
@@ -346,11 +355,11 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
 
                 # temperature classes
                 custars = []
-                if ta_p.shape[0] < max(ntaclasses + 1, minperioddata):
-                    if not minperioddata_warned:
-                        msg = f'Not enough data for year {yy}, season {p} to estimate ustar (got {ta_p.shape[0]}, need {max(ntaclasses + 1, minperioddata)}). Ustar threshold for this season will be set to ustar_default, or the maximum of other seasons if ustar_default is None.'
+                if ta_p.shape[0] < max(ntaclasses + 1, minseasondata):
+                    if not minseasondata_warned:
+                        msg = f'Not enough data for year {yy}, season {p} to estimate ustar (got {ta_p.shape[0]}, need {max(ntaclasses + 1, minseasondata)}). Ustar threshold for this season will be set to ustardefault, or the maximum of other seasons if ustardefault is None.'
                         warnings.warn(msg)
-                        minperioddata_warned = True
+                        minseasondata_warned = True
                     continue
                 ta_q = np.quantile(
                     ta_p,
@@ -406,7 +415,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                     for p in range(nperiod):
                         # Set threshold to 90% of data per season
                         # if not enough data
-                        flag_b = ( (~isday_b) &
+                        flag_b = ( (~isday_b.astype(bool)) &
                                    (ff_b[ustar_id] == 0) &
                                    (df_b.index.month > p * nmon) &
                                    (df_b.index.month <= (p + 1) * nmon) )
@@ -414,7 +423,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                         if len(ustar_b) > 0:
                             bustars[b, y, p] = np.quantile(ustar_b, 0.9)
                 else:
-                    flag_b = ( (~isday_b) &
+                    flag_b = ( (~isday_b.astype(bool)) &
                                (ff_b[ustar_id] == 0) )
                     bustars[b, y] = np.quantile(df_b.loc[flag_b, ustar_id],
                                                 0.9)
@@ -422,8 +431,8 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
     # set minimum ustar threshold
     if np.isnan(np.nanmax(bustars)):
         raise ValueError('No ustar threshold could be estimated for any season. Please check your data and parameters.')
-    ustar_default = np.nanmax(bustars) if ustar_default is None else ustar_default
-    bustars = np.where(np.isnan(bustars), ustar_default, bustars)
+    ustardefault = np.nanmax(bustars) if ustardefault is None else ustardefault
+    bustars = np.where(np.isnan(bustars), ustardefault, bustars)
     bustars = np.where(bustars <  ustarmin, ustarmin, bustars)
 
     # report 5, 50 and 95 percentile
