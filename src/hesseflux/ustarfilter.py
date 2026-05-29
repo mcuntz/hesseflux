@@ -80,8 +80,8 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
         *flag* must follow the same rules as *dfin* if pandas.Dataframe.
         If *flag* is numpy array, *df.columns.values* will be used as column
         heads and the index of *dfin* will be copied to *flag*.
-    isday : array_like of bool, optional
-        True when it is day, False when night. Must have the same length as
+    isday : array_like, optional
+        1/True when it is day, 0/False when night. May contain nan/undef values. Must have the same length as
         `dfin.shape[0]`.
         If *isday* is not given, *dfin* must have a column with head 'SW_IN' or
         starting with 'SW_IN'. *isday* will then be `dfin['SW_IN'] > swthr`.
@@ -174,7 +174,8 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
         istrans = False
         astr = 'Input must be either numpy.ndarray or pandas.DataFrame.'
         assert isinstance(dfin, pd.core.frame.DataFrame), astr
-        df = dfin.copy(deep=True)
+        df = dfin.copy(deep=True).astype(np.float32)
+    df = df.replace(undef, np.nan)
 
     # Incoming flags
     if flag is not None:
@@ -205,8 +206,7 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
         # flags: 0: good; 1: input flagged; 2: output flagged
         ff = df.copy(deep=True).astype(int)
         ff[:]           = 0
-        ff[df == undef] = 1
-        ff[df.isna()]   = 1
+    ff = ff.replace(undef, 1).replace(np.nan, 1).astype(int)
 
     # day or night
     if isday is None:
@@ -219,12 +219,15 @@ def ustarfilter(dfin, flag=None, isday=None, date=None,
                 ' in input if isday not given.')
         assert sw_id, astr
         # Papale et al. (Biogeosciences, 2006): 20; REddyProc: 10
-        isday = df[sw_id] > swthr
+        isday = (df[sw_id] > swthr).astype(np.float32)
+        isday[np.isnan(df[sw_id])] = np.nan
     if isinstance(isday, (pd.core.series.Series, pd.core.frame.DataFrame)):
         # otherwise time indexes could not match anymore after shifting times
-        isday = isday.to_numpy()
+        isday = np.atleast_1d(isday).astype(np.float32)
+    
     isday[isday == undef] = np.nan
-    ff[np.isnan(isday)] = 1
+    ff.loc[np.isnan(isday).flatten(), :] = 1
+    # ff[np.isnan(isday)] = 1
 
     # data and flags
     fc_id = ''

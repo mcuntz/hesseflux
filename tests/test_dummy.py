@@ -27,17 +27,17 @@ def load_data():
 
     df = (
         fullout
-        [["u*", "co2_flux", "air_temperature", "qc_co2_flux", "daytime"]]
-        .dropna()
+        [["u*", "co2_flux", "air_temperature"]]
         .rename(columns={"u*":"USTAR", "co2_flux":"NEE", "air_temperature":"TA", "qc_co2_flux":"flag", "daytime":"isday"})
-        .assign(
-            TA = lambda df: df["TA"] - 273.15,
-            flag = lambda df: df["flag"].astype(float),
-            isday = lambda df: df["isday"].astype(float)
-        )
+        .assign(TA = lambda df: df["TA"] - 273.15,)
     )
 
-    return df
+    df_flag = fullout[["qc_Tau", "qc_co2_flux"]].rename(columns={"qc_Tau":"USTAR", "qc_co2_flux":"NEE"})
+    df_flag["TA"] = 0
+
+    df_isday = fullout[["daytime"]].rename(columns={"daytime":"isday"}).astype(bool)
+
+    return df, df_flag, df_isday
 
 class TestDummy(unittest.TestCase):
 
@@ -46,17 +46,17 @@ class TestDummy(unittest.TestCase):
 
     def test_ustarfilter(self):
         
-        df = load_data()
+        df, df_flag, df_isday = load_data()
         hf.ustarfilter(
-            df[["USTAR", "NEE", "TA"]], 
-            flag=df[["flag"]],
-            isday=df[["isday"]]
+            df, 
+            flag=df_flag,
+            isday=df_isday
         )
 
 
 
 
 if __name__ == "__main__":
-    df = load_data()
-    hf.ustarfilter(df[["USTAR", "NEE", "TA"]], flag=df[["flag"]],isday=df[["isday"]])
+    df, df_flag, df_isday = load_data()
+    hf.ustarfilter(df, flag=df_flag, isday=df_isday)
     # unittest.main()
